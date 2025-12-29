@@ -1,10 +1,11 @@
-import { Stack } from 'expo-router';
-import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
-import { db } from '../db/client';
-import migrations from '../drizzle/migrations';
-import { View, Text, StyleSheet } from 'react-native';
+import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
+import { Stack } from "expo-router";
+import { StyleSheet, Text, View } from "react-native";
+import { db } from "../db/client";
+import migrations from "../drizzle/migrations";
 
 export default function RootLayout() {
+  // TOOD: #2 handle migrations error
   const { success, error } = useMigrations(db, migrations);
 
   if (error) {
@@ -29,10 +30,10 @@ export default function RootLayout() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   errorText: {
-    color: 'red',
+    color: "red",
   },
 });
