@@ -1,3 +1,6 @@
+import { Input, Label } from "@/components/ui";
+import { db } from "@/db/client";
+import { BILLING_CYCLES, subscriptions } from "@/db/schema";
 import { DateTimePicker, Host, Picker } from "@expo/ui/swift-ui";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router, Stack } from "expo-router";
@@ -7,12 +10,10 @@ import {
   Platform,
   ScrollView,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import { z } from "zod";
-import { Input, InputBox, Label } from "../components/ui";
-import { db } from "../db/client";
-import { BILLING_CYCLES, subscriptions } from "../db/schema";
 
 const subscriptionSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -115,7 +116,7 @@ export default function AddSubscription() {
                     <Text className="text-4xl font-light leading-tight text-zinc-400 dark:text-zinc-500">
                       CHF
                     </Text>
-                    <Input
+                    <TextInput
                       placeholder="0.00"
                       placeholderTextColor="#d4d4d8"
                       value={value}
@@ -124,6 +125,7 @@ export default function AddSubscription() {
                       keyboardType="decimal-pad"
                       className="ml-2 min-w-[120px] text-5xl font-semibold leading-tight text-zinc-900 dark:text-white"
                       textAlign="left"
+                      textAlignVertical="center"
                     />
                   </View>
                   <Text className="mt-1 text-sm leading-5 text-zinc-400">
@@ -141,21 +143,19 @@ export default function AddSubscription() {
 
           <View className="mb-4">
             <Label>Name</Label>
-            <InputBox>
-              <Controller
-                control={control}
-                name="name"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <Input
-                    placeholder="e.g. Netflix"
-                    value={value}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    autoCapitalize="words"
-                  />
-                )}
-              />
-            </InputBox>
+            <Controller
+              control={control}
+              name="name"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Input
+                  placeholder="e.g. Netflix"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  autoCapitalize="words"
+                />
+              )}
+            />
             {errors.name && (
               <Text className="mt-1 text-xs leading-4 text-red-500">
                 {errors.name.message}
@@ -183,7 +183,7 @@ export default function AddSubscription() {
             />
           </View>
 
-          <View className="mb-4">
+          <View className="mb-4 flex-1">
             <Label>Subscribed Since</Label>
             <Controller
               control={control}
@@ -204,24 +204,22 @@ export default function AddSubscription() {
           </View>
 
           <View className="mb-4">
-            <Label>Provider Domain(optional)</Label>
-            <InputBox>
-              <Controller
-                control={control}
-                name="url"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <Input
-                    placeholder="e.g. netflix.com"
-                    value={value}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    keyboardType="url"
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                  />
-                )}
-              />
-            </InputBox>
+            <Label>Provider Domain (optional)</Label>
+            <Controller
+              control={control}
+              name="url"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Input
+                  placeholder="e.g. netflix.com"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  keyboardType="url"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+              )}
+            />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
