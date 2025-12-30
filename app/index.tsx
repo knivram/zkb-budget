@@ -1,25 +1,120 @@
+import { Button, ContextMenu, Host } from "@expo/ui/swift-ui";
+import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { ScrollView, Text, View } from "react-native";
+import { Image } from "expo-image";
+import { Alert, ScrollView, Text, View } from "react-native";
 import { db } from "../db/client";
-import { Subscription, subscriptions } from "../db/schema";
+import { BillingCycle, Subscription, subscriptions } from "../db/schema";
+
+const formatPrice = (cents: number): string => {
+  return (cents / 100).toFixed(2);
+};
+
+const toMonthlyCents = (price: number, billingCycle: BillingCycle): number => {
+  switch (billingCycle) {
+    case "weekly":
+      return price * (52 / 12);
+    case "monthly":
+      return price;
+    case "yearly":
+      return price / 12;
+  }
+};
+
+const getLogoUrl = (domain: string | null): string | null => {
+  if (!domain) return null;
+  return `https://img.logo.dev/${domain}?token=${process.env.EXPO_PUBLIC_LOGO_DEV_KEY}`;
+};
 
 export default function Index() {
   const { data } = useLiveQuery(db.select().from(subscriptions));
+  const monthlyTotal =
+    data?.reduce(
+      (sum, sub) => sum + toMonthlyCents(sub.price, sub.billingCycle),
+      0
+    ) ?? 0;
+
+  const handleDelete = (subscription: Subscription) => {
+    Alert.alert(
+      "Delete Subscription",
+      `Are you sure you want to delete ${subscription.name}?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            await db
+              .delete(subscriptions)
+              .where(eq(subscriptions.id, subscription.id));
+          },
+        },
+      ]
+    );
+  };
 
   return (
-    <ScrollView contentInsetAdjustmentBehavior="automatic">
-      {data?.map((subscription: Subscription) => (
-        <View key={subscription.id}>
-          <Text>{subscription.name}</Text>
-          <Text>{subscription.price}</Text>
-          <Text>{subscription.billingCycle}</Text>
-          <Text>
-            {new Date(subscription.subscribedAt).toLocaleDateString()}
-          </Text>
-          <Text>{subscription.url}</Text>
-          <Text>{subscription.icon}</Text>
-        </View>
-      ))}
+    <ScrollView
+      className="flex-1 bg-white dark:bg-zinc-900"
+      contentInsetAdjustmentBehavior="automatic"
+    >
+      <View className="items-center py-8">
+        <Text className="text-lg text-zinc-400 dark:text-zinc-500">CHF</Text>
+        <Text className="text-5xl font-semibold text-zinc-900 dark:text-white">
+          {formatPrice(monthlyTotal)}
+        </Text>
+        <Text className="mt-1 text-sm text-zinc-400">per month</Text>
+      </View>
+      {data?.map((subscription: Subscription) => {
+        const logoUrl = getLogoUrl(subscription.url);
+
+        return (
+          <Host key={subscription.id}>
+            <ContextMenu activationMethod="longPress">
+              <ContextMenu.Items>
+                <Button systemImage="pencil" disabled>
+                  Edit
+                </Button>
+                <Button
+                  systemImage="trash"
+                  onPress={() => handleDelete(subscription)}
+                  role="destructive"
+                >
+                  Delete
+                </Button>
+              </ContextMenu.Items>
+              <ContextMenu.Trigger>
+                <View className="flex-row items-center border-b border-zinc-100 px-4 py-3 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+                  <View className="mr-3 h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-zinc-100 dark:bg-zinc-800">
+                    {logoUrl ? (
+                      <Image
+                        source={{ uri: logoUrl }}
+                        style={{ width: 48, height: 48 }}
+                        contentFit="cover"
+                      />
+                    ) : (
+                      <Text className="text-lg text-zinc-400">
+                        {subscription.name.charAt(0).toUpperCase()}
+                      </Text>
+                    )}
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-base font-medium text-zinc-900 dark:text-white">
+                      {subscription.name}
+                    </Text>
+                    <Text className="text-sm capitalize text-zinc-500">
+                      {subscription.billingCycle}
+                    </Text>
+                  </View>
+                  <Text className="text-base font-semibold text-zinc-900 dark:text-white">
+                    CHF {formatPrice(subscription.price)}
+                  </Text>
+                </View>
+              </ContextMenu.Trigger>
+            </ContextMenu>
+          </Host>
+        );
+      })}
     </ScrollView>
   );
 }
