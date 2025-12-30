@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.mkramer.zkbbudget"
+      "bundleIdentifier": "me.knivram.zkbbudget"
     },
     "android": {
       "adaptiveIcon": {
