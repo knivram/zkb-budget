@@ -1,11 +1,12 @@
-import { Text, View } from "react-native";
+import { Host, Text, VStack } from "@expo/ui/swift-ui";
+import React from "react";
 
 export default function Index() {
   return (
-    <View className="flex-1 items-center justify-center bg-white">
-      <Text className="text-xl font-bold text-blue-500">
-        Welcome to Nativewind!
-      </Text>
-    </View>
+    <Host style={{ flex: 1 }}>
+      <VStack>
+        <Text>Index</Text>
+      </VStack>
+    </Host>
   );
 }

@@ -1,11 +1,13 @@
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
+export const BILLING_CYCLES = ["weekly", "monthly", "yearly"] as const;
+
 export const subscriptions = sqliteTable("subscriptions", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   price: integer("price").notNull(), // in cents
   billingCycle: text("billing_cycle", {
-    enum: ["weekly", "monthly", "yearly"],
+    enum: BILLING_CYCLES,
   }).notNull(),
   subscribedAt: integer("subscribed_at", { mode: "timestamp" }).notNull(),
   createdAt: integer("created_at", { mode: "timestamp" })
@@ -17,3 +19,4 @@ export const subscriptions = sqliteTable("subscriptions", {
 
 export type Subscription = typeof subscriptions.$inferSelect;
 export type NewSubscription = typeof subscriptions.$inferInsert;
+export type BillingCycle = (typeof BILLING_CYCLES)[number];
