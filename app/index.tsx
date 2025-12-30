@@ -1,10 +1,10 @@
+import { db } from "@/db/client";
+import { BillingCycle, Subscription, subscriptions } from "@/db/schema";
 import { Button, ContextMenu, Host } from "@expo/ui/swift-ui";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { Image } from "expo-image";
 import { Alert, ScrollView, Text, View } from "react-native";
-import { db } from "../db/client";
-import { BillingCycle, Subscription, subscriptions } from "../db/schema";
 
 const formatPrice = (cents: number): string => {
   return (cents / 100).toFixed(2);
