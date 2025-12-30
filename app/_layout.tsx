@@ -40,6 +40,7 @@ export default function RootLayout() {
                 name: "plus",
                 type: "sfSymbol",
               },
+              variant: "prominent",
               onPress: () => router.push("/add-subscription"),
             },
           ],
