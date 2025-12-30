@@ -1,12 +1,26 @@
-import { Host, Text, VStack } from "@expo/ui/swift-ui";
-import React from "react";
+// Note: we use React state + useEffect since Expo/Drizzle queries must be async.
+import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { ScrollView, Text, View } from "react-native";
+import { db } from "../db/client";
+import { Subscription, subscriptions } from "../db/schema";
 
 export default function Index() {
+  const { data } = useLiveQuery(db.select().from(subscriptions));
+
   return (
-    <Host style={{ flex: 1 }}>
-      <VStack>
-        <Text>Index</Text>
-      </VStack>
-    </Host>
+    <ScrollView>
+      {data?.map((subscription: Subscription) => (
+        <View key={subscription.id}>
+          <Text>{subscription.name}</Text>
+          <Text>{subscription.price}</Text>
+          <Text>{subscription.billingCycle}</Text>
+          <Text>
+            {new Date(subscription.subscribedAt).toLocaleDateString()}
+          </Text>
+          <Text>{subscription.url}</Text>
+          <Text>{subscription.icon}</Text>
+        </View>
+      ))}
+    </ScrollView>
   );
 }
