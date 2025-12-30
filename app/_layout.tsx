@@ -6,7 +6,7 @@ import migrations from "../drizzle/migrations";
 import "../global.css";
 
 export default function RootLayout() {
-  // TOOD: #2 handle migrations error
+  // TODO: #2 handle migrations error
   const { success, error } = useMigrations(db, migrations);
 
   if (error) {

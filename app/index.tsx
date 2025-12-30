@@ -1,4 +1,3 @@
-// Note: we use React state + useEffect since Expo/Drizzle queries must be async.
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { ScrollView, Text, View } from "react-native";
 import { db } from "../db/client";

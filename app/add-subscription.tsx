@@ -1,6 +1,6 @@
 import { Input, Label } from "@/components/ui";
 import { db } from "@/db/client";
-import { BILLING_CYCLES, subscriptions } from "@/db/schema";
+import { BILLING_CYCLES, BillingCycle, subscriptions } from "@/db/schema";
 import { DateTimePicker, Host, Picker } from "@expo/ui/swift-ui";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router, Stack } from "expo-router";
@@ -23,18 +23,28 @@ const subscriptionSchema = z.object({
     .refine((val) => !isNaN(parseFloat(val)) && parseFloat(val) > 0, {
       message: "Price must be a valid positive number",
     }),
-  billingCycleIndex: z.number(),
+  billingCycleIndex: z
+    .number()
+    .min(0)
+    .max(BILLING_CYCLES.length - 1),
   subscribedAt: z.date(),
   url: z.string().optional(),
 });
 
 type SubscriptionFormData = z.infer<typeof subscriptionSchema>;
 
+const billingCycleLabels: Record<BillingCycle, string> = {
+  weekly: "per week",
+  monthly: "per month",
+  yearly: "per year",
+};
+
 export default function AddSubscription() {
   const {
     control,
     handleSubmit,
     formState: { errors, isValid, isSubmitting },
+    watch,
   } = useForm<SubscriptionFormData>({
     resolver: zodResolver(subscriptionSchema),
     defaultValues: {
@@ -46,11 +56,15 @@ export default function AddSubscription() {
     },
     mode: "onChange",
   });
+  const billingCycleText = BILLING_CYCLES[watch("billingCycleIndex") ?? 1];
+  const billingCycleLabel = billingCycleLabels[billingCycleText];
 
   const onSubmit = async (data: SubscriptionFormData) => {
     try {
       // Convert price string to cents (e.g., "9.99" -> 999)
-      const priceInCents = Math.round(parseFloat(data.price) * 100);
+      const [dollars, cents = "00"] = data.price.split(".");
+      const priceInCents =
+        parseInt(dollars) * 100 + parseInt(cents.padEnd(2, "0").slice(0, 2));
 
       await db.insert(subscriptions).values({
         name: data.name.trim(),
@@ -98,7 +112,8 @@ export default function AddSubscription() {
       />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="flex-1"
+        className="flex-1 bg-white dark:bg-zinc-900"
+        keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
       >
         <ScrollView
           className="flex-1 bg-white dark:bg-zinc-900"
@@ -129,7 +144,7 @@ export default function AddSubscription() {
                     />
                   </View>
                   <Text className="mt-1 text-sm leading-5 text-zinc-400">
-                    per month
+                    {billingCycleLabel}
                   </Text>
                   {errors.price && (
                     <Text className="mt-2 text-xs leading-4 text-red-500">
@@ -183,7 +198,7 @@ export default function AddSubscription() {
             />
           </View>
 
-          <View className="mb-4 flex-1">
+          <View className="mb-4">
             <Label>Subscribed Since</Label>
             <Controller
               control={control}
