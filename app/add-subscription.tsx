@@ -7,10 +7,10 @@ import {
   Platform,
   ScrollView,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import { z } from "zod";
+import { Input, InputBox, Label } from "../components/ui";
 import { db } from "../db/client";
 import { BILLING_CYCLES, subscriptions } from "../db/schema";
 
@@ -28,18 +28,6 @@ const subscriptionSchema = z.object({
 });
 
 type SubscriptionFormData = z.infer<typeof subscriptionSchema>;
-
-function SectionHeader({ title }: { title: string }) {
-  return (
-    <Text className="mb-2 ml-4 text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-      {title}
-    </Text>
-  );
-}
-
-function Separator() {
-  return <View className="ml-4 h-px bg-zinc-200 dark:bg-zinc-700" />;
-}
 
 export default function AddSubscription() {
   const {
@@ -89,6 +77,7 @@ export default function AddSubscription() {
                 name: "checkmark",
                 type: "sfSymbol",
               },
+              variant: "prominent",
               onPress: handleSubmit(onSubmit),
               disabled: !isValid || isSubmitting,
             },
@@ -111,134 +100,128 @@ export default function AddSubscription() {
         className="flex-1"
       >
         <ScrollView
-          className="flex-1 bg-zinc-100 dark:bg-zinc-900"
-          contentContainerClassName="px-4 pb-8 pt-4"
+          className="flex-1 bg-white dark:bg-zinc-900"
+          contentContainerClassName="px-4 pb-8 pt-6"
           keyboardShouldPersistTaps="handled"
           contentInsetAdjustmentBehavior="automatic"
         >
-          {/* Subscription Details Section */}
-          <View className="mb-6">
-            <SectionHeader title="Subscription Details" />
-            <View className="overflow-hidden rounded-xl bg-white dark:bg-zinc-800">
-              <Controller
-                control={control}
-                name="name"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <View className="px-4 py-3">
-                    <TextInput
-                      placeholder="Name"
-                      placeholderTextColor="#9ca3af"
-                      value={value}
-                      onChangeText={onChange}
-                      onBlur={onBlur}
-                      className="text-base text-zinc-900 dark:text-white"
-                      autoCapitalize="words"
-                    />
-                    {errors.name && (
-                      <Text className="mt-1 text-xs text-red-500">
-                        {errors.name.message}
-                      </Text>
-                    )}
-                  </View>
-                )}
-              />
-              <Separator />
-              <Controller
-                control={control}
-                name="price"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <View className="px-4 py-3">
-                    <TextInput
-                      placeholder="Price"
-                      placeholderTextColor="#9ca3af"
+          <View className="mb-8 items-center">
+            <Controller
+              control={control}
+              name="price"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <View className="flex items-center">
+                  <View className="flex-row items-baseline">
+                    <Text className="text-4xl font-light leading-tight text-zinc-400 dark:text-zinc-500">
+                      CHF
+                    </Text>
+                    <Input
+                      placeholder="0.00"
+                      placeholderTextColor="#d4d4d8"
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
                       keyboardType="decimal-pad"
-                      className="text-base text-zinc-900 dark:text-white"
+                      className="ml-2 min-w-[120px] text-5xl font-semibold leading-tight text-zinc-900 dark:text-white"
+                      textAlign="left"
                     />
-                    {errors.price && (
-                      <Text className="mt-1 text-xs text-red-500">
-                        {errors.price.message}
-                      </Text>
-                    )}
                   </View>
-                )}
-              />
-            </View>
+                  <Text className="mt-1 text-sm leading-5 text-zinc-400">
+                    per month
+                  </Text>
+                  {errors.price && (
+                    <Text className="mt-2 text-xs leading-4 text-red-500">
+                      {errors.price.message}
+                    </Text>
+                  )}
+                </View>
+              )}
+            />
           </View>
 
-          {/* Subscription Start Section */}
-          <View className="mb-6">
-            <SectionHeader title="Subscription Start" />
-            <View className="overflow-hidden rounded-xl bg-white dark:bg-zinc-800">
-              <View className="px-4 py-3">
-                <Controller
-                  control={control}
-                  name="billingCycleIndex"
-                  render={({ field: { onChange, value } }) => (
-                    <Host matchContents>
-                      <Picker
-                        options={["Weekly", "Monthly", "Yearly"]}
-                        selectedIndex={value ?? 0}
-                        onOptionSelected={({ nativeEvent: { index } }) =>
-                          onChange(index)
-                        }
-                        variant="segmented"
-                      />
-                    </Host>
-                  )}
-                />
-              </View>
-              <Separator />
+          <View className="mb-4">
+            <Label>Name</Label>
+            <InputBox>
               <Controller
                 control={control}
-                name="subscribedAt"
-                render={({ field: { onChange, value } }) => (
-                  <View className="flex-row items-center justify-between px-4 py-3">
-                    <Text className="text-base text-zinc-900 dark:text-white">
-                      Subscribed since
-                    </Text>
-                    <Host matchContents>
-                      <DateTimePicker
-                        onDateSelected={(date) => {
-                          onChange(date);
-                        }}
-                        displayedComponents="date"
-                        initialDate={value.toISOString()}
-                        variant="compact"
-                      />
-                    </Host>
-                  </View>
+                name="name"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <Input
+                    placeholder="e.g. Netflix"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    autoCapitalize="words"
+                  />
                 )}
               />
-            </View>
+            </InputBox>
+            {errors.name && (
+              <Text className="mt-1 text-xs leading-4 text-red-500">
+                {errors.name.message}
+              </Text>
+            )}
           </View>
 
-          {/* Additional Info Section */}
-          <View className="mb-6">
-            <SectionHeader title="Additional Info" />
-            <View className="overflow-hidden rounded-xl bg-white dark:bg-zinc-800">
+          <View className="mb-4">
+            <Label>Billing Cycle</Label>
+            <Controller
+              control={control}
+              name="billingCycleIndex"
+              render={({ field: { onChange, value } }) => (
+                <Host matchContents>
+                  <Picker
+                    options={["Weekly", "Monthly", "Yearly"]}
+                    selectedIndex={value ?? 0}
+                    onOptionSelected={({ nativeEvent: { index } }) =>
+                      onChange(index)
+                    }
+                    variant="segmented"
+                  />
+                </Host>
+              )}
+            />
+          </View>
+
+          <View className="mb-4">
+            <Label>Subscribed Since</Label>
+            <Controller
+              control={control}
+              name="subscribedAt"
+              render={({ field: { onChange, value } }) => (
+                <Host matchContents>
+                  <DateTimePicker
+                    onDateSelected={(date) => {
+                      onChange(date);
+                    }}
+                    displayedComponents="date"
+                    initialDate={value.toISOString()}
+                    variant="compact"
+                  />
+                </Host>
+              )}
+            />
+          </View>
+
+          <View className="mb-4">
+            <Label>Provider Domain(optional)</Label>
+            <InputBox>
               <Controller
                 control={control}
                 name="url"
                 render={({ field: { onChange, onBlur, value } }) => (
-                  <View className="px-4 py-3">
-                    <TextInput
-                      placeholder="URL (optional)"
-                      placeholderTextColor="#9ca3af"
-                      value={value}
-                      onChangeText={onChange}
-                      onBlur={onBlur}
-                      keyboardType="url"
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                      className="text-base text-zinc-900 dark:text-white"
-                    />
-                  </View>
+                  <Input
+                    placeholder="e.g. netflix.com"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    keyboardType="url"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                  />
                 )}
               />
-            </View>
+            </InputBox>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
