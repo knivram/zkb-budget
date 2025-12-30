@@ -39,9 +39,13 @@ export default function Index() {
           text: "Delete",
           style: "destructive",
           onPress: async () => {
-            await db
-              .delete(subscriptions)
-              .where(eq(subscriptions.id, subscription.id));
+            try {
+              await db
+                .delete(subscriptions)
+                .where(eq(subscriptions.id, subscription.id));
+            } catch (error) {
+              console.error("Failed to delete subscription:", error);
+            }
           },
         },
       ]
