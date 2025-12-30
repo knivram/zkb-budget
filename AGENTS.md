@@ -18,6 +18,7 @@
 - Language: TypeScript with React function components; use 2-space indentation.
 - Components in `PascalCase`; hooks/utilities in `camelCase`. Keep file names matching the default export.
 - Styling: Prefer NativeWind `className` utilities; Tailwind classes auto-sorted by Prettier Tailwind plugin.
+- Imports: use alias paths (`@/foo/bar`) instead of relative traversals (`../foo/bar`).
 - Keep DB enums/timestamps typed at the schema; store currency as integer cents (see `subscriptions.price`).
 
 ## Testing Guidelines

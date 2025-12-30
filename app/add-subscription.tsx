@@ -28,7 +28,19 @@ const subscriptionSchema = z.object({
     .min(0)
     .max(BILLING_CYCLES.length - 1),
   subscribedAt: z.date(),
-  url: z.string().optional(),
+  // TODO: either turn this into a url or rename to domain
+  url: z
+    .string()
+    .optional()
+    .refine(
+      (val) =>
+        !val ||
+        val.trim() === "" ||
+        /^([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/.test(
+          val.trim()
+        ),
+      { message: "Please enter a valid domain (e.g., netflix.com)" }
+    ),
 });
 
 type SubscriptionFormData = z.infer<typeof subscriptionSchema>;
@@ -45,6 +57,7 @@ const fetchLogoAsBase64 = async (domain: string): Promise<string | null> => {
     const response = await fetch(url);
     if (!response.ok) return null;
 
+    // TODO: #5 save logo to file system
     const blob = await response.blob();
     return new Promise((resolve) => {
       const reader = new FileReader();
@@ -258,6 +271,11 @@ export default function AddSubscription() {
                 />
               )}
             />
+            {errors.url && (
+              <Text className="mt-1 text-xs leading-4 text-red-500">
+                {errors.url.message}
+              </Text>
+            )}
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
