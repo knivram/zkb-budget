@@ -1,9 +1,9 @@
+import { db } from "@/db/client";
+import migrations from "@/drizzle/migrations";
+import "@/global.css";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import { router, Stack } from "expo-router";
 import { Text, View } from "react-native";
-import { db } from "../db/client";
-import migrations from "../drizzle/migrations";
-import "../global.css";
 
 export default function RootLayout() {
   // TODO: #2 handle migrations error
