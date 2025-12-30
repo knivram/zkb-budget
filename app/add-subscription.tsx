@@ -108,12 +108,13 @@ export default function AddSubscription() {
       />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="flex-1 pt-20"
+        className="flex-1"
       >
         <ScrollView
           className="flex-1 bg-zinc-100 dark:bg-zinc-900"
           contentContainerClassName="px-4 pb-8 pt-4"
           keyboardShouldPersistTaps="handled"
+          contentInsetAdjustmentBehavior="automatic"
         >
           {/* Subscription Details Section */}
           <View className="mb-6">

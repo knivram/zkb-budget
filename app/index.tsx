@@ -8,7 +8,7 @@ export default function Index() {
   const { data } = useLiveQuery(db.select().from(subscriptions));
 
   return (
-    <ScrollView>
+    <ScrollView contentInsetAdjustmentBehavior="automatic">
       {data?.map((subscription: Subscription) => (
         <View key={subscription.id}>
           <Text>{subscription.name}</Text>
