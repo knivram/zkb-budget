@@ -39,6 +39,24 @@ const billingCycleLabels: Record<BillingCycle, string> = {
   yearly: "per year",
 };
 
+const fetchLogoAsBase64 = async (domain: string): Promise<string | null> => {
+  try {
+    const url = `https://img.logo.dev/${domain}?token=${process.env.EXPO_PUBLIC_LOGO_DEV_KEY}`;
+    const response = await fetch(url);
+    if (!response.ok) return null;
+
+    const blob = await response.blob();
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
+  }
+};
+
 export default function AddSubscription() {
   const {
     control,
@@ -61,10 +79,14 @@ export default function AddSubscription() {
 
   const onSubmit = async (data: SubscriptionFormData) => {
     try {
-      // Convert price string to cents (e.g., "9.99" -> 999)
       const [dollars, cents = "00"] = data.price.split(".");
       const priceInCents =
         parseInt(dollars) * 100 + parseInt(cents.padEnd(2, "0").slice(0, 2));
+
+      let icon: string | null = null;
+      if (data.url?.trim()) {
+        icon = await fetchLogoAsBase64(data.url.trim());
+      }
 
       await db.insert(subscriptions).values({
         name: data.name.trim(),
@@ -72,6 +94,7 @@ export default function AddSubscription() {
         billingCycle: BILLING_CYCLES[data.billingCycleIndex],
         subscribedAt: data.subscribedAt,
         url: data.url?.trim() || null,
+        icon,
       });
 
       router.back();
