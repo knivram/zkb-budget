@@ -11,6 +11,7 @@ import {
   VStack,
 } from "@expo/ui/swift-ui";
 import { frame, padding } from "@expo/ui/swift-ui/modifiers";
+import { count } from "drizzle-orm";
 import * as DocumentPicker from "expo-document-picker";
 import { File } from "expo-file-system";
 import { useState } from "react";
@@ -54,16 +55,33 @@ export default function ImportTransactions({
         return;
       }
 
+      // TODO: #6 - Use imports table to track imports instead of counting before/after
+      const beforeCount = await db
+        .select({ count: count() })
+        .from(transactions);
+
       await db
         .insert(transactions)
         .values(parsedTransactions)
         .onConflictDoNothing();
 
+      const afterCount = await db.select({ count: count() }).from(transactions);
+
+      const newCount = afterCount[0].count - beforeCount[0].count;
+
       onOpenChange(false);
-      Alert.alert(
-        "Import Complete",
-        `Successfully imported ${parsedTransactions.length} transactions.`
-      );
+
+      if (newCount === 0) {
+        Alert.alert(
+          "No New Transactions",
+          "All transactions in this file already exist."
+        );
+      } else {
+        Alert.alert(
+          "Import Complete",
+          `Imported ${newCount} new transactions.`
+        );
+      }
     } catch (error) {
       console.error("Import error:", error);
       Alert.alert(
