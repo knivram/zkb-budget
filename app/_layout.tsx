@@ -2,7 +2,7 @@ import { db } from "@/db/client";
 import migrations from "@/drizzle/migrations";
 import "@/global.css";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
-import { router, Stack } from "expo-router";
+import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
 import { Text, View } from "react-native";
 
 export default function RootLayout() {
@@ -26,35 +26,15 @@ export default function RootLayout() {
   }
 
   return (
-    <Stack>
-      <Stack.Screen
-        name="index"
-        options={{
-          headerLargeTitleEnabled: true,
-          title: "Home",
-          unstable_headerRightItems: () => [
-            {
-              type: "button",
-              label: "Add",
-              icon: {
-                name: "plus",
-                type: "sfSymbol",
-              },
-              variant: "prominent",
-              onPress: () => router.push("/add-subscription"),
-            },
-          ],
-        }}
-      />
-      <Stack.Screen
-        name="add-subscription"
-        options={{
-          presentation: "modal",
-          title: "Add Subscription",
-          headerLargeTitleEnabled: false,
-          headerTransparent: true,
-        }}
-      />
-    </Stack>
+    <NativeTabs>
+      <NativeTabs.Trigger name="transactions">
+        <Icon sf="list.bullet" />
+        <Label>Transactions</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="subscriptions">
+        <Icon sf="repeat" />
+        <Label>Subscriptions</Label>
+      </NativeTabs.Trigger>
+    </NativeTabs>
   );
 }
