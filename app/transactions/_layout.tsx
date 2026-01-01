@@ -1,6 +1,6 @@
 import { Stack } from "expo-router";
 
-export default function SubscriptionLayout() {
+export default function TransactionsLayout() {
   return (
     <Stack>
       <Stack.Screen

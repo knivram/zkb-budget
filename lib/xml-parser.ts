@@ -16,6 +16,7 @@ export const parseTransaction = (
     return null;
   }
 
+  // TODO: Convert amounts to integer cents (multiply by 100, round) - https://github.com/knivram/zkb-budget/issues/8
   return {
     id: statement.transactionIdentification,
     statementType: statement.statementType,
