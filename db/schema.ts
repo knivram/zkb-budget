@@ -32,10 +32,12 @@ export const transactions = sqliteTable("transactions", {
   date: text("date").notNull(),
   accountIBAN: text("account_iban").notNull(),
   currency: text("currency").notNull(),
+  // TODO: #8 Change to integer (cents) to avoid precision errors
   amount: real("amount").notNull(),
   creditDebitIndicator: text("credit_debit_indicator", {
     enum: CREDIT_DEBIT_INDICATORS,
   }).notNull(),
+  // TODO: #8 Change to integer (cents) to avoid precision errors
   signedAmount: real("signed_amount").notNull(),
   transactionAdditionalDetails: text(
     "transaction_additional_details"
