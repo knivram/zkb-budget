@@ -20,6 +20,15 @@ export default function TransactionsLayout() {
           headerTransparent: true,
         }}
       />
+      <Stack.Screen
+        name="review-detected"
+        options={{
+          presentation: "modal",
+          title: "Review Subscriptions",
+          headerLargeTitleEnabled: false,
+          headerTransparent: true,
+        }}
+      />
     </Stack>
   );
 }

@@ -1,5 +1,7 @@
 import { db } from "@/db/client";
-import { transactions } from "@/db/schema";
+import { subscriptions, transactions } from "@/db/schema";
+import { DetectedSubscription } from "@/lib/api/ai-schemas";
+import { fetchLogoAsBase64 } from "@/lib/logo-fetcher";
 import { parseXMLTransactions } from "@/lib/xml-parser";
 import {
   BottomSheet,
@@ -11,9 +13,10 @@ import {
   VStack,
 } from "@expo/ui/swift-ui";
 import { frame, padding } from "@expo/ui/swift-ui/modifiers";
-import { count } from "drizzle-orm";
+import { count, desc, eq } from "drizzle-orm";
 import * as DocumentPicker from "expo-document-picker";
 import { File } from "expo-file-system";
+import { router } from "expo-router";
 import { useState } from "react";
 import { Alert } from "react-native";
 
@@ -22,11 +25,48 @@ interface ImportTransactionsProps {
   onOpenChange: (isOpen: boolean) => void;
 }
 
+async function insertDetectedSubscriptions(
+  detected: DetectedSubscription[]
+): Promise<void> {
+  if (detected.length === 0) return;
+
+  const subscriptionsToInsert = detected.map((sub) => ({
+    name: sub.name,
+    price: Math.round(sub.price * 100),
+    billingCycle: sub.billingCycle,
+    subscribedAt: new Date(sub.subscribedAt),
+    url: sub.domain || null,
+    icon: null,
+  }));
+
+  const insertedSubscriptions = await db
+    .insert(subscriptions)
+    .values(subscriptionsToInsert)
+    .returning();
+
+  insertedSubscriptions.forEach(async (sub) => {
+    if (sub.url) {
+      try {
+        const icon = await fetchLogoAsBase64(sub.url);
+        if (icon) {
+          await db
+            .update(subscriptions)
+            .set({ icon })
+            .where(eq(subscriptions.id, sub.id));
+        }
+      } catch (error) {
+        console.error(`Failed to fetch logo for ${sub.name}:`, error);
+      }
+    }
+  });
+}
+
 export default function ImportTransactions({
   isOpen,
   onOpenChange,
 }: ImportTransactionsProps) {
   const [isImporting, setIsImporting] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("Importing...");
 
   const handleImport = async () => {
     try {
@@ -41,6 +81,7 @@ export default function ImportTransactions({
       }
 
       setIsImporting(true);
+      setLoadingMessage("Importing...");
 
       const file = new File(selectedFile.uri);
       const xmlContent = await file.text();
@@ -69,19 +110,75 @@ export default function ImportTransactions({
 
       const newCount = afterCount[0].count - beforeCount[0].count;
 
-      onOpenChange(false);
-
       if (newCount === 0) {
+        setIsImporting(false);
+        onOpenChange(false);
         Alert.alert(
           "No New Transactions",
           "All transactions in this file already exist."
         );
-      } else {
-        Alert.alert(
-          "Import Complete",
-          `Imported ${newCount} new transactions.`
-        );
+        return;
       }
+
+      const newTransactions = await db
+        .select()
+        .from(transactions)
+        .orderBy(desc(transactions.createdAt))
+        .limit(newCount);
+
+      setLoadingMessage("Analyzing subscriptions...");
+      try {
+        console.log("Analyzing subscriptions...");
+        const response = await fetch("/api/detect-subscriptions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ transactions: newTransactions }),
+        });
+
+        if (response.ok) {
+          const { subscriptions: detected } = await response.json();
+
+          if (detected && detected.length > 0) {
+            const highConfidence = detected.filter(
+              (s: DetectedSubscription) => s.confidence > 0.8
+            );
+            const mediumConfidence = detected.filter(
+              (s: DetectedSubscription) =>
+                s.confidence >= 0.0 && s.confidence <= 0.8
+            );
+
+            if (highConfidence.length > 0) {
+              await insertDetectedSubscriptions(highConfidence);
+            }
+
+            if (mediumConfidence.length > 0) {
+              setIsImporting(false);
+              router.push({
+                pathname: "/transactions/review-detected",
+                params: {
+                  detectedSubscriptions: JSON.stringify(mediumConfidence),
+                },
+              });
+              onOpenChange(false);
+              return;
+            }
+
+            setIsImporting(false);
+            onOpenChange(false);
+            Alert.alert(
+              "Import Complete",
+              `Imported ${newCount} transactions. ${highConfidence.length} subscriptions detected and added.`
+            );
+            return;
+          }
+        }
+      } catch (error) {
+        console.error("AI detection failed:", error);
+      }
+
+      setIsImporting(false);
+      onOpenChange(false);
+      Alert.alert("Import Complete", `Imported ${newCount} new transactions.`);
     } catch (error) {
       console.error("Import error:", error);
       Alert.alert(
@@ -117,7 +214,7 @@ export default function ImportTransactions({
               modifiers={[frame({ maxWidth: Infinity })]}
             >
               <SwiftText modifiers={[frame({ maxWidth: Infinity })]}>
-                {isImporting ? "Importing..." : "Choose File"}
+                {isImporting ? loadingMessage : "Choose File"}
               </SwiftText>
             </Button>
           </VStack>

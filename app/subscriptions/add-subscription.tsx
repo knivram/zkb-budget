@@ -1,6 +1,7 @@
 import { Input, Label } from "@/components/ui";
 import { db } from "@/db/client";
 import { BILLING_CYCLES, BillingCycle, subscriptions } from "@/db/schema";
+import { fetchLogoAsBase64 } from "@/lib/logo-fetcher";
 import { DateTimePicker, Host, Picker } from "@expo/ui/swift-ui";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router, Stack } from "expo-router";
@@ -49,25 +50,6 @@ const billingCycleLabels: Record<BillingCycle, string> = {
   weekly: "per week",
   monthly: "per month",
   yearly: "per year",
-};
-
-const fetchLogoAsBase64 = async (domain: string): Promise<string | null> => {
-  try {
-    const url = `https://img.logo.dev/${domain}?token=${process.env.EXPO_PUBLIC_LOGO_DEV_KEY}`;
-    const response = await fetch(url);
-    if (!response.ok) return null;
-
-    // TODO: #5 save logo to file system
-    const blob = await response.blob();
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = () => resolve(null);
-      reader.readAsDataURL(blob);
-    });
-  } catch {
-    return null;
-  }
 };
 
 export default function AddSubscription() {
