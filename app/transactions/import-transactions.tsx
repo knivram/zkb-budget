@@ -1,5 +1,6 @@
 import { db } from "@/db/client";
-import { transactions } from "@/db/schema";
+import { subscriptions, transactions } from "@/db/schema";
+import { EnrichedTransaction } from "@/lib/api/ai-schemas";
 import { parseXMLTransactions } from "@/lib/xml-parser";
 import {
   BottomSheet,
@@ -11,9 +12,9 @@ import {
   VStack,
 } from "@expo/ui/swift-ui";
 import { frame, padding } from "@expo/ui/swift-ui/modifiers";
+import { eq } from "drizzle-orm";
 import * as DocumentPicker from "expo-document-picker";
 import { File } from "expo-file-system";
-import { router } from "expo-router";
 import { useState } from "react";
 import { Alert } from "react-native";
 
@@ -75,34 +76,81 @@ export default function ImportTransactions({
         return;
       }
 
-      setLoadingMessage("Analyzing subscriptions...");
+      // Enrich transactions with AI
+      setLoadingMessage("Enriching transactions...");
       try {
-        console.log("Analyzing subscriptions...");
-        const response = await fetch("/api/detect-subscriptions", {
+        // Fetch existing subscriptions for matching
+        const existingSubscriptions = await db
+          .select({
+            id: subscriptions.id,
+            name: subscriptions.name,
+            price: subscriptions.price,
+            billingCycle: subscriptions.billingCycle,
+          })
+          .from(subscriptions);
+
+        const enrichResponse = await fetch("/api/enrich-transactions", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ transactions: newTransactions }),
+          body: JSON.stringify({
+            transactions: newTransactions,
+            subscriptions: existingSubscriptions,
+          }),
         });
 
-        if (response.ok) {
-          const { subscriptions: detectedSubscriptions } =
-            await response.json();
+        if (enrichResponse.ok) {
+          const { transactions: enrichedData } = await enrichResponse.json();
 
-          if (detectedSubscriptions && detectedSubscriptions.length > 0) {
-            setIsImporting(false);
-            router.push({
-              pathname: "/transactions/review-detected",
-              params: {
-                detectedSubscriptions: JSON.stringify(detectedSubscriptions),
-              },
-            });
-            onOpenChange(false);
-            return;
+          // Update transactions with enriched data
+          if (enrichedData && enrichedData.length > 0) {
+            await Promise.all(
+              enrichedData.map((enriched: EnrichedTransaction) =>
+                db
+                  .update(transactions)
+                  .set({
+                    category: enriched.category,
+                    displayName: enriched.displayName,
+                    domain: enriched.domain ?? null,
+                    subscriptionId: enriched.subscriptionId ?? null,
+                  })
+                  .where(eq(transactions.id, enriched.id))
+              )
+            );
           }
         }
       } catch (error) {
-        console.error("AI detection failed:", error);
+        console.error("Transaction enrichment failed:", error);
+        // Continue - enrichment is non-critical
       }
+
+      // setLoadingMessage("Analyzing subscriptions...");
+      // try {
+      //   console.log("Analyzing subscriptions...");
+      //   const response = await fetch("/api/detect-subscriptions", {
+      //     method: "POST",
+      //     headers: { "Content-Type": "application/json" },
+      //     body: JSON.stringify({ transactions: newTransactions }),
+      //   });
+
+      //   if (response.ok) {
+      //     const { subscriptions: detectedSubscriptions } =
+      //       await response.json();
+
+      //     if (detectedSubscriptions && detectedSubscriptions.length > 0) {
+      //       setIsImporting(false);
+      //       router.push({
+      //         pathname: "/transactions/review-detected",
+      //         params: {
+      //           detectedSubscriptions: JSON.stringify(detectedSubscriptions),
+      //         },
+      //       });
+      //       onOpenChange(false);
+      //       return;
+      //     }
+      //   }
+      // } catch (error) {
+      //   console.error("AI detection failed:", error);
+      // }
 
       setIsImporting(false);
       onOpenChange(false);

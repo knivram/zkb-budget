@@ -20,7 +20,7 @@ export const parseTransaction = (
   return {
     id: statement.transactionIdentification,
     statementType: statement.statementType,
-    date: statement.bookingDate,
+    date: statement.valueDate,
     accountIBAN: statement.accountIdentification,
     amount: statement.amountInMaccCurrency,
     currency: statement.maccCurrency,

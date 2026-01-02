@@ -1,4 +1,5 @@
 import { Transaction } from "@/db/schema";
+import { SubscriptionForAI } from "@/lib/api/api-schemas";
 import { encode } from "@toon-format/toon";
 
 /**
@@ -29,4 +30,28 @@ export function convertTransactionsToToon(transactions: Transaction[]): string {
   }));
 
   return encode({ transactions: relevantData });
+}
+
+/**
+ * Converts an array of subscriptions to Toon format for AI processing.
+ * Includes only the fields needed for transaction-to-subscription matching.
+ *
+ * @param subscriptions - Array of subscription objects with id, name, price, and billingCycle
+ * @returns Toon-formatted string representation of the subscriptions
+ */
+export function convertSubscriptionsToToon(
+  subscriptions: SubscriptionForAI[]
+): string {
+  if (subscriptions.length === 0) {
+    return encode({ subscriptions: [] });
+  }
+
+  const relevantData = subscriptions.map((s) => ({
+    id: s.id,
+    name: s.name,
+    price: s.price,
+    billingCycle: s.billingCycle,
+  }));
+
+  return encode({ subscriptions: relevantData });
 }

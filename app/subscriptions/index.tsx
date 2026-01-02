@@ -4,7 +4,8 @@ import { BillingCycle, Subscription, subscriptions } from "@/db/schema";
 import { Button, ContextMenu, Host } from "@expo/ui/swift-ui";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { Alert, ScrollView, Text, View } from "react-native";
+import { router } from "expo-router";
+import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 
 const formatPrice = (cents: number): string => {
   return (cents / 100).toFixed(2);
@@ -82,25 +83,31 @@ export default function Subscriptions() {
                   </Button>
                 </ContextMenu.Items>
                 <ContextMenu.Trigger>
-                  <View className="flex-row items-center border-b border-zinc-100 px-4 py-3 dark:border-zinc-800 bg-white dark:bg-zinc-900">
-                    <DomainLogo
-                      domain={subscription.domain}
-                      name={subscription.name}
-                      size={48}
-                      className="mr-3"
-                    />
-                    <View className="flex-1">
-                      <Text className="text-base font-medium text-zinc-900 dark:text-white">
-                        {subscription.name}
-                      </Text>
-                      <Text className="text-sm capitalize text-zinc-500">
-                        {subscription.billingCycle}
+                  <Pressable
+                    onPress={() =>
+                      router.push(`/subscriptions/${subscription.id}`)
+                    }
+                  >
+                    <View className="flex-row items-center border-b border-zinc-100 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
+                      <DomainLogo
+                        domain={subscription.domain}
+                        name={subscription.name}
+                        size={48}
+                        className="mr-3"
+                      />
+                      <View className="flex-1">
+                        <Text className="text-base font-medium text-zinc-900 dark:text-white">
+                          {subscription.name}
+                        </Text>
+                        <Text className="text-sm capitalize text-zinc-500">
+                          {subscription.billingCycle}
+                        </Text>
+                      </View>
+                      <Text className="text-base font-semibold text-zinc-900 dark:text-white">
+                        CHF {formatPrice(subscription.price)}
                       </Text>
                     </View>
-                    <Text className="text-base font-semibold text-zinc-900 dark:text-white">
-                      CHF {formatPrice(subscription.price)}
-                    </Text>
-                  </View>
+                  </Pressable>
                 </ContextMenu.Trigger>
               </ContextMenu>
             </Host>
