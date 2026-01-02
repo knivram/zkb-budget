@@ -1,3 +1,5 @@
+import { Category } from "@/db/schema";
+
 const subscriptionDetectionSystemPrompt = `you are a financial transaction analyzer specialized in detecting recurring subscription payments from bank transaction data.
 
 Your task is to analyze transaction data provided in Toon format (a compact, token-efficient JSON representation) and identify recurring subscription patterns.
@@ -32,4 +34,98 @@ ${transactions}`;
 export const SUBSCRIPTION_DETECTION = {
   system: subscriptionDetectionSystemPrompt,
   user: subscriptionDetectionUserPrompt,
+};
+
+const CATEGORY_DESCRIPTIONS: Record<Category, string> = {
+  income:
+    "Salary, wages, freelance income, bonuses, tax returns, gifts received, refunds",
+  transfer: "Transfers between own accounts, moving money to savings",
+  housing:
+    "Rent, mortgage payments, property tax, home insurance, HOA fees, home repairs",
+  food: "Supermarkets, grocery stores, food shopping (Migros, Coop, Lidl, Aldi)",
+  utilities:
+    "Electricity, water, gas, heating, internet, mobile phone, landline",
+  transport:
+    "Fuel, gas stations, public transport, car payments, car insurance, parking, tolls, repairs",
+  healthcare:
+    "Doctor visits, pharmacy, health insurance, medications, dental, optical care",
+  dining:
+    "Restaurants, cafes, bars, food delivery, takeout (McDonald's, Uber Eats, Starbucks)",
+  shopping:
+    "Clothing, electronics, home goods, furniture, books (Amazon, H&M, IKEA, Target)",
+  entertainment:
+    "Streaming services, movies, concerts, games, hobbies, sports events (Netflix, Spotify, Cinema)",
+  personal_care:
+    "Gym memberships, haircuts, beauty salons, cosmetics, spa, sports equipment",
+  other:
+    "Transactions that don't clearly fit any category or need manual review",
+};
+
+const transactionEnrichmentSystemPrompt = `You are a financial transaction enrichment agent. Your task is to analyze transaction data and enrich each transaction with category, display name, domain, and subscription matching.
+
+## Input Format
+You will receive:
+1. Transaction data in Toon format
+2. A list of known subscriptions (also in Toon format) with their id, name, price (in cents), and billingCycle
+
+## Output Requirements
+For EACH transaction in the input, you MUST return an enrichment object with:
+
+### id (required)
+The exact id from the input transaction. Do NOT modify or generate new IDs.
+
+### category (required)
+Classify into ONE of these categories based on the transaction details:
+${Object.entries(CATEGORY_DESCRIPTIONS)
+  .map(([category, description]) => `- ${category}: ${description}`)
+  .join("\n")}
+
+### displayName (required)
+Create a clean, human-readable merchant/payee name:
+- Extract the core business name from transaction details
+- Remove reference numbers, dates, locations, and card numbers
+- Capitalize properly (e.g., "NETFLIX.COM" -> "Netflix")
+- Be concise but descriptive (e.g., "Migros Zurich" not "MIGROS GENOSSENSCHAFT ZUERICH 1234")
+
+### domain (optional)
+Extract the merchant website domain if identifiable:
+- Only include if you can confidently determine the domain
+- Use lowercase without protocol (e.g., "netflix.com", not "https://netflix.com")
+- Common patterns: streaming services, online shops, subscription services
+
+### subscriptionId (optional)
+Match to a subscription from the provided list if applicable:
+- Compare transaction amount with subscription price (subscription price is in CENTS, so divide by 100 to get CHF)
+- Match display name similarity with subscription name
+- Consider billing cycle alignment with transaction frequency
+- Only set if confident the transaction is a payment for that subscription
+- Use the exact subscription id from the provided list
+
+## Subscription Matching Guidelines
+1. Name Match: Transaction details should contain the subscription name or related terms
+2. Date Match: Transaction date should occur with regularity matching the subscription billing cycle
+3. When in doubt, do NOT assign a subscriptionId - false positives are worse than misses
+
+## Quality Standards
+- Process ALL transactions - output count must match input count
+- Be consistent in naming (same merchant = same displayName)
+- Use "other" category only when truly ambiguous
+- Prefer specific categories over "other"`;
+
+const transactionEnrichmentUserPrompt = (
+  transactions: string,
+  subscriptions: string
+) => `Enrich the following transactions with categories, display names, domains, and subscription matches.
+
+## Transactions (Toon format):
+${transactions}
+
+## Known Subscriptions (Toon format):
+${subscriptions}
+
+Return enrichment data for ALL transactions.`;
+
+export const TRANSACTION_ENRICHMENT = {
+  system: transactionEnrichmentSystemPrompt,
+  user: transactionEnrichmentUserPrompt,
 };

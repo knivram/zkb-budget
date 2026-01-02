@@ -25,6 +25,21 @@ export type Subscription = typeof subscriptions.$inferSelect;
 export type NewSubscription = typeof subscriptions.$inferInsert;
 export type BillingCycle = (typeof BILLING_CYCLES)[number];
 
+export const CATEGORIES = [
+  "income",
+  "transfer",
+  "housing",
+  "food",
+  "transport",
+  "utilities",
+  "healthcare",
+  "dining",
+  "shopping",
+  "entertainment",
+  "personal_care",
+  "other",
+] as const;
+
 export const transactions = sqliteTable("transactions", {
   id: text("id").primaryKey(),
   statementType: text("statement_type").notNull(),
@@ -47,9 +62,18 @@ export const transactions = sqliteTable("transactions", {
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
+  category: text("category", {
+    enum: CATEGORIES,
+  })
+    .notNull()
+    .default("other"),
+  displayName: text("display_name"),
+  domain: text("domain"),
+  subscriptionId: integer("subscription_id").references(() => subscriptions.id),
 });
 
 export type Transaction = typeof transactions.$inferSelect;
 export type NewTransaction = typeof transactions.$inferInsert;
 export type TransactionSubtype = (typeof TRANSACTION_SUBTYPES)[number];
 export type CreditDebitIndicator = (typeof CREDIT_DEBIT_INDICATORS)[number];
+export type Category = (typeof CATEGORIES)[number];

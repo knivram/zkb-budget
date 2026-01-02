@@ -32,6 +32,14 @@ export default function SubscriptionLayout() {
           headerTransparent: true,
         }}
       />
+      <Stack.Screen
+        name="[id]"
+        options={{
+          title: "Subscription",
+          headerLargeTitleEnabled: false,
+          headerTransparent: true,
+        }}
+      />
     </Stack>
   );
 }
