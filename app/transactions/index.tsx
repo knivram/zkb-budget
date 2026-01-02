@@ -1,8 +1,8 @@
 import { db } from "@/db/client";
-import { Category, subscriptions, transactions } from "@/db/schema";
+import { Category, transactions } from "@/db/schema";
 import { Host, Image as SwiftImage } from "@expo/ui/swift-ui";
 import {} from "@expo/ui/swift-ui/modifiers";
-import { desc, eq } from "drizzle-orm";
+import { desc } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { Image } from "expo-image";
 import { Stack } from "expo-router";
@@ -82,27 +82,7 @@ export default function Transactions() {
   const [isImportOpen, setIsImportOpen] = useState(false);
 
   const { data } = useLiveQuery(
-    db
-      .select({
-        id: transactions.id,
-        displayName: transactions.displayName,
-        transactionAdditionalDetails: transactions.transactionAdditionalDetails,
-        date: transactions.date,
-        amount: transactions.amount,
-        signedAmount: transactions.signedAmount,
-        creditDebitIndicator: transactions.creditDebitIndicator,
-        category: transactions.category,
-        domain: transactions.domain,
-        subscriptionId: transactions.subscriptionId,
-        subscriptionName: subscriptions.name,
-        subscriptionIcon: subscriptions.icon,
-      })
-      .from(transactions)
-      .leftJoin(
-        subscriptions,
-        eq(transactions.subscriptionId, subscriptions.id)
-      )
-      .orderBy(desc(transactions.date))
+    db.select().from(transactions).orderBy(desc(transactions.date))
   );
 
   return (
@@ -171,7 +151,7 @@ export default function Transactions() {
                     </Text>
                   </View>
 
-                  {item.subscriptionId && item.subscriptionName && (
+                  {item.subscriptionId && (
                     <View className="flex-row items-center rounded-md bg-blue-50 px-2 py-0.5 dark:bg-blue-900/30">
                       <Text className="text-xs text-blue-600 dark:text-blue-400">
                         Subscription
