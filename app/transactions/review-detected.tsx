@@ -6,6 +6,9 @@ import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
+const HIGH_CONFIDENCE_THRESHOLD = 0.8;
+const MEDIUM_CONFIDENCE_THRESHOLD = 0.6;
+
 export default function ReviewDetectedSubscriptions() {
   const params = useLocalSearchParams();
   const detectedSubscriptions: DetectedSubscription[] = JSON.parse(
@@ -66,14 +69,14 @@ export default function ReviewDetectedSubscriptions() {
   };
 
   const getConfidenceColor = (confidence: number): string => {
-    if (confidence >= 0.8) return "bg-green-500";
-    if (confidence >= 0.6) return "bg-yellow-500";
+    if (confidence >= HIGH_CONFIDENCE_THRESHOLD) return "bg-green-500";
+    if (confidence >= MEDIUM_CONFIDENCE_THRESHOLD) return "bg-yellow-500";
     return "bg-orange-500";
   };
 
   const getConfidenceBadgeText = (confidence: number): string => {
-    if (confidence >= 0.7) return "High";
-    if (confidence >= 0.5) return "Medium";
+    if (confidence >= HIGH_CONFIDENCE_THRESHOLD) return "High";
+    if (confidence >= MEDIUM_CONFIDENCE_THRESHOLD) return "Medium";
     return "Low";
   };
 
