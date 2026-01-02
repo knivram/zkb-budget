@@ -1,7 +1,5 @@
 import { db } from "@/db/client";
-import { subscriptions, transactions } from "@/db/schema";
-import { DetectedSubscription } from "@/lib/api/ai-schemas";
-import { fetchLogoAsBase64 } from "@/lib/logo-fetcher";
+import { transactions } from "@/db/schema";
 import { parseXMLTransactions } from "@/lib/xml-parser";
 import {
   BottomSheet,
@@ -13,7 +11,6 @@ import {
   VStack,
 } from "@expo/ui/swift-ui";
 import { frame, padding } from "@expo/ui/swift-ui/modifiers";
-import { count, desc, eq } from "drizzle-orm";
 import * as DocumentPicker from "expo-document-picker";
 import { File } from "expo-file-system";
 import { router } from "expo-router";
@@ -23,42 +20,6 @@ import { Alert } from "react-native";
 interface ImportTransactionsProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-}
-
-async function insertDetectedSubscriptions(
-  detected: DetectedSubscription[]
-): Promise<void> {
-  if (detected.length === 0) return;
-
-  const subscriptionsToInsert = detected.map((sub) => ({
-    name: sub.name,
-    price: Math.round(sub.price * 100),
-    billingCycle: sub.billingCycle,
-    subscribedAt: new Date(sub.subscribedAt),
-    url: sub.domain || null,
-    icon: null,
-  }));
-
-  const insertedSubscriptions = await db
-    .insert(subscriptions)
-    .values(subscriptionsToInsert)
-    .returning();
-
-  insertedSubscriptions.forEach(async (sub) => {
-    if (sub.url) {
-      try {
-        const icon = await fetchLogoAsBase64(sub.url);
-        if (icon) {
-          await db
-            .update(subscriptions)
-            .set({ icon })
-            .where(eq(subscriptions.id, sub.id));
-        }
-      } catch (error) {
-        console.error(`Failed to fetch logo for ${sub.name}:`, error);
-      }
-    }
-  });
 }
 
 export default function ImportTransactions({
@@ -96,19 +57,13 @@ export default function ImportTransactions({
         return;
       }
 
-      // TODO: #6 - Use imports table to track imports instead of counting before/after
-      const beforeCount = await db
-        .select({ count: count() })
-        .from(transactions);
-
-      await db
+      const newTransactions = await db
         .insert(transactions)
         .values(parsedTransactions)
-        .onConflictDoNothing();
+        .onConflictDoNothing()
+        .returning();
 
-      const afterCount = await db.select({ count: count() }).from(transactions);
-
-      const newCount = afterCount[0].count - beforeCount[0].count;
+      const newCount = newTransactions.length;
 
       if (newCount === 0) {
         setIsImporting(false);
@@ -120,12 +75,6 @@ export default function ImportTransactions({
         return;
       }
 
-      const newTransactions = await db
-        .select()
-        .from(transactions)
-        .orderBy(desc(transactions.createdAt))
-        .limit(newCount);
-
       setLoadingMessage("Analyzing subscriptions...");
       try {
         console.log("Analyzing subscriptions...");
@@ -136,39 +85,18 @@ export default function ImportTransactions({
         });
 
         if (response.ok) {
-          const { subscriptions: detected } = await response.json();
+          const { subscriptions: detectedSubscriptions } =
+            await response.json();
 
-          if (detected && detected.length > 0) {
-            const highConfidence = detected.filter(
-              (s: DetectedSubscription) => s.confidence > 0.8
-            );
-            const mediumConfidence = detected.filter(
-              (s: DetectedSubscription) =>
-                s.confidence >= 0.0 && s.confidence <= 0.8
-            );
-
-            if (highConfidence.length > 0) {
-              await insertDetectedSubscriptions(highConfidence);
-            }
-
-            if (mediumConfidence.length > 0) {
-              setIsImporting(false);
-              router.push({
-                pathname: "/transactions/review-detected",
-                params: {
-                  detectedSubscriptions: JSON.stringify(mediumConfidence),
-                },
-              });
-              onOpenChange(false);
-              return;
-            }
-
+          if (detectedSubscriptions && detectedSubscriptions.length > 0) {
             setIsImporting(false);
+            router.push({
+              pathname: "/transactions/review-detected",
+              params: {
+                detectedSubscriptions: JSON.stringify(detectedSubscriptions),
+              },
+            });
             onOpenChange(false);
-            Alert.alert(
-              "Import Complete",
-              `Imported ${newCount} transactions. ${highConfidence.length} subscriptions detected and added.`
-            );
             return;
           }
         }
@@ -196,6 +124,7 @@ export default function ImportTransactions({
         isOpened={isOpen}
         onIsOpenedChange={onOpenChange}
         presentationDetents={[0.2]}
+        interactiveDismissDisabled={isImporting}
       >
         <HStack>
           <VStack alignment="leading" modifiers={[padding({ all: 24 })]}>

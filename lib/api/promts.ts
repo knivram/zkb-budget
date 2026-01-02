@@ -17,7 +17,7 @@ Your task is to analyze transaction data provided in Toon format (a compact, tok
 
 ## Quality Standards:
 - Provide brief reasoning for each detection (1-2 sentences explaining the pattern)
-- Be conservative: it's better to create false positives than to miss a subscription
+- Be conservative: it's better to miss a subscription than to create false positives 
 - Focus on true recurring subscriptions, not one-time purchases or irregular payments
 
 ## Output Format:
