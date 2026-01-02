@@ -18,8 +18,7 @@ export const subscriptions = sqliteTable("subscriptions", {
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
-  url: text("url"),
-  icon: text("icon"),
+  domain: text("domain"),
 });
 
 export type Subscription = typeof subscriptions.$inferSelect;
