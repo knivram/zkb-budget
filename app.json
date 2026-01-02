@@ -21,7 +21,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.mkramer.zkbbudget"
+      "package": "me.knivram.zkbbudget"
     },
     "web": {
       "bundler": "metro",

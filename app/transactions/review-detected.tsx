@@ -2,7 +2,6 @@ import { db } from "@/db/client";
 import { subscriptions } from "@/db/schema";
 import { DetectedSubscription } from "@/lib/api/ai-schemas";
 import { fetchLogoAsBase64 } from "@/lib/logo-fetcher";
-import { eq } from "drizzle-orm";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
@@ -42,35 +41,18 @@ export default function ReviewDetectedSubscriptions() {
         return;
       }
 
-      const subscriptionsToInsert = selected.map((sub) => ({
-        name: sub.name,
-        price: Math.round(sub.price * 100), // Convert to cents
-        billingCycle: sub.billingCycle,
-        subscribedAt: new Date(sub.subscribedAt),
-        url: sub.domain || null,
-        icon: null, // Will be fetched async
-      }));
+      const subscriptionsToInsert = await Promise.all(
+        selected.map(async (sub) => ({
+          name: sub.name,
+          price: Math.round(sub.price * 100), // Convert to cents
+          billingCycle: sub.billingCycle,
+          subscribedAt: new Date(sub.subscribedAt),
+          url: sub.domain || null,
+          icon: sub.domain ? await fetchLogoAsBase64(sub.domain) : null,
+        }))
+      );
 
-      const insertedSubscriptions = await db
-        .insert(subscriptions)
-        .values(subscriptionsToInsert)
-        .returning();
-
-      insertedSubscriptions.forEach(async (sub) => {
-        if (sub.url) {
-          try {
-            const icon = await fetchLogoAsBase64(sub.url);
-            if (icon) {
-              await db
-                .update(subscriptions)
-                .set({ icon })
-                .where(eq(subscriptions.id, sub.id));
-            }
-          } catch (error) {
-            console.error(`Failed to fetch logo for ${sub.name}:`, error);
-          }
-        }
-      });
+      await db.insert(subscriptions).values(subscriptionsToInsert);
 
       // TODO: find out why the router.back() is needed
       router.back();
@@ -84,8 +66,8 @@ export default function ReviewDetectedSubscriptions() {
   };
 
   const getConfidenceColor = (confidence: number): string => {
-    if (confidence >= 0.7) return "bg-green-500";
-    if (confidence >= 0.5) return "bg-yellow-500";
+    if (confidence >= 0.8) return "bg-green-500";
+    if (confidence >= 0.6) return "bg-yellow-500";
     return "bg-orange-500";
   };
 
