@@ -1,5 +1,5 @@
 import { getLogoUri } from "@/lib/logo-cache";
-import clsx from "clsx";
+import { cn } from "@/lib/utils";
 import { Image } from "expo-image";
 import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
@@ -44,7 +44,7 @@ export default function DomainLogo({
 
   return (
     <View
-      className={clsx(
+      className={cn(
         "items-center justify-center overflow-hidden rounded-xl bg-zinc-100 dark:bg-zinc-800",
         className
       )}
