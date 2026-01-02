@@ -104,17 +104,26 @@ export default function ImportTransactions({
           // Update transactions with enriched data
           if (enrichedData && enrichedData.length > 0) {
             await Promise.all(
-              enrichedData.map((enriched: EnrichedTransaction) =>
-                db
+              enrichedData.map((enriched: EnrichedTransaction) => {
+                const transaction = newTransactions.find(
+                  (t) => t.id === enriched.id
+                );
+                if (!transaction) {
+                  return;
+                }
+                const isTwint =
+                  transaction.transactionAdditionalDetails.includes("TWINT");
+
+                return db
                   .update(transactions)
                   .set({
                     category: enriched.category,
                     displayName: enriched.displayName,
-                    domain: enriched.domain ?? null,
+                    domain: enriched.domain ?? (isTwint ? "twint.ch" : null),
                     subscriptionId: enriched.subscriptionId ?? null,
                   })
-                  .where(eq(transactions.id, enriched.id))
-              )
+                  .where(eq(transactions.id, enriched.id));
+              })
             );
           }
         }
