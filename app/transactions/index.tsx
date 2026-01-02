@@ -103,7 +103,6 @@ export default function Transactions() {
         eq(transactions.subscriptionId, subscriptions.id)
       )
       .orderBy(desc(transactions.date))
-      .limit(50)
   );
 
   return (
