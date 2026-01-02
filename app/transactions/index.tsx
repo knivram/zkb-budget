@@ -1,10 +1,10 @@
+import DomainLogo from "@/components/DomainLogo";
 import { db } from "@/db/client";
 import { Category, transactions } from "@/db/schema";
 import { Host, Image as SwiftImage } from "@expo/ui/swift-ui";
 import {} from "@expo/ui/swift-ui/modifiers";
 import { desc } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { Image } from "expo-image";
 import { Stack } from "expo-router";
 import { useState } from "react";
 import { FlatList, Text, View } from "react-native";
@@ -73,11 +73,6 @@ const formatDate = (dateStr: string): string => {
   });
 };
 
-const getLogoUrl = (domain: string | null): string | null => {
-  if (!domain) return null;
-  return `https://img.logo.dev/${domain}?token=${process.env.EXPO_PUBLIC_LOGO_DEV_KEY}`;
-};
-
 export default function Transactions() {
   const [isImportOpen, setIsImportOpen] = useState(false);
 
@@ -110,25 +105,17 @@ export default function Transactions() {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => {
           const name = item.displayName ?? item.transactionAdditionalDetails;
-          const logoUrl = getLogoUrl(item.domain);
           const categoryConfig = CATEGORIES[item.category];
           const isCredit = item.creditDebitIndicator === "credit";
 
           return (
             <View className="flex-row border-b border-zinc-100 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
-              <View className="mr-3 h-10 w-10 items-center justify-center overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-800">
-                {logoUrl ? (
-                  <Image
-                    source={{ uri: logoUrl }}
-                    style={{ width: 40, height: 40 }}
-                    contentFit="cover"
-                  />
-                ) : (
-                  <Text className="text-base font-medium text-zinc-400">
-                    {name.charAt(0).toUpperCase()}
-                  </Text>
-                )}
-              </View>
+              <DomainLogo
+                domain={item.domain}
+                name={name}
+                size={40}
+                className="mr-3"
+              />
 
               <View className="flex-1">
                 <Text
