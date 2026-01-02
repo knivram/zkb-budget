@@ -1,7 +1,6 @@
 import { Input, Label } from "@/components/ui";
 import { db } from "@/db/client";
 import { BILLING_CYCLES, BillingCycle, subscriptions } from "@/db/schema";
-import { fetchLogoAsBase64 } from "@/lib/logo-fetcher";
 import { DateTimePicker, Host, Picker } from "@expo/ui/swift-ui";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router, Stack } from "expo-router";
@@ -29,8 +28,7 @@ const subscriptionSchema = z.object({
     .min(0)
     .max(BILLING_CYCLES.length - 1),
   subscribedAt: z.date(),
-  // TODO: either turn this into a url or rename to domain
-  url: z
+  domain: z
     .string()
     .optional()
     .refine(
@@ -65,7 +63,7 @@ export default function AddSubscription() {
       price: "",
       billingCycleIndex: 1, // default to monthly
       subscribedAt: new Date(),
-      url: "",
+      domain: "",
     },
     mode: "onChange",
   });
@@ -78,18 +76,12 @@ export default function AddSubscription() {
       const priceInCents =
         parseInt(dollars) * 100 + parseInt(cents.padEnd(2, "0").slice(0, 2));
 
-      let icon: string | null = null;
-      if (data.url?.trim()) {
-        icon = await fetchLogoAsBase64(data.url.trim());
-      }
-
       await db.insert(subscriptions).values({
         name: data.name.trim(),
         price: priceInCents,
         billingCycle: BILLING_CYCLES[data.billingCycleIndex],
         subscribedAt: data.subscribedAt,
-        url: data.url?.trim() || null,
-        icon,
+        domain: data.domain?.trim() || null,
       });
 
       router.back();
@@ -240,7 +232,7 @@ export default function AddSubscription() {
             <Label>Provider Domain (optional)</Label>
             <Controller
               control={control}
-              name="url"
+              name="domain"
               render={({ field: { onChange, onBlur, value } }) => (
                 <Input
                   placeholder="e.g. netflix.com"
@@ -253,9 +245,9 @@ export default function AddSubscription() {
                 />
               )}
             />
-            {errors.url && (
+            {errors.domain && (
               <Text className="mt-1 text-xs leading-4 text-red-500">
-                {errors.url.message}
+                {errors.domain.message}
               </Text>
             )}
           </View>

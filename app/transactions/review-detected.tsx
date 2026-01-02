@@ -1,7 +1,7 @@
 import { db } from "@/db/client";
 import { subscriptions } from "@/db/schema";
 import { DetectedSubscription } from "@/lib/api/ai-schemas";
-import { fetchLogoAsBase64 } from "@/lib/logo-fetcher";
+import DomainLogo from "@/components/DomainLogo";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
@@ -44,16 +44,13 @@ export default function ReviewDetectedSubscriptions() {
         return;
       }
 
-      const subscriptionsToInsert = await Promise.all(
-        selected.map(async (sub) => ({
-          name: sub.name,
-          price: Math.round(sub.price * 100), // Convert to cents
-          billingCycle: sub.billingCycle,
-          subscribedAt: new Date(sub.subscribedAt),
-          url: sub.domain || null,
-          icon: sub.domain ? await fetchLogoAsBase64(sub.domain) : null,
-        }))
-      );
+      const subscriptionsToInsert = selected.map((sub) => ({
+        name: sub.name,
+        price: Math.round(sub.price * 100), // Convert to cents
+        billingCycle: sub.billingCycle,
+        subscribedAt: new Date(sub.subscribedAt),
+        domain: sub.domain || null,
+      }));
 
       await db.insert(subscriptions).values(subscriptionsToInsert);
 
@@ -148,34 +145,42 @@ export default function ReviewDetectedSubscriptions() {
                 }`}
               >
                 <View className="flex-row items-start justify-between">
-                  <View className="flex-1">
-                    <View className="mb-2 flex-row items-center gap-2">
-                      <Text className="text-lg font-semibold text-zinc-900 dark:text-white">
-                        {sub.name}
-                      </Text>
-                      <View
-                        className={`rounded-full px-2 py-0.5 ${getConfidenceColor(sub.confidence)}`}
-                      >
-                        <Text className="text-xs font-medium text-white">
-                          {getConfidenceBadgeText(sub.confidence)} (
-                          {Math.round(sub.confidence * 100)}%)
+                  <View className="flex-row flex-1">
+                    <DomainLogo
+                      domain={sub.domain}
+                      name={sub.name}
+                      size={40}
+                      className="mr-3"
+                    />
+                    <View className="flex-1">
+                      <View className="mb-2 flex-row items-center gap-2">
+                        <Text className="text-lg font-semibold text-zinc-900 dark:text-white">
+                          {sub.name}
                         </Text>
+                        <View
+                          className={`rounded-full px-2 py-0.5 ${getConfidenceColor(sub.confidence)}`}
+                        >
+                          <Text className="text-xs font-medium text-white">
+                            {getConfidenceBadgeText(sub.confidence)} (
+                            {Math.round(sub.confidence * 100)}%)
+                          </Text>
+                        </View>
                       </View>
+                      <Text className="mb-1 text-base font-medium text-zinc-700 dark:text-zinc-300">
+                        CHF {formatPrice(sub.price)} ·{" "}
+                        {formatBillingCycle(sub.billingCycle)}
+                      </Text>
+                      {sub.domain && (
+                        <Text className="mb-2 text-sm text-zinc-500 dark:text-zinc-400">
+                          {sub.domain}
+                        </Text>
+                      )}
+                      {sub.reasoning && (
+                        <Text className="text-sm italic text-zinc-600 dark:text-zinc-400">
+                          &quot;{sub.reasoning}&quot;
+                        </Text>
+                      )}
                     </View>
-                    <Text className="mb-1 text-base font-medium text-zinc-700 dark:text-zinc-300">
-                      CHF {formatPrice(sub.price)} ·{" "}
-                      {formatBillingCycle(sub.billingCycle)}
-                    </Text>
-                    {sub.domain && (
-                      <Text className="mb-2 text-sm text-zinc-500 dark:text-zinc-400">
-                        {sub.domain}
-                      </Text>
-                    )}
-                    {sub.reasoning && (
-                      <Text className="text-sm italic text-zinc-600 dark:text-zinc-400">
-                        &quot;{sub.reasoning}&quot;
-                      </Text>
-                    )}
                   </View>
                   <View
                     className={`ml-3 h-6 w-6 items-center justify-center rounded-full border-2 ${

@@ -1,9 +1,9 @@
+import DomainLogo from "@/components/DomainLogo";
 import { db } from "@/db/client";
 import { BillingCycle, Subscription, subscriptions } from "@/db/schema";
 import { Button, ContextMenu, Host } from "@expo/ui/swift-ui";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { Image } from "expo-image";
 import { Alert, ScrollView, Text, View } from "react-native";
 
 const formatPrice = (cents: number): string => {
@@ -83,19 +83,12 @@ export default function Subscriptions() {
                 </ContextMenu.Items>
                 <ContextMenu.Trigger>
                   <View className="flex-row items-center border-b border-zinc-100 px-4 py-3 dark:border-zinc-800 bg-white dark:bg-zinc-900">
-                    <View className="mr-3 h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-zinc-100 dark:bg-zinc-800">
-                      {subscription.icon ? (
-                        <Image
-                          source={{ uri: subscription.icon }}
-                          style={{ width: 48, height: 48 }}
-                          contentFit="cover"
-                        />
-                      ) : (
-                        <Text className="text-lg text-zinc-400">
-                          {subscription.name.charAt(0).toUpperCase()}
-                        </Text>
-                      )}
-                    </View>
+                    <DomainLogo
+                      domain={subscription.domain}
+                      name={subscription.name}
+                      size={48}
+                      className="mr-3"
+                    />
                     <View className="flex-1">
                       <Text className="text-base font-medium text-zinc-900 dark:text-white">
                         {subscription.name}
