@@ -1,8 +1,8 @@
+import DomainLogo from "@/components/DomainLogo";
 import { db } from "@/db/client";
 import { subscriptions, transactions } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
 import { FlatList, Text, View } from "react-native";
 
@@ -56,19 +56,7 @@ export default function SubscriptionDetail() {
       ListHeaderComponent={
         <View>
           <View className="items-center border-b border-zinc-100 px-4 py-6 dark:border-zinc-800">
-            <View className="mb-4 h-20 w-20 items-center justify-center overflow-hidden rounded-2xl bg-zinc-100 dark:bg-zinc-800">
-              {sub.icon ? (
-                <Image
-                  source={{ uri: sub.icon }}
-                  style={{ width: 80, height: 80 }}
-                  contentFit="cover"
-                />
-              ) : (
-                <Text className="text-3xl text-zinc-400">
-                  {sub.name.charAt(0).toUpperCase()}
-                </Text>
-              )}
-            </View>
+            <DomainLogo domain={sub.domain} name={sub.name} size={80} />
             <Text className="text-2xl font-semibold text-zinc-900 dark:text-white">
               {sub.name}
             </Text>
@@ -80,8 +68,8 @@ export default function SubscriptionDetail() {
             <Text className="mt-2 text-sm text-zinc-400">
               Since {formatDate(sub.subscribedAt)}
             </Text>
-            {sub.url && (
-              <Text className="mt-1 text-sm text-blue-500">{sub.url}</Text>
+            {sub.domain && (
+              <Text className="mt-1 text-sm text-blue-500">{sub.domain}</Text>
             )}
           </View>
 
