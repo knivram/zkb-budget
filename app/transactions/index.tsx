@@ -130,8 +130,7 @@ export default function Transactions() {
         data={data}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => {
-          const name =
-            item.displayName ?? item.transactionAdditionalDetails ?? "Unknown";
+          const name = item.displayName ?? item.transactionAdditionalDetails;
           const logoUrl = getLogoUrl(item.domain);
           const categoryConfig = CATEGORIES[item.category];
           const isCredit = item.creditDebitIndicator === "credit";
