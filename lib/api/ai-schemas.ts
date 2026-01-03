@@ -27,6 +27,9 @@ export const detectedSubscriptionSchema = z.object({
     .describe(
       "Brief explanation of why this was detected as a subscription (helps user understand AI decision)"
     ),
+  transactionIds: z
+    .array(z.string())
+    .describe("IDs of transactions that belong to this subscription"),
 });
 
 export const subscriptionDetectionResponseSchema = z.object({
