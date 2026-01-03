@@ -11,6 +11,7 @@ import {
   VStack,
 } from "@expo/ui/swift-ui";
 import { frame, padding } from "@expo/ui/swift-ui/modifiers";
+import { isNull } from "drizzle-orm";
 import { router } from "expo-router";
 import { useState } from "react";
 import { Alert } from "react-native";
@@ -33,7 +34,10 @@ export default function DetectSubscriptions({
       setLoadingMessage("Fetching transactions...");
 
       // Fetch all transactions
-      const allTransactions = await db.select().from(transactions);
+      const allTransactions = await db
+        .select()
+        .from(transactions)
+        .where(isNull(transactions.subscriptionId));
 
       if (allTransactions.length === 0) {
         setIsDetecting(false);
@@ -95,7 +99,7 @@ export default function DetectSubscriptions({
       <BottomSheet
         isOpened={isOpen}
         onIsOpenedChange={onOpenChange}
-        presentationDetents={[0.25]}
+        presentationDetents={[0.23]}
         interactiveDismissDisabled={isDetecting}
       >
         <HStack>
