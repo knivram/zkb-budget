@@ -5,7 +5,7 @@ import { BillingCycle, Subscription, subscriptions } from "@/db/schema";
 import { Button, ContextMenu, Host } from "@expo/ui/swift-ui";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { Link } from "expo-router";
+import { router } from "expo-router";
 import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 
 const toMonthlyCents = (price: number, billingCycle: BillingCycle): number => {
@@ -82,35 +82,35 @@ export default function Subscriptions() {
                   </Button>
                 </ContextMenu.Items>
                 <ContextMenu.Trigger>
-                  <Link
-                    href={{
-                      pathname: "/subscriptions/[id]",
-                      params: { id: subscription.id },
-                    }}
+                  <Pressable
+                    onPress={() =>
+                      router.push({
+                        pathname: "/subscriptions/[id]",
+                        params: { id: subscription.id },
+                      })
+                    }
                   >
-                    <Pressable>
-                      <View className="flex-row items-center border-b border-zinc-100 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
-                        <DomainLogo
-                          domain={subscription.domain}
-                          name={subscription.name}
-                          size={48}
-                          className="mr-3"
-                        />
-                        <View className="flex-1">
-                          <Text className="text-base font-medium text-zinc-900 dark:text-white">
-                            {subscription.name}
-                          </Text>
-                          <Text className="text-sm capitalize text-zinc-500">
-                            {subscription.billingCycle}
-                          </Text>
-                        </View>
-                        <AmountText
-                          amountCents={subscription.price}
-                          className="text-base font-semibold text-zinc-900 dark:text-white"
-                        />
+                    <View className="flex-row items-center border-b border-zinc-100 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
+                      <DomainLogo
+                        domain={subscription.domain}
+                        name={subscription.name}
+                        size={48}
+                        className="mr-3"
+                      />
+                      <View className="flex-1">
+                        <Text className="text-base font-medium text-zinc-900 dark:text-white">
+                          {subscription.name}
+                        </Text>
+                        <Text className="text-sm capitalize text-zinc-500">
+                          {subscription.billingCycle}
+                        </Text>
                       </View>
-                    </Pressable>
-                  </Link>
+                      <AmountText
+                        amountCents={subscription.price}
+                        className="text-base font-semibold text-zinc-900 dark:text-white"
+                      />
+                    </View>
+                  </Pressable>
                 </ContextMenu.Trigger>
               </ContextMenu>
             </Host>
