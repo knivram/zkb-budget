@@ -48,26 +48,28 @@ export default function ReviewDetectedSubscriptions() {
       }
 
       // Insert subscriptions and link transactions
-      for (const sub of selected) {
-        const [inserted] = await db
-          .insert(subscriptions)
-          .values({
-            name: sub.name,
-            price: sub.price,
-            billingCycle: sub.billingCycle,
-            subscribedAt: new Date(sub.subscribedAt),
-            domain: sub.domain || null,
-          })
-          .returning({ id: subscriptions.id });
+      await db.transaction(async (tx) => {
+        for (const sub of selected) {
+          const [inserted] = await tx
+            .insert(subscriptions)
+            .values({
+              name: sub.name,
+              price: sub.price,
+              billingCycle: sub.billingCycle,
+              subscribedAt: new Date(sub.subscribedAt),
+              domain: sub.domain || null,
+            })
+            .returning({ id: subscriptions.id });
 
-        // Link transactions to this subscription
-        if (sub.transactionIds.length > 0) {
-          await db
-            .update(transactions)
-            .set({ subscriptionId: inserted.id })
-            .where(inArray(transactions.id, sub.transactionIds));
+          // Link transactions to this subscription
+          if (sub.transactionIds.length > 0) {
+            await tx
+              .update(transactions)
+              .set({ subscriptionId: inserted.id })
+              .where(inArray(transactions.id, sub.transactionIds));
+          }
         }
-      }
+      });
 
       // TODO: find out why the router.back() is needed
       router.back();
