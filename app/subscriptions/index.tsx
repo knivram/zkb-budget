@@ -27,7 +27,7 @@ export default function Subscriptions() {
   const monthlyTotal =
     data?.reduce(
       (sum, sub) => sum + toMonthlyCents(sub.price, sub.billingCycle),
-      0
+      0,
     ) ?? 0;
 
   const handleDelete = (subscription: Subscription) => {
@@ -49,7 +49,7 @@ export default function Subscriptions() {
             }
           },
         },
-      ]
+      ],
     );
   };
 
@@ -101,7 +101,15 @@ export default function Subscriptions() {
               <Host key={subscription.id}>
                 <ContextMenu activationMethod="longPress">
                   <ContextMenu.Items>
-                    <Button systemImage="pencil" disabled>
+                    <Button
+                      systemImage="pencil"
+                      onPress={() =>
+                        router.push({
+                          pathname: "/subscriptions/add-subscription",
+                          params: { id: subscription.id },
+                        })
+                      }
+                    >
                       Edit
                     </Button>
                     <Button
