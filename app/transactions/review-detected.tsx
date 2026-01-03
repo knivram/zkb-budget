@@ -1,8 +1,8 @@
+import AmountText from "@/components/AmountText";
+import DomainLogo from "@/components/DomainLogo";
 import { db } from "@/db/client";
 import { subscriptions } from "@/db/schema";
 import { DetectedSubscription } from "@/lib/api/ai-schemas";
-import AmountText from "@/components/AmountText";
-import DomainLogo from "@/components/DomainLogo";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
@@ -47,7 +47,7 @@ export default function ReviewDetectedSubscriptions() {
 
       const subscriptionsToInsert = selected.map((sub) => ({
         name: sub.name,
-        price: Math.round(sub.price * 100), // Convert to cents
+        price: sub.price,
         billingCycle: sub.billingCycle,
         subscribedAt: new Date(sub.subscribedAt),
         domain: sub.domain || null,
@@ -165,7 +165,7 @@ export default function ReviewDetectedSubscriptions() {
                       </View>
                       <View className="mb-1 flex-row flex-wrap items-center">
                         <AmountText
-                          amountCents={Math.round(sub.price * 100)}
+                          amountCents={sub.price}
                           className="text-base font-medium text-zinc-700 dark:text-zinc-300"
                         />
                         <Text className="text-base font-medium text-zinc-700 dark:text-zinc-300">
