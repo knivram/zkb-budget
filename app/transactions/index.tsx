@@ -3,7 +3,6 @@ import DomainLogo from "@/components/DomainLogo";
 import { db } from "@/db/client";
 import { Category, transactions } from "@/db/schema";
 import { Host, Image as SwiftImage } from "@expo/ui/swift-ui";
-import {} from "@expo/ui/swift-ui/modifiers";
 import { FlashList } from "@shopify/flash-list";
 import { desc } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
