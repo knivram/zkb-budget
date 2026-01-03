@@ -1,8 +1,10 @@
 import AmountText from "@/components/AmountText";
 import DomainLogo from "@/components/DomainLogo";
 import { db } from "@/db/client";
-import { subscriptions } from "@/db/schema";
+import { subscriptions, transactions } from "@/db/schema";
 import { DetectedSubscription } from "@/lib/api/ai-schemas";
+import { cn } from "@/lib/utils";
+import { inArray } from "drizzle-orm";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
@@ -45,15 +47,27 @@ export default function ReviewDetectedSubscriptions() {
         return;
       }
 
-      const subscriptionsToInsert = selected.map((sub) => ({
-        name: sub.name,
-        price: sub.price,
-        billingCycle: sub.billingCycle,
-        subscribedAt: new Date(sub.subscribedAt),
-        domain: sub.domain || null,
-      }));
+      // Insert subscriptions and link transactions
+      for (const sub of selected) {
+        const [inserted] = await db
+          .insert(subscriptions)
+          .values({
+            name: sub.name,
+            price: sub.price,
+            billingCycle: sub.billingCycle,
+            subscribedAt: new Date(sub.subscribedAt),
+            domain: sub.domain || null,
+          })
+          .returning({ id: subscriptions.id });
 
-      await db.insert(subscriptions).values(subscriptionsToInsert);
+        // Link transactions to this subscription
+        if (sub.transactionIds.length > 0) {
+          await db
+            .update(transactions)
+            .set({ subscriptionId: inserted.id })
+            .where(inArray(transactions.id, sub.transactionIds));
+        }
+      }
 
       // TODO: find out why the router.back() is needed
       router.back();
@@ -76,19 +90,6 @@ export default function ReviewDetectedSubscriptions() {
     if (confidence >= HIGH_CONFIDENCE_THRESHOLD) return "High";
     if (confidence >= MEDIUM_CONFIDENCE_THRESHOLD) return "Medium";
     return "Low";
-  };
-
-  const formatBillingCycle = (cycle: string): string => {
-    switch (cycle) {
-      case "weekly":
-        return "Weekly";
-      case "monthly":
-        return "Monthly";
-      case "yearly":
-        return "Yearly";
-      default:
-        return cycle;
-    }
   };
 
   return (
@@ -170,7 +171,7 @@ export default function ReviewDetectedSubscriptions() {
                         />
                         <Text className="text-base font-medium text-zinc-700 dark:text-zinc-300">
                           {" \u2022 "}
-                          {formatBillingCycle(sub.billingCycle)}
+                          <Text className="capitalize">{sub.billingCycle}</Text>
                         </Text>
                       </View>
                       {sub.domain && (
@@ -186,11 +187,12 @@ export default function ReviewDetectedSubscriptions() {
                     </View>
                   </View>
                   <View
-                    className={`ml-3 h-6 w-6 items-center justify-center rounded-full border-2 ${
+                    className={cn(
+                      "ml-3 h-6 w-6 items-center justify-center rounded-full border-2",
                       selectedIds.has(index)
                         ? "border-blue-500 bg-blue-500"
                         : "border-zinc-300 bg-white dark:border-zinc-600 dark:bg-zinc-700"
-                    }`}
+                    )}
                   >
                     {selectedIds.has(index) && (
                       <Text className="text-sm font-bold text-white">✓</Text>

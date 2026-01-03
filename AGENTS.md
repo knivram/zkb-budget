@@ -8,11 +8,10 @@
 - Root configs: `tailwind.config.js` + `global.css` for NativeWind utility styling, `eslint.config.js` for lint rules, `drizzle.config.ts` for migration targets.
 
 ## Build, Test, and Development Commands
-- Install deps: `bun install` (preferred with `bun.lock`) or `npm install` if bun unavailable.
-- Run app: `npm start` for Expo dev server; platform targets via `npm run android`, `npm run ios`, `npm run web`.
-- Lint: `npm run lint` (Expo ESLint config with TypeScript support).
-- DB migrations: `npm run db:generate` after schema changes; inspect output in `drizzle/`. Use `npm run db:studio` for Drizzle Studio.
-- Reset template: `npm run reset-project` wipes current `app/` in favor of starter; use only when intentionally restarting.
+- Install deps: `bun install` (preferred with `bun.lock`). 
+- Run app: `bun start` for Expo dev server; platform targets via `bun run android`, `bun run ios`, `bun run web`.
+- Lint: `bun run lint` (Expo ESLint config with TypeScript support).
+- DB migrations: `bun run db:generate` after schema changes; inspect output in `drizzle/`. Use `bun run db:studio` for Drizzle Studio.
 
 ## Coding Style & Naming Conventions
 - Language: TypeScript with React function components; use 2-space indentation.

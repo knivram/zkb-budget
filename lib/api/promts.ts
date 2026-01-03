@@ -23,7 +23,12 @@ Your task is to analyze transaction data provided in Toon format (a compact, tok
 - Focus on true recurring subscriptions, not one-time purchases or irregular payments
 
 ## Output Format:
-You must return a structured object with a "subscriptions" array. Each subscription must include: name, subscribedAt, price (in cents, e.g. CHF 4.55 is 455), domain (optional), billingCycle, confidence, and reasoning.
+You must return a structured object with a "subscriptions" array. Each subscription must include: name, subscribedAt, price (in cents, e.g. CHF 4.55 is 455), domain (optional), billingCycle, confidence, reasoning, and transactionIds (array of transaction IDs that belong to this subscription).
+
+## Transaction Linking:
+- For each detected subscription, include ALL transaction IDs that match it in the transactionIds array
+- Use the exact transaction IDs from the input data
+- A transaction can only belong to one subscription
 
 Note: transaction amounts are provided in cents.`;
 

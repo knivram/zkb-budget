@@ -5,8 +5,10 @@ import { BillingCycle, Subscription, subscriptions } from "@/db/schema";
 import { Button, ContextMenu, Host } from "@expo/ui/swift-ui";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { router } from "expo-router";
+import { router, Stack } from "expo-router";
+import { useState } from "react";
 import { Alert, Pressable, ScrollView, Text, View } from "react-native";
+import DetectSubscriptions from "./detect-subscriptions";
 
 const toMonthlyCents = (price: number, billingCycle: BillingCycle): number => {
   switch (billingCycle) {
@@ -20,6 +22,7 @@ const toMonthlyCents = (price: number, billingCycle: BillingCycle): number => {
 };
 
 export default function Subscriptions() {
+  const [isDetectOpen, setIsDetectOpen] = useState(false);
   const { data } = useLiveQuery(db.select().from(subscriptions));
   const monthlyTotal =
     data?.reduce(
@@ -51,10 +54,36 @@ export default function Subscriptions() {
   };
 
   return (
-    <ScrollView
-      className="flex-1 flex-grow bg-white dark:bg-zinc-900"
-      contentInsetAdjustmentBehavior="automatic"
-    >
+    <>
+      <Stack.Screen
+        options={{
+          unstable_headerRightItems: () => [
+            {
+              type: "button",
+              label: "Detect",
+              icon: {
+                name: "sparkles",
+                type: "sfSymbol",
+              },
+              onPress: () => setIsDetectOpen(true),
+            },
+            {
+              type: "button",
+              label: "Add",
+              icon: {
+                name: "plus",
+                type: "sfSymbol",
+              },
+              variant: "prominent",
+              onPress: () => router.push("/subscriptions/add-subscription"),
+            },
+          ],
+        }}
+      />
+      <ScrollView
+        className="flex-1 flex-grow bg-white dark:bg-zinc-900"
+        contentInsetAdjustmentBehavior="automatic"
+      >
       <View className="min-h-full bg-white dark:bg-zinc-900">
         <View className="items-center py-8">
           <Text className="text-lg text-zinc-400 dark:text-zinc-500">CHF</Text>
@@ -118,5 +147,10 @@ export default function Subscriptions() {
         })}
       </View>
     </ScrollView>
+      <DetectSubscriptions
+        isOpen={isDetectOpen}
+        onOpenChange={setIsDetectOpen}
+      />
+    </>
   );
 }
