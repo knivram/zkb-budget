@@ -7,6 +7,8 @@ export const transactionSchema = createSelectSchema(transactions, {
   createdAt: z.string().pipe(z.coerce.date()),
 });
 
+export type Transaction = z.infer<typeof transactionSchema>;
+
 // Request schema for detect-subscriptions endpoint
 export const detectSubscriptionsRequestSchema = z.object({
   transactions: z.array(transactionSchema).min(1, {
