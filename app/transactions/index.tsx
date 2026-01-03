@@ -4,11 +4,12 @@ import { db } from "@/db/client";
 import { Category, transactions } from "@/db/schema";
 import { Host, Image as SwiftImage } from "@expo/ui/swift-ui";
 import {} from "@expo/ui/swift-ui/modifiers";
+import { FlashList } from "@shopify/flash-list";
 import { desc } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { Stack } from "expo-router";
 import { useState } from "react";
-import { FlatList, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import ImportTransactions from "./import-transactions";
 
 const CATEGORIES: Record<
@@ -99,7 +100,7 @@ export default function Transactions() {
           ],
         }}
       />
-      <FlatList
+      <FlashList
         className="flex-1 bg-white dark:bg-zinc-900"
         contentInsetAdjustmentBehavior="automatic"
         data={data}
@@ -113,7 +114,7 @@ export default function Transactions() {
             <View className="flex-row border-b border-zinc-100 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
               <DomainLogo
                 domain={item.domain}
-                name={name}
+                fallbackIcon={categoryConfig.icon}
                 size={40}
                 className="mr-3"
               />

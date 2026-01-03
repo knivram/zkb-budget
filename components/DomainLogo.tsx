@@ -1,18 +1,33 @@
 import { getLogoUri } from "@/lib/logo-cache";
 import { cn } from "@/lib/utils";
+import { Host, Image as SwiftImage } from "@expo/ui/swift-ui";
 import { Image } from "expo-image";
 import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 
-type DomainLogoProps = {
+type BaseProps = {
   domain?: string | null;
-  name: string;
   size?: number;
   className?: string;
 };
 
+type DomainLogoProps = BaseProps &
+  (
+    | {
+        /** SF Symbol to show when no domain logo is available */
+        fallbackIcon: Parameters<typeof SwiftImage>[0]["systemName"];
+        name?: never;
+      }
+    | {
+        fallbackIcon?: never;
+        /** Text to extract first letter from */
+        name: string;
+      }
+  );
+
 export default function DomainLogo({
   domain,
+  fallbackIcon,
   name,
   size = 48,
   className,
@@ -40,7 +55,22 @@ export default function DomainLogo({
   }, [domain]);
 
   const dimensionStyle = { width: size, height: size };
-  const fallbackLetter = name.trim().charAt(0).toUpperCase() || "?";
+
+  const renderFallback = () => {
+    if (fallbackIcon) {
+      return (
+        <Host matchContents>
+          <SwiftImage systemName={fallbackIcon} size={size / 2} />
+        </Host>
+      );
+    }
+    const fallbackLetter = name?.trim().charAt(0).toUpperCase() || "?";
+    return (
+      <Text className="text-lg text-zinc-400 dark:text-zinc-500">
+        {fallbackLetter}
+      </Text>
+    );
+  };
 
   return (
     <View
@@ -57,9 +87,7 @@ export default function DomainLogo({
           contentFit="cover"
         />
       ) : (
-        <Text className="text-lg text-zinc-400 dark:text-zinc-500">
-          {fallbackLetter}
-        </Text>
+        renderFallback()
       )}
     </View>
   );
