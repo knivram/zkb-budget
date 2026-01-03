@@ -3,7 +3,9 @@ import { db } from "@/db/client";
 import { BILLING_CYCLES, BillingCycle, subscriptions } from "@/db/schema";
 import { DateTimePicker, Host, Picker } from "@expo/ui/swift-ui";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { router, Stack } from "expo-router";
+import { eq } from "drizzle-orm";
+import { router, Stack, useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   KeyboardAvoidingView,
@@ -36,9 +38,9 @@ const subscriptionSchema = z.object({
         !val ||
         val.trim() === "" ||
         /^([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/.test(
-          val.trim()
+          val.trim(),
         ),
-      { message: "Please enter a valid domain (e.g., netflix.com)" }
+      { message: "Please enter a valid domain (e.g., netflix.com)" },
     ),
 });
 
@@ -51,11 +53,17 @@ const billingCycleLabels: Record<BillingCycle, string> = {
 };
 
 export default function AddSubscription() {
+  const { id } = useLocalSearchParams<{ id?: string }>();
+  const isEditing = !!id;
+  const subscriptionId = id ? parseInt(id, 10) : null;
+  const [isLoading, setIsLoading] = useState(isEditing);
+
   const {
     control,
     handleSubmit,
     formState: { errors, isValid, isSubmitting },
     watch,
+    reset,
   } = useForm<SubscriptionFormData>({
     resolver: zodResolver(subscriptionSchema),
     defaultValues: {
@@ -67,6 +75,41 @@ export default function AddSubscription() {
     },
     mode: "onChange",
   });
+
+  useEffect(() => {
+    if (isEditing && subscriptionId) {
+      const loadSubscription = async () => {
+        try {
+          const result = await db
+            .select()
+            .from(subscriptions)
+            .where(eq(subscriptions.id, subscriptionId))
+            .limit(1);
+
+          if (result.length > 0) {
+            const sub = result[0];
+            const priceString = (sub.price / 100).toFixed(2);
+            const billingCycleIndex = BILLING_CYCLES.indexOf(sub.billingCycle);
+
+            reset({
+              name: sub.name,
+              price: priceString,
+              billingCycleIndex: billingCycleIndex >= 0 ? billingCycleIndex : 1,
+              subscribedAt: new Date(sub.subscribedAt),
+              domain: sub.domain ?? "",
+            });
+          }
+        } catch (error) {
+          console.error("Failed to load subscription:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      loadSubscription();
+    }
+  }, [isEditing, subscriptionId, reset]);
+
   const billingCycleText = BILLING_CYCLES[watch("billingCycleIndex") ?? 1];
   const billingCycleLabel = billingCycleLabels[billingCycleText];
 
@@ -76,13 +119,22 @@ export default function AddSubscription() {
       const priceInCents =
         parseInt(dollars) * 100 + parseInt(cents.padEnd(2, "0").slice(0, 2));
 
-      await db.insert(subscriptions).values({
+      const subscriptionData = {
         name: data.name.trim(),
         price: priceInCents,
         billingCycle: BILLING_CYCLES[data.billingCycleIndex],
         subscribedAt: data.subscribedAt,
         domain: data.domain?.trim() || null,
-      });
+      };
+
+      if (isEditing && subscriptionId) {
+        await db
+          .update(subscriptions)
+          .set(subscriptionData)
+          .where(eq(subscriptions.id, subscriptionId));
+      } else {
+        await db.insert(subscriptions).values(subscriptionData);
+      }
 
       router.back();
     } catch (error) {
@@ -90,10 +142,22 @@ export default function AddSubscription() {
     }
   };
 
+  if (isLoading) {
+    return (
+      <>
+        <Stack.Screen options={{ title: "Edit Subscription" }} />
+        <View className="flex-1 items-center justify-center bg-white dark:bg-zinc-900">
+          <Text className="text-zinc-500">Loading subscription...</Text>
+        </View>
+      </>
+    );
+  }
+
   return (
     <>
       <Stack.Screen
         options={{
+          title: isEditing ? "Edit Subscription" : "Add Subscription",
           unstable_headerRightItems: () => [
             {
               type: "button",
