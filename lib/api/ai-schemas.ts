@@ -28,7 +28,8 @@ export const detectedSubscriptionSchema = z.object({
       "Brief explanation of why this was detected as a subscription (helps user understand AI decision)"
     ),
   transactionIds: z
-    .array(z.string())
+    .array(z.string().min(1))
+    .min(1)
     .describe("IDs of transactions that belong to this subscription"),
 });
 
