@@ -132,35 +132,6 @@ export default function ImportTransactions({
         // Continue - enrichment is non-critical
       }
 
-      // setLoadingMessage("Analyzing subscriptions...");
-      // try {
-      //   console.log("Analyzing subscriptions...");
-      //   const response = await fetch("/api/detect-subscriptions", {
-      //     method: "POST",
-      //     headers: { "Content-Type": "application/json" },
-      //     body: JSON.stringify({ transactions: newTransactions }),
-      //   });
-
-      //   if (response.ok) {
-      //     const { subscriptions: detectedSubscriptions } =
-      //       await response.json();
-
-      //     if (detectedSubscriptions && detectedSubscriptions.length > 0) {
-      //       setIsImporting(false);
-      //       router.push({
-      //         pathname: "/transactions/review-detected",
-      //         params: {
-      //           detectedSubscriptions: JSON.stringify(detectedSubscriptions),
-      //         },
-      //       });
-      //       onOpenChange(false);
-      //       return;
-      //     }
-      //   }
-      // } catch (error) {
-      //   console.error("AI detection failed:", error);
-      // }
-
       setIsImporting(false);
       onOpenChange(false);
       Alert.alert("Import Complete", `Imported ${newCount} new transactions.`);
