@@ -61,8 +61,8 @@ export default function SubscriptionDetail() {
               <Text className="text-lg text-zinc-500">
                 <Text className="capitalize">{sub.billingCycle}</Text>
                 {" \u2022 "}
+                <AmountText amountCents={sub.price} />
               </Text>
-              <AmountText amountCents={sub.price} className="text-lg text-zinc-500" />
             </View>
             <Text className="mt-2 text-sm text-zinc-400">
               Since {formatDate(sub.subscribedAt)}

@@ -8,7 +8,7 @@ export const detectedSubscriptionSchema = z.object({
   subscribedAt: z
     .string()
     .describe("ISO 8601 date of first payment detected (e.g., '2024-01-15')"),
-  price: z.number().positive().describe("Price in CHF"),
+  price: z.int().positive().describe("Price in cents"),
   domain: z
     .string()
     .optional()
@@ -45,9 +45,7 @@ export type SubscriptionDetectionResponse = z.infer<
 
 // Transaction enrichment schemas
 export const enrichedTransactionSchema = z.object({
-  id: z
-    .string()
-    .describe("The transaction ID - must match exactly from input"),
+  id: z.string().describe("The transaction ID - must match exactly from input"),
   category: z
     .enum(CATEGORIES)
     .describe("Transaction category based on merchant/purpose"),
