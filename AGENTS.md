@@ -1,33 +1,73 @@
 # Repository Guidelines
 
+## Project Overview
+ZKB Budget is a React Native/Expo app for tracking personal finances using transaction data exported from ZKB (Zürcher Kantonalbank). It features AI-powered transaction categorization and subscription detection.
+
 ## Project Structure & Module Organization
-- `app/`: Expo Router entry points (`_layout.tsx`, route screens). Keep new screens co-located with feature hooks/components.
-- `db/`: Drizzle ORM schema (`schema.ts`) and Expo SQLite client (`client.ts`). Update schema before generating migrations.
-- `drizzle/`: Auto-generated SQL migrations (`0000_*.sql`) and runner (`migrations.js`). Never hand-edit generated files.
-- `assets/`: Images/fonts; reference via Expo asset system.
-- Root configs: `tailwind.config.js` + `global.css` for NativeWind utility styling, `eslint.config.js` for lint rules, `drizzle.config.ts` for migration targets.
+- `app/`: Expo Router entry points and screens
+  - `api/`: API routes for AI-powered features (`enrich-transactions`, `detect-subscriptions`)
+  - `transactions/`: Transaction list, import flow
+  - `subscriptions/`: Subscription management, detection, and review screens
+- `db/`: Drizzle ORM schema (`schema.ts`) and Expo SQLite client (`client.ts`)
+- `drizzle/`: Auto-generated SQL migrations. Never hand-edit generated files.
+- `lib/`: Shared utilities
+  - `api/`: API schemas (Zod), AI response schemas, prompts, validation helpers
+  - `xml-parser.ts`: Parses ZKB XML transaction exports
+  - `toon-converter.ts`: Converts data to TOON format for token-efficient AI calls
+  - `logo-cache.ts`: Caches company logos fetched by domain
+  - `utils.ts`: General utilities (cn, chunkArray, etc.)
+- `components/`: Reusable UI components (`DomainLogo`, form inputs, `AmountText`)
+- `assets/`: Images/fonts; reference via Expo asset system
+- Root configs: `tailwind.config.js` + `global.css` for NativeWind, `eslint.config.js`, `drizzle.config.ts`
+
+## Tech Stack
+- **Framework**: Expo SDK 54, React Native 0.81, Expo Router 6
+- **Language**: TypeScript with React function components
+- **Styling**: NativeWind (TailwindCSS), @expo/ui SwiftUI components
+- **Database**: Expo SQLite with Drizzle ORM
+- **AI**: OpenRouter SDK with Google Gemini for transaction enrichment
+- **Validation**: Zod for schema validation, drizzle-zod for DB integration
+- **Forms**: react-hook-form with @hookform/resolvers
+
+## Database Schema
+Two main tables in `db/schema.ts`:
+- `transactions`: Bank transactions with fields for amount (cents), category, display name, domain, and optional subscription linking
+- `subscriptions`: Tracked subscriptions with name, price (cents), billing cycle (weekly/monthly/yearly), domain
 
 ## Build, Test, and Development Commands
-- Install deps: `bun install` (preferred with `bun.lock`). 
-- Run app: `bun start` for Expo dev server; platform targets via `bun run android`, `bun run ios`, `bun run web`.
-- Lint: `bun run lint` (Expo ESLint config with TypeScript support).
-- DB migrations: `bun run db:generate` after schema changes; inspect output in `drizzle/`. Use `bun run db:studio` for Drizzle Studio.
+- Install deps: `bun install`
+- Run app: `bun start` for Expo dev server; `bun run android`, `bun run ios`, `bun run web` for platforms
+- Lint: `bun run lint`
+- DB migrations: `bun run db:generate` after schema changes; `bun run db:studio` for Drizzle Studio
+
+## Environment Variables
+- `OPENROUTER_API_KEY`: Required for AI-powered features (transaction enrichment, subscription detection)
+
+## Key Features
+1. **Transaction Import**: Import XML files from ZKB bank exports
+2. **AI Transaction Enrichment**: Automatically categorize transactions, extract merchant names, and match to subscriptions
+3. **Subscription Detection**: AI analyzes transaction patterns to detect recurring subscriptions
+4. **Subscription Management**: Manual creation/editing of subscriptions with domain-based logos
 
 ## Coding Style & Naming Conventions
-- Language: TypeScript with React function components; use 2-space indentation.
-- Components in `PascalCase`; hooks/utilities in `camelCase`. Keep file names matching the default export.
-- Styling: Prefer NativeWind `className` utilities; Tailwind classes auto-sorted by Prettier Tailwind plugin.
-- Imports: use alias paths (`@/foo/bar`) instead of relative traversals (`../foo/bar`).
-- Keep DB enums/timestamps typed at the schema; store currency as integer cents (see `subscriptions.price`).
+- Use 2-space indentation
+- Components in `PascalCase`; hooks/utilities in `camelCase`
+- File names should match the default export
+- Prefer NativeWind `className` utilities for styling
+- Use alias paths (`@/foo/bar`) instead of relative traversals
+- Store currency as integer cents (e.g., `subscriptions.price`, `transactions.amount`)
 
 ## Testing Guidelines
-- No automated tests are configured yet. When adding, favor Jest with `@testing-library/react-native`; name files `*.test.tsx` alongside the code or under `__tests__/`.
-- Cover critical flows: subscription creation/editing, SQLite migrations, routing guards. Document any manual test steps in PRs until automated coverage exists.
+- No automated tests configured yet
+- When adding tests, use Jest with `@testing-library/react-native`
+- Name test files `*.test.tsx` alongside the code or under `__tests__/`
+- Priority test coverage: transaction import/parsing, subscription detection, SQLite migrations
 
 ## Commit & Pull Request Guidelines
-- Commits: short, imperative summaries (e.g., `add nativewind`, `update table to have integer for price`). Reference issues inline (e.g., `#2`) when relevant.
-- PRs: include what changed, why, and how to test. Add screenshots for UI changes, note DB schema/migration impacts, and list any follow-ups or known gaps.
+- Commits: short, imperative summaries (e.g., `add subscription detection`, `fix transaction import`)
+- PRs: describe what changed, why, how to test; include screenshots for UI changes
 
-## Security & Configuration Tips
-- Avoid hardcoding secrets; if APIs are added, load keys via Expo config or environment variables and exclude from VCS.
-- SQLite DB files are device-local; don’t commit generated `.db` artifacts. Keep migrations in sync with `db/schema.ts` to avoid drift.
+## Security & Configuration
+- Never hardcode API keys; use environment variables
+- SQLite DB files are device-local; don't commit `.db` artifacts
+- Keep migrations in sync with `db/schema.ts`
