@@ -1,6 +1,7 @@
 import { db } from "@/db/client";
 import { subscriptions } from "@/db/schema";
 import { DetectedSubscription } from "@/lib/api/ai-schemas";
+import AmountText from "@/components/AmountText";
 import DomainLogo from "@/components/DomainLogo";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
@@ -75,10 +76,6 @@ export default function ReviewDetectedSubscriptions() {
     if (confidence >= HIGH_CONFIDENCE_THRESHOLD) return "High";
     if (confidence >= MEDIUM_CONFIDENCE_THRESHOLD) return "Medium";
     return "Low";
-  };
-
-  const formatPrice = (price: number): string => {
-    return price.toFixed(2);
   };
 
   const formatBillingCycle = (cycle: string): string => {
@@ -166,10 +163,16 @@ export default function ReviewDetectedSubscriptions() {
                           </Text>
                         </View>
                       </View>
-                      <Text className="mb-1 text-base font-medium text-zinc-700 dark:text-zinc-300">
-                        CHF {formatPrice(sub.price)} ·{" "}
-                        {formatBillingCycle(sub.billingCycle)}
-                      </Text>
+                      <View className="mb-1 flex-row flex-wrap items-center">
+                        <AmountText
+                          amountCents={Math.round(sub.price * 100)}
+                          className="text-base font-medium text-zinc-700 dark:text-zinc-300"
+                        />
+                        <Text className="text-base font-medium text-zinc-700 dark:text-zinc-300">
+                          {" \u2022 "}
+                          {formatBillingCycle(sub.billingCycle)}
+                        </Text>
+                      </View>
                       {sub.domain && (
                         <Text className="mb-2 text-sm text-zinc-500 dark:text-zinc-400">
                           {sub.domain}
