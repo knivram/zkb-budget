@@ -1,4 +1,4 @@
-import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 export const BILLING_CYCLES = ["weekly", "monthly", "yearly"] as const;
 export const TRANSACTION_SUBTYPES = [
@@ -46,13 +46,11 @@ export const transactions = sqliteTable("transactions", {
   date: text("date").notNull(),
   accountIBAN: text("account_iban").notNull(),
   currency: text("currency").notNull(),
-  // TODO: #8 Change to integer (cents) to avoid precision errors
-  amount: real("amount").notNull(),
+  amount: integer("amount").notNull(),
   creditDebitIndicator: text("credit_debit_indicator", {
     enum: CREDIT_DEBIT_INDICATORS,
   }).notNull(),
-  // TODO: #8 Change to integer (cents) to avoid precision errors
-  signedAmount: real("signed_amount").notNull(),
+  signedAmount: integer("signed_amount").notNull(),
   transactionAdditionalDetails: text(
     "transaction_additional_details"
   ).notNull(),

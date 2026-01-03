@@ -1,3 +1,4 @@
+import AmountText from "@/components/AmountText";
 import DomainLogo from "@/components/DomainLogo";
 import { db } from "@/db/client";
 import { Category, transactions } from "@/db/schema";
@@ -149,15 +150,14 @@ export default function Transactions() {
               </View>
 
               <View className="items-end justify-center">
-                <Text
+                <AmountText
+                  amountCents={item.signedAmount}
                   className={`text-base font-semibold ${
                     isCredit
                       ? "text-emerald-700 dark:text-emerald-200"
                       : "text-rose-800 dark:text-rose-200"
                   }`}
-                >
-                  CHF {item.signedAmount.toFixed(2)}
-                </Text>
+                />
               </View>
             </View>
           );

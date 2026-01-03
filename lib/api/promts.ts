@@ -23,7 +23,9 @@ Your task is to analyze transaction data provided in Toon format (a compact, tok
 - Focus on true recurring subscriptions, not one-time purchases or irregular payments
 
 ## Output Format:
-You must return a structured object with a "subscriptions" array. Each subscription must include: name, subscribedAt, price (in CHF), domain (optional), billingCycle, confidence, and reasoning.`;
+You must return a structured object with a "subscriptions" array. Each subscription must include: name, subscribedAt, price (in CHF), domain (optional), billingCycle, confidence, and reasoning.
+
+Note: transaction amounts are provided in cents.`;
 
 const subscriptionDetectionUserPrompt = (
   transactions: string
@@ -95,7 +97,7 @@ Extract the merchant website domain if identifiable:
 
 ### subscriptionId (optional)
 Match to a subscription from the provided list if applicable:
-- Compare transaction amount with subscription price (subscription price is in CENTS, so divide by 100 to get CHF)
+- Compare transaction amount with subscription price (both values are in cents)
 - Match display name similarity with subscription name
 - Consider billing cycle alignment with transaction frequency
 - Only set if confident the transaction is a payment for that subscription

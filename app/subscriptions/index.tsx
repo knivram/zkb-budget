@@ -1,3 +1,4 @@
+import AmountText from "@/components/AmountText";
 import DomainLogo from "@/components/DomainLogo";
 import { db } from "@/db/client";
 import { BillingCycle, Subscription, subscriptions } from "@/db/schema";
@@ -6,10 +7,6 @@ import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { Link } from "expo-router";
 import { Alert, Pressable, ScrollView, Text, View } from "react-native";
-
-const formatPrice = (cents: number): string => {
-  return (cents / 100).toFixed(2);
-};
 
 const toMonthlyCents = (price: number, billingCycle: BillingCycle): number => {
   switch (billingCycle) {
@@ -61,9 +58,11 @@ export default function Subscriptions() {
       <View className="min-h-full bg-white dark:bg-zinc-900">
         <View className="items-center py-8">
           <Text className="text-lg text-zinc-400 dark:text-zinc-500">CHF</Text>
-          <Text className="text-5xl font-semibold text-zinc-900 dark:text-white">
-            {formatPrice(monthlyTotal)}
-          </Text>
+          <AmountText
+            amountCents={monthlyTotal}
+            showCurrency={false}
+            className="text-5xl font-semibold text-zinc-900 dark:text-white"
+          />
           <Text className="mt-1 text-sm text-zinc-400">per month</Text>
         </View>
         {data?.map((subscription: Subscription) => {
@@ -105,9 +104,10 @@ export default function Subscriptions() {
                             {subscription.billingCycle}
                           </Text>
                         </View>
-                        <Text className="text-base font-semibold text-zinc-900 dark:text-white">
-                          CHF {formatPrice(subscription.price)}
-                        </Text>
+                        <AmountText
+                          amountCents={subscription.price}
+                          className="text-base font-semibold text-zinc-900 dark:text-white"
+                        />
                       </View>
                     </Pressable>
                   </Link>

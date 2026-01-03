@@ -16,18 +16,19 @@ export const parseTransaction = (
     return null;
   }
 
-  // TODO: #8 Convert amounts to integer cents (multiply by 100, round)
+  const amount = Math.round(Number(statement.amountInMaccCurrency) * 100);
+  const signedAmount =
+    amount * (statement.creditDebitIndicator === "debit" ? -1 : 1);
+
   return {
     id: statement.transactionIdentification,
     statementType: statement.statementType,
     date: statement.valueDate,
     accountIBAN: statement.accountIdentification,
-    amount: statement.amountInMaccCurrency,
+    amount,
     currency: statement.maccCurrency,
     creditDebitIndicator: statement.creditDebitIndicator,
-    signedAmount:
-      statement.amountInMaccCurrency *
-      (statement.creditDebitIndicator === "debit" ? -1 : 1),
+    signedAmount,
     transactionAdditionalDetails: statement.transactionAdditionalDetails,
     transactionSubtype: statement.transactionSubtype,
   };

@@ -1,3 +1,4 @@
+import AmountText from "@/components/AmountText";
 import DomainLogo from "@/components/DomainLogo";
 import { db } from "@/db/client";
 import { subscriptions, transactions } from "@/db/schema";
@@ -5,10 +6,6 @@ import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useLocalSearchParams } from "expo-router";
 import { FlatList, Text, View } from "react-native";
-
-const formatPrice = (cents: number): string => {
-  return `CHF ${(cents / 100).toFixed(2)}`;
-};
 
 const formatDate = (date: Date): string => {
   return date.toLocaleDateString("de-CH", {
@@ -60,11 +57,13 @@ export default function SubscriptionDetail() {
             <Text className="text-2xl font-semibold text-zinc-900 dark:text-white">
               {sub.name}
             </Text>
-            <Text className="mt-1 text-lg text-zinc-500">
-              <Text className="capitalize">{sub.billingCycle}</Text>
-              {" \u2022 "}
-              {formatPrice(sub.price)}
-            </Text>
+            <View className="mt-1 flex-row items-center">
+              <Text className="text-lg text-zinc-500">
+                <Text className="capitalize">{sub.billingCycle}</Text>
+                {" \u2022 "}
+              </Text>
+              <AmountText amountCents={sub.price} className="text-lg text-zinc-500" />
+            </View>
             <Text className="mt-2 text-sm text-zinc-400">
               Since {formatDate(sub.subscribedAt)}
             </Text>
@@ -88,9 +87,10 @@ export default function SubscriptionDetail() {
             </Text>
             <Text className="text-sm text-zinc-500">{item.date}</Text>
           </View>
-          <Text className="text-base font-medium">
-            {formatPrice(item.signedAmount * 100)}
-          </Text>
+          <AmountText
+            amountCents={item.signedAmount}
+            className="text-base font-medium"
+          />
         </View>
       )}
       ListEmptyComponent={
