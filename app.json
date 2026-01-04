@@ -53,6 +53,12 @@
         "projectId": "53d57b29-bcf6-4aee-97de-391ad0b071fb"
       }
     },
-    "owner": "knivram"
+    "owner": "knivram",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/53d57b29-bcf6-4aee-97de-391ad0b071fb"
+    }
   }
 }
