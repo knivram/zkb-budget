@@ -48,8 +48,7 @@ jobs:
 
             - name: Set EXPO_PUBLIC_API_URL for update bundling
               run: |
-                  echo "\nEXPO_PUBLIC_API_URL=https://zkb-budget--pr-${{ github.event.pull_request.number }}.expo.app" >> .env.local
-                  cat .env.local
+                  printf '\nEXPO_PUBLIC_API_URL=%s\n' "https://zkb-budget--pr-${{ github.event.pull_request.number }}.expo.app" >> .env.local
 
             - name: Print .env.local
               run: |
