@@ -33,6 +33,13 @@ jobs:
             - name: Install dependencies
               run: bun install
 
+            - name: Pull EAS env (preview) into .env.local
+              run: eas env:pull --environment preview --path .env.local --non-interactive
+
+            - name: Add OPENROUTER_API_KEY to .env.local
+              run: |
+                  printf '\nOPENROUTER_API_KEY=%s\n' "${{ secrets.OPENROUTER_API_KEY }}" >> .env.local
+
             - name: Build server routes
               run: bunx expo export --platform web --no-ssg
 
@@ -42,9 +49,6 @@ jobs:
 
             - name: Deploy preview server routes
               run: eas deploy --id "pr-${{ github.event.pull_request.number }}" --environment preview --non-interactive
-
-            - name: Pull EAS env (preview) into .env.local
-              run: eas env:pull --environment preview --path .env.local --non-interactive
 
             - name: Set EXPO_PUBLIC_API_URL for update bundling
               run: |
