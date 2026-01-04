@@ -106,6 +106,19 @@ export default function Subscriptions() {
               api url is undefined:{" "}
               {process.env.EXPO_PUBLIC_API_URL === undefined ? "true" : "false"}
             </Text>
+            <Text className="mt-1 text-sm text-zinc-400">
+              {process.env.EXPO_PUBLIC_LOGO_DEV_KEY?.toString() ?? "undefined"}
+            </Text>
+            <Text className="mt-1 text-sm text-zinc-400">
+              logo dev key is empty:{" "}
+              {process.env.EXPO_PUBLIC_LOGO_DEV_KEY === "" ? "true" : "false"}
+            </Text>
+            <Text className="mt-1 text-sm text-zinc-400">
+              logo dev key is undefined:{" "}
+              {process.env.EXPO_PUBLIC_LOGO_DEV_KEY === undefined
+                ? "true"
+                : "false"}
+            </Text>
           </View>
           {data?.map((subscription: Subscription) => {
             return (
