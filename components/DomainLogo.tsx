@@ -1,9 +1,4 @@
-import { getLogoUri } from "@/lib/logo-cache";
-import { cn } from "@/lib/utils";
-import { Host, Image as SwiftImage } from "@expo/ui/swift-ui";
-import { Image } from "expo-image";
-import { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { Image as SwiftImage } from "@expo/ui/swift-ui";
 
 type BaseProps = {
   domain?: string | null;
@@ -11,7 +6,7 @@ type BaseProps = {
   className?: string;
 };
 
-type DomainLogoProps = BaseProps &
+export type DomainLogoProps = BaseProps &
   (
     | {
         /** SF Symbol to show when no domain logo is available */
@@ -25,70 +20,6 @@ type DomainLogoProps = BaseProps &
       }
   );
 
-export default function DomainLogo({
-  domain,
-  fallbackIcon,
-  name,
-  size = 48,
-  className,
-}: DomainLogoProps) {
-  const [logoUri, setLogoUri] = useState<string | null>(null);
-
-  useEffect(() => {
-    let isActive = true;
-
-    const loadLogo = async () => {
-      if (!domain?.trim()) {
-        if (isActive) setLogoUri(null);
-        return;
-      }
-
-      const uri = await getLogoUri(domain);
-      if (isActive) setLogoUri(uri);
-    };
-
-    loadLogo();
-
-    return () => {
-      isActive = false;
-    };
-  }, [domain]);
-
-  const dimensionStyle = { width: size, height: size };
-
-  const renderFallback = () => {
-    if (fallbackIcon) {
-      return (
-        <Host matchContents>
-          <SwiftImage systemName={fallbackIcon} size={size / 2} />
-        </Host>
-      );
-    }
-    const fallbackLetter = name?.trim().charAt(0).toUpperCase() || "?";
-    return (
-      <Text className="text-lg text-zinc-400 dark:text-zinc-500">
-        {fallbackLetter}
-      </Text>
-    );
-  };
-
-  return (
-    <View
-      className={cn(
-        "items-center justify-center overflow-hidden rounded-xl bg-zinc-100 dark:bg-zinc-800",
-        className
-      )}
-      style={dimensionStyle}
-    >
-      {logoUri ? (
-        <Image
-          source={{ uri: logoUri }}
-          style={dimensionStyle}
-          contentFit="cover"
-        />
-      ) : (
-        renderFallback()
-      )}
-    </View>
-  );
+export default function DomainLogo(_: DomainLogoProps) {
+  return null;
 }

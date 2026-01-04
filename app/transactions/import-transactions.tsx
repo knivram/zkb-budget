@@ -89,14 +89,17 @@ export default function ImportTransactions({
           })
           .from(subscriptions);
 
-        const enrichResponse = await fetch("/api/enrich-transactions", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            transactions: newTransactions,
-            subscriptions: existingSubscriptions,
-          }),
-        });
+        const enrichResponse = await fetch(
+          `${process.env.EXPO_PUBLIC_API_URL}/api/enrich-transactions`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              transactions: newTransactions,
+              subscriptions: existingSubscriptions,
+            }),
+          }
+        );
 
         if (enrichResponse.ok) {
           const { transactions: enrichedData } = await enrichResponse.json();

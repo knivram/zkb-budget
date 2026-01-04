@@ -51,11 +51,14 @@ export default function DetectSubscriptions({
       setLoadingMessage("Analyzing transactions...");
 
       // Call the detect-subscriptions API
-      const response = await fetch("/api/detect-subscriptions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ transactions: allTransactions }),
-      });
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/api/detect-subscriptions`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ transactions: allTransactions }),
+        }
+      );
 
       if (!response.ok) {
         const error = await response.json();
