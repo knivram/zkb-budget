@@ -49,6 +49,16 @@ jobs:
             - name: Set EXPO_PUBLIC_API_URL for update bundling
               run: |
                   echo "\nEXPO_PUBLIC_API_URL=https://zkb-budget--pr-${{ github.event.pull_request.number }}.expo.app" >> .env.local
+                  cat .env.local
+
+            - name: Print .env.local
+              run: |
+                  echo "================"
+                  echo ".env.local content:"
+                  echo "================"
+                  ls -la
+                  cat .env.local
+                  echo "================"
 
             - name: Create preview
               uses: expo/expo-github-action/preview@v8
