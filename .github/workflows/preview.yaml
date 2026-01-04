@@ -36,4 +36,22 @@ jobs:
             - name: Create preview
               uses: expo/expo-github-action/preview@v8
               with:
-                  command: eas update --channel preview --message "${{ github.event.pull_request.title }}"
+                  command: >
+                      eas update
+                        --branch "pr-${{ github.event.pull_request.number }}"
+                        --message "${{ github.event.pull_request.title }}"
+                        --environment preview
+                        --non-interactive
+
+    cleanup:
+        if: github.event.action == 'closed'
+        runs-on: ubuntu-latest
+        steps:
+            - name: Setup EAS
+              uses: expo/expo-github-action@v8
+              with:
+                  eas-version: latest
+                  token: ${{ secrets.EXPO_TOKEN }}
+
+            - name: Delete EAS branch for PR
+              run: eas branch:delete "pr-${{ github.event.pull_request.number }}" --non-interactive
