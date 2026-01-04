@@ -95,30 +95,6 @@ export default function Subscriptions() {
               className="text-5xl font-semibold text-zinc-900 dark:text-white"
             />
             <Text className="mt-1 text-sm text-zinc-400">per month</Text>
-            <Text className="mt-1 text-sm text-zinc-400">
-              {process.env.EXPO_PUBLIC_API_URL?.toString() ?? "undefined"}
-            </Text>
-            <Text className="mt-1 text-sm text-zinc-400">
-              api url is empty:{" "}
-              {process.env.EXPO_PUBLIC_API_URL === "" ? "true" : "false"}
-            </Text>
-            <Text className="mt-1 text-sm text-zinc-400">
-              api url is undefined:{" "}
-              {process.env.EXPO_PUBLIC_API_URL === undefined ? "true" : "false"}
-            </Text>
-            <Text className="mt-1 text-sm text-zinc-400">
-              {process.env.EXPO_PUBLIC_LOGO_DEV_KEY?.toString() ?? "undefined"}
-            </Text>
-            <Text className="mt-1 text-sm text-zinc-400">
-              logo dev key is empty:{" "}
-              {process.env.EXPO_PUBLIC_LOGO_DEV_KEY === "" ? "true" : "false"}
-            </Text>
-            <Text className="mt-1 text-sm text-zinc-400">
-              logo dev key is undefined:{" "}
-              {process.env.EXPO_PUBLIC_LOGO_DEV_KEY === undefined
-                ? "true"
-                : "false"}
-            </Text>
           </View>
           {data?.map((subscription: Subscription) => {
             return (

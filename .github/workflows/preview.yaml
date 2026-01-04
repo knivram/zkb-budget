@@ -36,6 +36,7 @@ jobs:
             - name: Pull EAS env (preview) into .env.local
               run: eas env:pull --environment preview --path .env.local --non-interactive
 
+            #   TODO: #21 why are server secrets needed in the pipeline?
             - name: Add OPENROUTER_API_KEY to .env.local
               run: |
                   printf '\nOPENROUTER_API_KEY=%s\n' "${{ secrets.OPENROUTER_API_KEY }}" >> .env.local
