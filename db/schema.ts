@@ -67,7 +67,7 @@ export const transactions = sqliteTable("transactions", {
     .default("other"),
   displayName: text("display_name"),
   domain: text("domain"),
-  subscriptionId: integer("subscription_id").references(() => subscriptions.id),
+  subscriptionId: integer("subscription_id").references(() => subscriptions.id, { onDelete: 'set null' }),
 });
 
 export type Transaction = typeof transactions.$inferSelect;
