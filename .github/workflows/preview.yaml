@@ -41,7 +41,7 @@ jobs:
 
             - name: Remove old deployment
               continue-on-error: true
-              run: eas branch:delete "pr-${{ github.event.pull_request.number }}" --non-interactive
+              run: eas deploy:delete "pr-${{ github.event.pull_request.number }}" --non-interactive
 
             - name: Deploy preview server routes
               run: eas deploy --id "pr-${{ github.event.pull_request.number }}" --environment preview --non-interactive
@@ -66,7 +66,9 @@ jobs:
                   token: ${{ secrets.EXPO_TOKEN }}
 
             - name: Delete EAS branch for PR
+              continue-on-error: true
               run: eas branch:delete "pr-${{ github.event.pull_request.number }}" --non-interactive
 
             - name: Delete preview server routes
+              continue-on-error: true
               run: eas deploy:delete "pr-${{ github.event.pull_request.number }}" --non-interactive
