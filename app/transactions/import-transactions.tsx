@@ -138,7 +138,6 @@ export default function ImportTransactions({
 
       setIsImporting(false);
       onOpenChange(false);
-      Alert.alert("Import Complete", `Imported ${newCount} new transactions.`);
     } catch (error) {
       console.error("Import error:", error);
       Alert.alert(

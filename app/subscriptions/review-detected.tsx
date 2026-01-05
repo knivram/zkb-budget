@@ -15,11 +15,11 @@ const MEDIUM_CONFIDENCE_THRESHOLD = 0.6;
 export default function ReviewDetectedSubscriptions() {
   const params = useLocalSearchParams();
   const detectedSubscriptions: DetectedSubscription[] = JSON.parse(
-    params.detectedSubscriptions as string
+    params.detectedSubscriptions as string,
   );
 
   const [selectedIds, setSelectedIds] = useState<Set<number>>(
-    new Set(detectedSubscriptions.map((_, i) => i))
+    new Set(detectedSubscriptions.map((_, i) => i)),
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -39,7 +39,7 @@ export default function ReviewDetectedSubscriptions() {
     setIsSubmitting(true);
     try {
       const selected = detectedSubscriptions.filter((_, i) =>
-        selectedIds.has(i)
+        selectedIds.has(i),
       );
 
       if (selected.length === 0) {
@@ -71,9 +71,7 @@ export default function ReviewDetectedSubscriptions() {
         }
       });
 
-      // TODO: find out why the router.back() is needed
-      router.back();
-      router.push("/subscriptions");
+      router.dismissTo("/subscriptions");
     } catch (error) {
       console.error("Failed to add subscriptions:", error);
       Alert.alert("Error", "Failed to add subscriptions.");
@@ -193,7 +191,7 @@ export default function ReviewDetectedSubscriptions() {
                       "ml-3 h-6 w-6 items-center justify-center rounded-full border-2",
                       selectedIds.has(index)
                         ? "border-blue-500 bg-blue-500"
-                        : "border-zinc-300 bg-white dark:border-zinc-600 dark:bg-zinc-700"
+                        : "border-zinc-300 bg-white dark:border-zinc-600 dark:bg-zinc-700",
                     )}
                   >
                     {selectedIds.has(index) && (

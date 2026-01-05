@@ -24,14 +24,14 @@ export default function SubscriptionDetail() {
       .select()
       .from(subscriptions)
       .where(eq(subscriptions.id, subscriptionId))
-      .limit(1)
+      .limit(1),
   );
 
   const { data: relatedTransactions } = useLiveQuery(
     db
       .select()
       .from(transactions)
-      .where(eq(transactions.subscriptionId, subscriptionId))
+      .where(eq(transactions.subscriptionId, subscriptionId)),
   );
 
   const sub = subscription?.[0];
@@ -89,7 +89,7 @@ export default function SubscriptionDetail() {
           </View>
           <AmountText
             amountCents={item.signedAmount}
-            className="text-base font-medium"
+            className="text-base font-medium text-zinc-900 dark:text-zinc-100"
           />
         </View>
       )}

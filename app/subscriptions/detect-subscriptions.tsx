@@ -46,6 +46,7 @@ export default function DetectSubscriptions({
           "No Transactions",
           "Import some transactions first before detecting subscriptions.",
         );
+        onOpenChange(false);
         return;
       }
 
