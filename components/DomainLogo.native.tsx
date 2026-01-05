@@ -1,9 +1,8 @@
 import { getLogoUri } from "@/lib/logo-cache";
 import { cn } from "@/lib/utils";
 import { Host, Image as SwiftImage } from "@expo/ui/swift-ui";
-import { Image } from "expo-image";
 import { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { Image, Text, View } from "react-native";
 import { DomainLogoProps } from "./DomainLogo";
 
 export default function DomainLogo({
@@ -57,7 +56,7 @@ export default function DomainLogo({
     <View
       className={cn(
         "items-center justify-center overflow-hidden rounded-xl bg-zinc-100 dark:bg-zinc-800",
-        className
+        className,
       )}
       style={dimensionStyle}
     >
@@ -65,7 +64,7 @@ export default function DomainLogo({
         <Image
           source={{ uri: logoUri }}
           style={dimensionStyle}
-          contentFit="cover"
+          resizeMode="cover"
         />
       ) : (
         renderFallback()
