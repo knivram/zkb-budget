@@ -51,9 +51,10 @@ jobs:
       - name: Deploy preview server routes
         run: eas deploy --id "pr-${{ github.event.pull_request.number }}" --environment preview --non-interactive
 
-      - name: Set EXPO_PUBLIC_API_URL for update bundling
+      - name: Set env variables for preview
         run: |
           printf '\nEXPO_PUBLIC_API_URL=%s\n' "https://zkb-budget--pr-${{ github.event.pull_request.number }}.expo.app" >> .env.local
+          printf '\nEXPO_PUBLIC_PREVIEW=true\n' >> .env.local
 
       - name: Create preview
         uses: expo/expo-github-action/preview@v8

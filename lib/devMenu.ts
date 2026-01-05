@@ -2,19 +2,21 @@ import { registerDevMenuItems as registerDevMenuItemsClient } from "expo-dev-cli
 import { File, Paths } from "expo-file-system";
 import { reloadAsync } from "expo-updates";
 
-export function registerDevMenuItems() {
-  if (!__DEV__) return;
+const isPreviewEnv = process.env.EXPO_PUBLIC_PREVIEW === "true";
 
-  registerDevMenuItemsClient([
-    {
-      name: "Reset local DB",
-      shouldCollapse: true,
-      callback: () => {
-        void (async () => {
-          new File(Paths.document, "SQLite", "zkb-budget.db").delete();
-          await reloadAsync();
-        })();
+export function registerDevMenuItems() {
+  if (__DEV__ || isPreviewEnv) {
+    registerDevMenuItemsClient([
+      {
+        name: "Reset local DB",
+        shouldCollapse: true,
+        callback: () => {
+          void (async () => {
+            new File(Paths.document, "SQLite", "zkb-budget.db").delete();
+            await reloadAsync();
+          })();
+        },
       },
-    },
-  ]);
+    ]);
+  }
 }
