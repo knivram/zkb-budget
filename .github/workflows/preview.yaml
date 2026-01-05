@@ -1,5 +1,17 @@
 name: preview
-on: pull_request
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "**/*.ts"
+      - "**/*.tsx"
+      - "**/*.js"
+      - "**/*.jsx"
+      - "package.json"
+      - "app.json"
+      - "app.config.js"
+      - "tailwind.config.js"
 
 jobs:
   update:
