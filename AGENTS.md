@@ -38,10 +38,11 @@ Two main tables in `db/schema.ts`:
 - Install deps: `bun install`
 - Run app: `bun start` for Expo dev server; `bun run android`, `bun run ios`, `bun run web` for platforms
 - Lint: `bun run lint`
-- DB migrations: `bun run db:generate` after schema changes; `bun run db:studio` for Drizzle Studio
+- DB migrations: `bun run db:generate` REQUIRED before committing schema changes
 
 ## Environment Variables
 - `OPENROUTER_API_KEY`: Required for AI-powered features (transaction enrichment, subscription detection)
+- `EXPO_PUBLIC_LOGO_DEV_KEY`: Required for logo fetching in development
 
 ## Key Features
 1. **Transaction Import**: Import XML files from ZKB bank exports
@@ -53,21 +54,14 @@ Two main tables in `db/schema.ts`:
 - Use 2-space indentation
 - Components in `PascalCase`; hooks/utilities in `camelCase`
 - File names should match the default export
-- Prefer NativeWind `className` utilities for styling
-- Use alias paths (`@/foo/bar`) instead of relative traversals
+- Use NativeWind `className` utilities for styling
+- Use alias paths (`@/foo/bar`) instead of relative imports
 - Store currency as integer cents (e.g., `subscriptions.price`, `transactions.amount`)
-
-## Testing Guidelines
-- No automated tests configured yet
-- When adding tests, use Jest with `@testing-library/react-native`
-- Name test files `*.test.tsx` alongside the code or under `__tests__/`
-- Priority test coverage: transaction import/parsing, subscription detection, SQLite migrations
 
 ## Commit & Pull Request Guidelines
 - Commits: short, imperative summaries (e.g., `add subscription detection`, `fix transaction import`)
-- PRs: describe what changed, why, how to test; include screenshots for UI changes
+- PRs: describe what changed, and why
 
 ## Security & Configuration
 - Never hardcode API keys; use environment variables
-- SQLite DB files are device-local; don't commit `.db` artifacts
 - Keep migrations in sync with `db/schema.ts`

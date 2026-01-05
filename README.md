@@ -17,16 +17,16 @@ A React Native/Expo app for tracking personal finances using transaction data ex
 - TypeScript
 - [Drizzle ORM](https://orm.drizzle.team/) with Expo SQLite
 - [NativeWind](https://www.nativewind.dev/) (TailwindCSS for React Native)
-- [OpenRouter](https://openrouter.ai/) AI SDK with Google Gemini
+- [OpenRouter](https://openrouter.ai/) AI SDK
 - [TOON format](https://github.com/toon-format/toon) for token-efficient AI prompts
 
 ## Getting Started
 
 ### Prerequisites
 
-- [Bun](https://bun.sh/) (recommended) or npm
-- [Expo CLI](https://docs.expo.dev/get-started/installation/)
-- iOS Simulator, Android Emulator, or physical device with Expo Go
+- [Bun](https://bun.sh/)
+- [Expo CLI](https://docs.expo.dev/get-started/installation/) (optional)
+- iOS Simulator or physical device
 
 ### Installation
 
@@ -38,23 +38,22 @@ A React Native/Expo app for tracking personal finances using transaction data ex
 
 2. Set up environment variables:
 
-   ```bash
+   ```txt
    # Create a .env file with your OpenRouter API key
    OPENROUTER_API_KEY=your_api_key_here
+   EXPO_PUBLIC_LOGO_DEV_KEY=your_logo_dev_key_here
    ```
 
-3. Start the development server:
+3. Create a prebuild:
 
    ```bash
-   bun start
+   bunx expo prebuild
    ```
 
 4. Run on your preferred platform:
 
    ```bash
-   bun run ios      # iOS
-   bun run android  # Android
-   bun run web      # Web
+   bun run ios
    ```
 
 ## Database
@@ -72,29 +71,6 @@ After modifying `db/schema.ts`, generate new migrations:
 
 ```bash
 bun run db:generate
-```
-
-Use Drizzle Studio to inspect the database:
-
-```bash
-bun run db:studio
-```
-
-## Project Structure
-
-```
-├── app/                    # Expo Router screens
-│   ├── api/               # API routes for AI features
-│   ├── transactions/      # Transaction screens
-│   └── subscriptions/     # Subscription screens
-├── components/            # Reusable UI components
-├── db/                    # Database schema and client
-├── drizzle/               # Generated SQL migrations
-├── lib/                   # Utilities and helpers
-│   ├── api/              # API schemas and prompts
-│   ├── xml-parser.ts     # ZKB XML parser
-│   └── toon-converter.ts # TOON format converter
-└── assets/               # Images and fonts
 ```
 
 ## Usage
@@ -115,11 +91,4 @@ bun run lint
 
 # Generate DB migrations
 bun run db:generate
-
-# Open Drizzle Studio
-bun run db:studio
 ```
-
-## License
-
-Private project - not licensed for public use.
