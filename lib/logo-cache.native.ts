@@ -10,10 +10,10 @@ const normalizeDomainToFilename = (domain: string): string => {
 
 const fetchAndCacheLogo = async (
   file: File,
-  domain: string
+  domain: string,
 ): Promise<string | null> => {
   try {
-    const url = `https://img.logo.dev/${domain}?token=${process.env.EXPO_PUBLIC_LOGO_DEV_KEY}`;
+    const url = `https://img.logo.dev/${domain}?token=${process.env.EXPO_PUBLIC_LOGO_DEV_KEY}&format=png&retina=true&fallback=404`;
     const response = await fetch(url);
 
     if (!response.ok) return null;
@@ -30,7 +30,7 @@ const fetchAndCacheLogo = async (
 };
 
 export const getLogoUri = async (
-  domain?: string | null
+  domain?: string | null,
 ): Promise<string | null> => {
   if (!domain?.trim()) return null;
 
