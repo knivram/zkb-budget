@@ -1,11 +1,14 @@
 import { db } from "@/db/client";
 import migrations from "@/drizzle/migrations";
 import "@/global.css";
+import { registerDevMenuItems } from "@/lib/devMenu";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
 import { Text, View } from "react-native";
 
 export default function RootLayout() {
+  registerDevMenuItems();
+
   // TODO: #2 handle migrations error
   const { success, error } = useMigrations(db, migrations);
 
