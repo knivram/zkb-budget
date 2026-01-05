@@ -1,6 +1,7 @@
 import { db } from "@/db/client";
 import { subscriptions, transactions } from "@/db/schema";
 import { EnrichedTransaction } from "@/lib/api/ai-schemas";
+import { API_URL } from "@/lib/config";
 import { parseXMLTransactions } from "@/lib/xml-parser";
 import {
   BottomSheet,
@@ -52,7 +53,7 @@ export default function ImportTransactions({
       if (parsedTransactions.length === 0) {
         Alert.alert(
           "No Transactions",
-          "No valid transactions found in the file."
+          "No valid transactions found in the file.",
         );
         setIsImporting(false);
         return;
@@ -71,7 +72,7 @@ export default function ImportTransactions({
         onOpenChange(false);
         Alert.alert(
           "No New Transactions",
-          "All transactions in this file already exist."
+          "All transactions in this file already exist.",
         );
         return;
       }
@@ -90,7 +91,7 @@ export default function ImportTransactions({
           .from(subscriptions);
 
         const enrichResponse = await fetch(
-          `${process.env.EXPO_PUBLIC_API_URL}/api/enrich-transactions`,
+          `${API_URL}/api/enrich-transactions`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -98,7 +99,7 @@ export default function ImportTransactions({
               transactions: newTransactions,
               subscriptions: existingSubscriptions,
             }),
-          }
+          },
         );
 
         if (enrichResponse.ok) {
@@ -109,7 +110,7 @@ export default function ImportTransactions({
             await Promise.all(
               enrichedData.map((enriched: EnrichedTransaction) => {
                 const transaction = newTransactions.find(
-                  (t) => t.id === enriched.id
+                  (t) => t.id === enriched.id,
                 );
                 if (!transaction) {
                   return;
@@ -126,7 +127,7 @@ export default function ImportTransactions({
                     subscriptionId: enriched.subscriptionId ?? null,
                   })
                   .where(eq(transactions.id, enriched.id));
-              })
+              }),
             );
           }
         }
@@ -142,7 +143,7 @@ export default function ImportTransactions({
       console.error("Import error:", error);
       Alert.alert(
         "Import Failed",
-        "An error occurred while importing transactions."
+        "An error occurred while importing transactions.",
       );
     } finally {
       setIsImporting(false);

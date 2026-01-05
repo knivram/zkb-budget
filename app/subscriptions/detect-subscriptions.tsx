@@ -1,6 +1,7 @@
 import { db } from "@/db/client";
 import { transactions } from "@/db/schema";
 import { SubscriptionDetectionResponse } from "@/lib/api/ai-schemas";
+import { API_URL } from "@/lib/config";
 import {
   BottomSheet,
   Button,
@@ -43,7 +44,7 @@ export default function DetectSubscriptions({
         setIsDetecting(false);
         Alert.alert(
           "No Transactions",
-          "Import some transactions first before detecting subscriptions."
+          "Import some transactions first before detecting subscriptions.",
         );
         return;
       }
@@ -51,14 +52,11 @@ export default function DetectSubscriptions({
       setLoadingMessage("Analyzing transactions...");
 
       // Call the detect-subscriptions API
-      const response = await fetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/api/detect-subscriptions`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ transactions: allTransactions }),
-        }
-      );
+      const response = await fetch(`${API_URL}/api/detect-subscriptions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ transactions: allTransactions }),
+      });
 
       if (!response.ok) {
         const error = await response.json();
@@ -73,7 +71,7 @@ export default function DetectSubscriptions({
       if (!result.subscriptions || result.subscriptions.length === 0) {
         Alert.alert(
           "No Subscriptions Found",
-          "No recurring subscriptions were detected in your transactions."
+          "No recurring subscriptions were detected in your transactions.",
         );
         return;
       }
@@ -92,7 +90,7 @@ export default function DetectSubscriptions({
         "Detection Failed",
         error instanceof Error
           ? error.message
-          : "An error occurred while detecting subscriptions."
+          : "An error occurred while detecting subscriptions.",
       );
     }
   };

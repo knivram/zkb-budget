@@ -52,7 +52,7 @@ export const transactions = sqliteTable("transactions", {
   }).notNull(),
   signedAmount: integer("signed_amount").notNull(),
   transactionAdditionalDetails: text(
-    "transaction_additional_details"
+    "transaction_additional_details",
   ).notNull(),
   transactionSubtype: text("transaction_subtype", {
     enum: TRANSACTION_SUBTYPES,
@@ -67,7 +67,10 @@ export const transactions = sqliteTable("transactions", {
     .default("other"),
   displayName: text("display_name"),
   domain: text("domain"),
-  subscriptionId: integer("subscription_id").references(() => subscriptions.id, { onDelete: 'set null' }),
+  subscriptionId: integer("subscription_id").references(
+    () => subscriptions.id,
+    { onDelete: "set null" },
+  ),
 });
 
 export type Transaction = typeof transactions.$inferSelect;
