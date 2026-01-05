@@ -1,0 +1,26 @@
+name: Cleanup preview environment
+
+on:
+  pull_request_target:
+    types: [closed]
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Delete EAS branch for PR
+        continue-on-error: true
+        run: eas branch:delete "pr-${{ github.event.pull_request.number }}" --non-interactive
+
+      - name: Delete preview server routes
+        continue-on-error: true
+        run: eas deploy:delete "pr-${{ github.event.pull_request.number }}" --non-interactive

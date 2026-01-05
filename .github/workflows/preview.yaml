@@ -2,78 +2,60 @@ name: preview
 on: pull_request
 
 jobs:
-    update:
-        name: EAS Update
-        runs-on: ubuntu-latest
-        permissions:
-            contents: read
-            pull-requests: write
-        steps:
-            - name: Check for EXPO_TOKEN
-              run: |
-                  if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
-                    echo "You must provide an EXPO_TOKEN secret linked to this project's Expo account in this repo's secrets. Learn more: https://docs.expo.dev/eas-update/github-actions"
-                    exit 1
-                  fi
+  update:
+    name: EAS Update
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Check for EXPO_TOKEN
+        run: |
+          if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
+            echo "You must provide an EXPO_TOKEN secret linked to this project's Expo account in this repo's secrets. Learn more: https://docs.expo.dev/eas-update/github-actions"
+            exit 1
+          fi
 
-            - name: Checkout repository
-              uses: actions/checkout@v5
+      - name: Checkout repository
+        uses: actions/checkout@v5
 
-            - name: Setup Bun
-              uses: oven-sh/setup-bun@v1
-              with:
-                  bun-version: latest
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
 
-            - name: Setup EAS
-              uses: expo/expo-github-action@v8
-              with:
-                  eas-version: latest
-                  token: ${{ secrets.EXPO_TOKEN }}
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
 
-            - name: Install dependencies
-              run: bun install
+      - name: Install dependencies
+        run: bun install
 
-            - name: Pull EAS env (preview) into .env.local
-              run: eas env:pull --environment preview --path .env.local --non-interactive
+      - name: Pull EAS env (preview) into .env.local
+        run: eas env:pull --environment preview --path .env.local --non-interactive
 
-            #   TODO: #21 why are server secrets needed in the pipeline?
-            - name: Add OPENROUTER_API_KEY to .env.local
-              run: |
-                  printf '\nOPENROUTER_API_KEY=%s\n' "${{ secrets.OPENROUTER_API_KEY }}" >> .env.local
+      #   TODO: #21 why are server secrets needed in the pipeline?
+      - name: Add OPENROUTER_API_KEY to .env.local
+        run: |
+          printf '\nOPENROUTER_API_KEY=%s\n' "${{ secrets.OPENROUTER_API_KEY }}" >> .env.local
 
-            - name: Build server routes
-              run: bunx expo export --platform web --no-ssg
+      - name: Build server routes
+        run: bunx expo export --platform web --no-ssg
 
-            - name: Remove old deployment
-              continue-on-error: true
-              run: eas deploy:delete "pr-${{ github.event.pull_request.number }}" --non-interactive
+      - name: Remove old deployment
+        continue-on-error: true
+        run: eas deploy:delete "pr-${{ github.event.pull_request.number }}" --non-interactive
 
-            - name: Deploy preview server routes
-              run: eas deploy --id "pr-${{ github.event.pull_request.number }}" --environment preview --non-interactive
+      - name: Deploy preview server routes
+        run: eas deploy --id "pr-${{ github.event.pull_request.number }}" --environment preview --non-interactive
 
-            - name: Set EXPO_PUBLIC_API_URL for update bundling
-              run: |
-                  printf '\nEXPO_PUBLIC_API_URL=%s\n' "https://zkb-budget--pr-${{ github.event.pull_request.number }}.expo.app" >> .env.local
+      - name: Set EXPO_PUBLIC_API_URL for update bundling
+        run: |
+          printf '\nEXPO_PUBLIC_API_URL=%s\n' "https://zkb-budget--pr-${{ github.event.pull_request.number }}.expo.app" >> .env.local
 
-            - name: Create preview
-              uses: expo/expo-github-action/preview@v8
-              with:
-                  command: eas update --branch "pr-${{ github.event.pull_request.number }}" --message "${{ github.event.pull_request.title }}" --non-interactive
-
-    cleanup:
-        if: github.event.action == 'closed'
-        runs-on: ubuntu-latest
-        steps:
-            - name: Setup EAS
-              uses: expo/expo-github-action@v8
-              with:
-                  eas-version: latest
-                  token: ${{ secrets.EXPO_TOKEN }}
-
-            - name: Delete EAS branch for PR
-              continue-on-error: true
-              run: eas branch:delete "pr-${{ github.event.pull_request.number }}" --non-interactive
-
-            - name: Delete preview server routes
-              continue-on-error: true
-              run: eas deploy:delete "pr-${{ github.event.pull_request.number }}" --non-interactive
+      - name: Create preview
+        uses: expo/expo-github-action/preview@v8
+        with:
+          command: eas update --branch "pr-${{ github.event.pull_request.number }}" --message "${{ github.event.pull_request.title }}" --non-interactive
