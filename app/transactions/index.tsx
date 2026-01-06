@@ -1,15 +1,29 @@
 import AmountText from "@/components/AmountText";
 import DomainLogo from "@/components/DomainLogo";
 import { db } from "@/db/client";
-import { Category, transactions } from "@/db/schema";
+import { Category, transactions, type Transaction } from "@/db/schema";
 import { Host, Image as SwiftImage } from "@expo/ui/swift-ui";
 import { FlashList } from "@shopify/flash-list";
 import { desc } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { Stack } from "expo-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Text, View } from "react-native";
 import ImportTransactions from "./import-transactions";
+
+type SectionHeader = {
+  type: "header";
+  month: string;
+  year: number;
+  key: string;
+};
+
+type TransactionItem = {
+  type: "transaction";
+  data: Transaction;
+};
+
+type ListItem = SectionHeader | TransactionItem;
 
 const CATEGORIES: Record<
   Category,
@@ -74,11 +88,59 @@ const formatDate = (dateStr: string): string => {
   });
 };
 
+const formatMonthHeader = (dateStr: string): { month: string; year: number } => {
+  const date = new Date(dateStr);
+  const month = date.toLocaleDateString("de-CH", { month: "long" });
+  const year = date.getFullYear();
+  return { month, year };
+};
+
+const getMonthKey = (dateStr: string): string => {
+  const date = new Date(dateStr);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+};
+
+const groupTransactionsByMonth = (
+  transactionsList: Transaction[]
+): { items: ListItem[]; stickyIndices: number[] } => {
+  const items: ListItem[] = [];
+  const stickyIndices: number[] = [];
+  let currentMonthKey = "";
+
+  for (const transaction of transactionsList) {
+    const monthKey = getMonthKey(transaction.date);
+
+    if (monthKey !== currentMonthKey) {
+      const { month, year } = formatMonthHeader(transaction.date);
+      stickyIndices.push(items.length);
+      items.push({
+        type: "header",
+        month,
+        year,
+        key: monthKey,
+      });
+      currentMonthKey = monthKey;
+    }
+
+    items.push({
+      type: "transaction",
+      data: transaction,
+    });
+  }
+
+  return { items, stickyIndices };
+};
+
 export default function Transactions() {
   const [isImportOpen, setIsImportOpen] = useState(false);
 
   const { data } = useLiveQuery(
     db.select().from(transactions).orderBy(desc(transactions.date))
+  );
+
+  const { items, stickyIndices } = useMemo(
+    () => groupTransactionsByMonth(data ?? []),
+    [data]
   );
 
   return (
@@ -102,17 +164,34 @@ export default function Transactions() {
       <FlashList
         className="flex-1 bg-white dark:bg-zinc-900"
         contentInsetAdjustmentBehavior="automatic"
-        data={data}
-        keyExtractor={(item) => item.id}
+        data={items}
+        keyExtractor={(item) =>
+          item.type === "header" ? item.key : item.data.id
+        }
+        getItemType={(item) => item.type}
+        stickyHeaderIndices={stickyIndices}
+        estimatedItemSize={80}
         renderItem={({ item }) => {
-          const name = item.displayName ?? item.transactionAdditionalDetails;
-          const categoryConfig = CATEGORIES[item.category];
-          const isCredit = item.creditDebitIndicator === "credit";
+          if (item.type === "header") {
+            return (
+              <View className="border-b border-zinc-200 bg-zinc-50 px-4 py-2 dark:border-zinc-700 dark:bg-zinc-800">
+                <Text className="text-sm font-semibold text-zinc-600 dark:text-zinc-300">
+                  {item.month} {item.year}
+                </Text>
+              </View>
+            );
+          }
+
+          const transaction = item.data;
+          const name =
+            transaction.displayName ?? transaction.transactionAdditionalDetails;
+          const categoryConfig = CATEGORIES[transaction.category];
+          const isCredit = transaction.creditDebitIndicator === "credit";
 
           return (
             <View className="flex-row border-b border-zinc-100 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
               <DomainLogo
-                domain={item.domain}
+                domain={transaction.domain}
                 fallbackIcon={categoryConfig.icon}
                 size={40}
                 className="mr-3"
@@ -126,7 +205,7 @@ export default function Transactions() {
                   {name}
                 </Text>
                 <Text className="text-sm text-zinc-500">
-                  {formatDate(item.date)}
+                  {formatDate(transaction.date)}
                 </Text>
 
                 <View className="mt-1 flex-row flex-wrap gap-1">
@@ -139,7 +218,7 @@ export default function Transactions() {
                     </Text>
                   </View>
 
-                  {item.subscriptionId && (
+                  {transaction.subscriptionId && (
                     <View className="flex-row items-center rounded-md bg-blue-50 px-2 py-0.5 dark:bg-blue-900/30">
                       <Text className="text-xs text-blue-600 dark:text-blue-400">
                         Subscription
@@ -151,7 +230,7 @@ export default function Transactions() {
 
               <View className="items-end justify-center">
                 <AmountText
-                  amountCents={item.signedAmount}
+                  amountCents={transaction.signedAmount}
                   className={`text-base font-semibold ${
                     isCredit
                       ? "text-emerald-700 dark:text-emerald-200"
