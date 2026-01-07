@@ -38,6 +38,10 @@ export default function RootLayout() {
         <Icon sf="repeat" />
         <Label>Subscriptions</Label>
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="analytics">
+        <Icon sf="chart.bar.fill" />
+        <Label>Analytics</Label>
+      </NativeTabs.Trigger>
     </NativeTabs>
   );
 }
