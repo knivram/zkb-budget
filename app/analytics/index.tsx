@@ -55,17 +55,20 @@ export default function Analytics() {
   const barData = useMemo(() => {
     if (!monthlyData || monthlyData.length === 0) return [];
 
-    return monthlyData.flatMap((item) => [
+    return monthlyData.flatMap((item, index) => [
       {
         value: (item.income ?? 0) / 100,
         label: formatMonth(item.month),
         frontColor: INCOME_COLOR,
         spacing: 2,
+        labelTextStyle: { fontSize: 10 },
       },
       {
         value: (item.expenses ?? 0) / 100,
+        label: "",
         frontColor: EXPENSE_COLOR,
-        spacing: 24,
+        spacing: index === monthlyData.length - 1 ? 0 : 24,
+        labelTextStyle: { fontSize: 10 },
       },
     ]);
   }, [monthlyData]);
@@ -137,6 +140,8 @@ export default function Analytics() {
               xAxisLabelTextStyle={{
                 color: isDark ? "#a1a1aa" : "#71717a",
                 fontSize: 10,
+                width: 50,
+                textAlign: "center",
               }}
               noOfSections={4}
               maxValue={maxValue}
@@ -146,6 +151,8 @@ export default function Analytics() {
               barBorderRadius={4}
               yAxisLabelPrefix="CHF "
               formatYLabel={(label) => formatAmount(parseFloat(label) * 100)}
+              hideRules
+              xAxisLabelsVerticalShift={2}
             />
 
             <View className="mt-4 flex-row justify-center gap-6">
