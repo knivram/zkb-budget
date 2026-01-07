@@ -16,6 +16,7 @@ type SectionHeader = {
   month: string;
   year: number;
   key: string;
+  sum: number;
 };
 
 type TransactionItem = {
@@ -88,7 +89,9 @@ const formatDate = (dateStr: string): string => {
   });
 };
 
-const formatMonthHeader = (dateStr: string): { month: string; year: number } => {
+const formatMonthHeader = (
+  dateStr: string,
+): { month: string; year: number } => {
   const date = new Date(dateStr);
   const month = date.toLocaleDateString("de-CH", { month: "long" });
   const year = date.getFullYear();
@@ -101,47 +104,51 @@ const getMonthKey = (dateStr: string): string => {
 };
 
 const groupTransactionsByMonth = (
-  transactionsList: Transaction[]
-): { items: ListItem[]; stickyIndices: number[] } => {
+  transactionsList: Transaction[],
+): { items: ListItem[] } => {
   const items: ListItem[] = [];
-  const stickyIndices: number[] = [];
   let currentMonthKey = "";
+  let currentMonthIndex = 0;
 
   for (const transaction of transactionsList) {
     const monthKey = getMonthKey(transaction.date);
 
     if (monthKey !== currentMonthKey) {
       const { month, year } = formatMonthHeader(transaction.date);
-      stickyIndices.push(items.length);
-      items.push({
+      const newLength = items.push({
         type: "header",
         month,
         year,
         key: monthKey,
+        sum: 0,
       });
       currentMonthKey = monthKey;
+      currentMonthIndex = newLength - 1;
     }
 
     items.push({
       type: "transaction",
       data: transaction,
     });
+    items[currentMonthIndex] = {
+      ...items[currentMonthIndex],
+      sum:
+        (items[currentMonthIndex] as SectionHeader).sum +
+        transaction.signedAmount,
+    } as SectionHeader;
   }
 
-  return { items, stickyIndices };
+  return { items };
 };
 
 export default function Transactions() {
   const [isImportOpen, setIsImportOpen] = useState(false);
 
   const { data } = useLiveQuery(
-    db.select().from(transactions).orderBy(desc(transactions.date))
+    db.select().from(transactions).orderBy(desc(transactions.date)),
   );
 
-  const { items, stickyIndices } = useMemo(
-    () => groupTransactionsByMonth(data ?? []),
-    [data]
-  );
+  const { items } = useMemo(() => groupTransactionsByMonth(data ?? []), [data]);
 
   return (
     <>
@@ -169,15 +176,17 @@ export default function Transactions() {
           item.type === "header" ? item.key : item.data.id
         }
         getItemType={(item) => item.type}
-        stickyHeaderIndices={stickyIndices}
-        estimatedItemSize={80}
         renderItem={({ item }) => {
           if (item.type === "header") {
             return (
-              <View className="border-b border-zinc-200 bg-zinc-50 px-4 py-2 dark:border-zinc-700 dark:bg-zinc-800">
+              <View className="flex-row justify-between border-b border-zinc-200 bg-zinc-50 px-4 py-2 dark:border-zinc-700 dark:bg-zinc-800">
                 <Text className="text-sm font-semibold text-zinc-600 dark:text-zinc-300">
                   {item.month} {item.year}
                 </Text>
+                <AmountText
+                  amountCents={item.sum}
+                  className="text-sm font-semibold text-zinc-600 dark:text-zinc-300"
+                />
               </View>
             );
           }

@@ -55,7 +55,8 @@ export default function DomainLogo({
   return (
     <View
       className={cn(
-        "items-center justify-center overflow-hidden rounded-xl bg-zinc-100 dark:bg-zinc-800",
+        "items-center justify-center overflow-hidden rounded-xl ",
+        !logoUri ? "bg-zinc-100 dark:bg-zinc-800" : "bg-white",
         className,
       )}
       style={dimensionStyle}
