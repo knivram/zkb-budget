@@ -183,10 +183,7 @@ export default function Transactions() {
                 <Text className="text-sm font-semibold text-zinc-600 dark:text-zinc-300">
                   {item.month} {item.year}
                 </Text>
-                <AmountText
-                  amountCents={item.sum}
-                  className="text-sm font-semibold text-zinc-600 dark:text-zinc-300"
-                />
+                <AmountText amountCents={item.sum} />
               </View>
             );
           }
@@ -195,7 +192,6 @@ export default function Transactions() {
           const name =
             transaction.displayName ?? transaction.transactionAdditionalDetails;
           const categoryConfig = CATEGORIES[transaction.category];
-          const isCredit = transaction.creditDebitIndicator === "credit";
 
           return (
             <View className="flex-row border-b border-zinc-100 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
@@ -238,14 +234,7 @@ export default function Transactions() {
               </View>
 
               <View className="items-end justify-center">
-                <AmountText
-                  amountCents={transaction.signedAmount}
-                  className={`text-base font-semibold ${
-                    isCredit
-                      ? "text-emerald-700 dark:text-emerald-200"
-                      : "text-rose-800 dark:text-rose-200"
-                  }`}
-                />
+                <AmountText amountCents={transaction.signedAmount} />
               </View>
             </View>
           );

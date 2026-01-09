@@ -146,7 +146,7 @@ export default function Subscriptions() {
                         </View>
                         <AmountText
                           amountCents={subscription.price}
-                          className="text-base font-semibold text-zinc-900 dark:text-white"
+                          className="text-zinc-900 dark:text-white"
                         />
                       </View>
                     </Pressable>
