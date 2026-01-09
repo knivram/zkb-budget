@@ -1,49 +1,13 @@
 import DomainLogo from "@/components/DomainLogo";
 import { db } from "@/db/client";
 import { transactions } from "@/db/schema";
+import { CATEGORIES } from "@/lib/categories";
+import { Button, Host, Image as SwiftImage } from "@expo/ui/swift-ui";
+import { scaleEffect } from "@expo/ui/swift-ui/modifiers";
 import { sql } from "drizzle-orm";
-import {
-  ChevronLeft,
-  ChevronRight,
-  TrendingDown,
-  TrendingUp,
-} from "lucide-react-native";
+import { TrendingDown, TrendingUp } from "lucide-react-native";
 import { useEffect, useMemo, useState } from "react";
-import {
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  useColorScheme,
-  View,
-} from "react-native";
-
-const CATEGORY_COLORS: Record<string, string> = {
-  housing: "#3b82f6",
-  food: "#10b981",
-  transport: "#f59e0b",
-  utilities: "#8b5cf6",
-  healthcare: "#ec4899",
-  dining: "#f43f5e",
-  shopping: "#06b6d4",
-  entertainment: "#a855f7",
-  personal_care: "#14b8a6",
-  transfer: "#6366f1",
-  other: "#64748b",
-};
-
-const CATEGORY_LABELS: Record<string, string> = {
-  housing: "Housing",
-  food: "Food",
-  transport: "Transport",
-  utilities: "Utilities",
-  healthcare: "Healthcare",
-  dining: "Dining",
-  shopping: "Shopping",
-  entertainment: "Entertainment",
-  personal_care: "Personal",
-  transfer: "Transfer",
-  other: "Other",
-};
+import { ScrollView, Text, View } from "react-native";
 
 const formatMonthFull = (monthStr: string): string => {
   const [year, month] = monthStr.split("-");
@@ -59,9 +23,6 @@ const formatAmount = (amountCents: number): string => {
 };
 
 export default function Analytics() {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
-
   // Current month (for limiting forward navigation)
   const currentMonth = useMemo(() => {
     const date = new Date();
@@ -231,23 +192,26 @@ export default function Analytics() {
       <View className="p-4">
         {/* Month Switcher */}
         <View className="mb-6 flex-row items-center justify-between">
-          <TouchableOpacity
-            onPress={handlePreviousMonth}
-            className="rounded-lg bg-zinc-100 p-2 dark:bg-zinc-800"
-          >
-            <ChevronLeft size={24} color={isDark ? "#a1a1aa" : "#71717a"} />
-          </TouchableOpacity>
+          <Host matchContents>
+            <Button
+              onPress={handlePreviousMonth}
+              systemImage="chevron.left"
+              variant="glass"
+              modifiers={[scaleEffect(1.1)]}
+            />
+          </Host>
           <Text className="text-lg font-semibold text-zinc-900 dark:text-white">
             {formatMonthFull(selectedMonth)}
           </Text>
-          <TouchableOpacity
-            onPress={handleNextMonth}
-            disabled={isCurrentMonth}
-            className="rounded-lg bg-zinc-100 p-2 dark:bg-zinc-800"
-            style={{ opacity: isCurrentMonth ? 0.5 : 1 }}
-          >
-            <ChevronRight size={24} color={isDark ? "#a1a1aa" : "#71717a"} />
-          </TouchableOpacity>
+          <Host matchContents>
+            <Button
+              onPress={handleNextMonth}
+              systemImage="chevron.right"
+              disabled={isCurrentMonth}
+              variant="glass"
+              modifiers={[scaleEffect(1.1)]}
+            />
+          </Host>
         </View>
 
         {/* Month-specific Income/Expense Cards */}
@@ -301,53 +265,71 @@ export default function Analytics() {
               Spending by Category
             </Text>
             <View className="rounded-xl bg-zinc-50 p-4 dark:bg-zinc-800">
-              {displayCategories.map((item, index) => {
-                const percentage =
-                  monthExpenses > 0
-                    ? Math.round(((item.total ?? 0) / monthExpenses) * 100)
-                    : 0;
-                const color =
-                  CATEGORY_COLORS[item.category ?? "other"] ??
-                  CATEGORY_COLORS.other;
-                const label =
-                  CATEGORY_LABELS[item.category ?? "other"] ?? "Other";
+              {(() => {
+                // Find max value for relative bar widths
+                const maxTotal = Math.max(
+                  ...displayCategories.map((item) => item.total ?? 0),
+                );
 
-                return (
-                  <View
-                    key={item.category ?? index}
-                    className={
-                      index < displayCategories.length - 1 ? "mb-4" : ""
-                    }
-                  >
-                    <View className="mb-1.5 flex-row items-center justify-between">
-                      <View className="flex-row items-center">
-                        <View
-                          className="mr-2 h-3 w-3 rounded-sm"
-                          style={{ backgroundColor: color }}
-                        />
-                        <Text className="text-sm text-zinc-700 dark:text-zinc-300">
-                          {label}
+                return displayCategories.map((item, index) => {
+                  const percentage =
+                    monthExpenses > 0
+                      ? Math.round(((item.total ?? 0) / monthExpenses) * 100)
+                      : 0;
+                  // Bar width relative to max category (highest = ~90%)
+                  const relativeWidth =
+                    maxTotal > 0
+                      ? Math.round(((item.total ?? 0) / maxTotal) * 90)
+                      : 0;
+                  const categoryKey = (item.category ??
+                    "other") as keyof typeof CATEGORIES;
+                  const categoryConfig =
+                    CATEGORIES[categoryKey] ?? CATEGORIES.other;
+
+                  return (
+                    <View
+                      key={item.category ?? index}
+                      className={
+                        index < displayCategories.length - 1 ? "mb-4" : ""
+                      }
+                    >
+                      <View className="mb-1.5 flex-row items-center justify-between">
+                        <View className="flex-row items-center">
+                          <View
+                            className="mr-2 h-8 w-8 items-center justify-center rounded"
+                            style={{ backgroundColor: categoryConfig.color }}
+                          >
+                            <Host matchContents>
+                              <SwiftImage
+                                systemName={categoryConfig.icon}
+                                size={14}
+                              />
+                            </Host>
+                          </View>
+                          <Text className="text-sm text-zinc-700 dark:text-zinc-300">
+                            {categoryConfig.label}
+                          </Text>
+                        </View>
+                        <Text className="text-sm font-medium text-zinc-900 dark:text-white">
+                          CHF {formatAmount(item.total ?? 0)}
                         </Text>
                       </View>
-                      <Text className="text-sm font-medium text-zinc-900 dark:text-white">
-                        CHF {formatAmount(item.total ?? 0)}
+                      <View className="h-2 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700">
+                        <View
+                          className="h-full rounded-full"
+                          style={{
+                            backgroundColor: categoryConfig.color,
+                            width: `${relativeWidth}%`,
+                          }}
+                        />
+                      </View>
+                      <Text className="mt-1 text-xs text-zinc-500">
+                        {percentage}%
                       </Text>
                     </View>
-                    <View className="h-2 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700">
-                      <View
-                        className="h-full rounded-full"
-                        style={{
-                          backgroundColor: color,
-                          width: `${percentage}%`,
-                        }}
-                      />
-                    </View>
-                    <Text className="mt-1 text-xs text-zinc-500">
-                      {percentage}%
-                    </Text>
-                  </View>
-                );
-              })}
+                  );
+                });
+              })()}
             </View>
           </View>
         )}
