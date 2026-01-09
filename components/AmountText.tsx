@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { Text } from "react-native";
 
 type AmountTextProps = {
@@ -10,7 +11,7 @@ type AmountTextProps = {
 const formatAmount = (
   amountCents: number,
   showCurrency: boolean,
-  currency: string
+  currency: string,
 ): string => {
   const rounded = Math.round(amountCents);
   const formatted = (rounded / 100).toFixed(2);
@@ -24,7 +25,15 @@ export default function AmountText({
   currency = "CHF",
 }: AmountTextProps) {
   return (
-    <Text className={className}>
+    <Text
+      className={cn(
+        "text-sm font-semibold",
+        amountCents >= 0
+          ? "text-emerald-700 dark:text-emerald-200"
+          : "text-rose-800 dark:text-rose-200",
+        className,
+      )}
+    >
       {formatAmount(amountCents, showCurrency, currency)}
     </Text>
   );

@@ -61,7 +61,10 @@ export default function SubscriptionDetail() {
               <Text className="text-lg text-zinc-500">
                 <Text className="capitalize">{sub.billingCycle}</Text>
                 {" \u2022 "}
-                <AmountText amountCents={sub.price} />
+                <AmountText
+                  amountCents={sub.price}
+                  className="text-lg font-semibold text-zinc-500 dark:text-zinc-500"
+                />
               </Text>
             </View>
             <Text className="mt-2 text-sm text-zinc-400">
