@@ -27,7 +27,7 @@ export default function AmountText({
   return (
     <Text
       className={cn(
-        "text-sm font-semibold",
+        "text-base font-semibold",
         amountCents >= 0
           ? "text-emerald-700 dark:text-emerald-200"
           : "text-rose-800 dark:text-rose-200",

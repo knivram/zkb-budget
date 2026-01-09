@@ -183,7 +183,7 @@ export default function Transactions() {
                 <Text className="text-sm font-semibold text-zinc-600 dark:text-zinc-300">
                   {item.month} {item.year}
                 </Text>
-                <AmountText amountCents={item.sum} />
+                <AmountText amountCents={item.sum} className="text-sm" />
               </View>
             );
           }
