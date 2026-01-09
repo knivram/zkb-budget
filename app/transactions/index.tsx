@@ -1,7 +1,8 @@
 import AmountText from "@/components/AmountText";
 import DomainLogo from "@/components/DomainLogo";
 import { db } from "@/db/client";
-import { Category, transactions, type Transaction } from "@/db/schema";
+import { transactions, type Transaction } from "@/db/schema";
+import { CATEGORIES } from "@/lib/categories";
 import { Host, Image as SwiftImage } from "@expo/ui/swift-ui";
 import { FlashList } from "@shopify/flash-list";
 import { desc } from "drizzle-orm";
@@ -25,60 +26,6 @@ type TransactionItem = {
 };
 
 type ListItem = SectionHeader | TransactionItem;
-
-const CATEGORIES: Record<
-  Category,
-  { label: string; icon: Parameters<typeof SwiftImage>[0]["systemName"] }
-> = {
-  income: {
-    label: "Income",
-    icon: "dollarsign.circle",
-  },
-  transfer: {
-    label: "Transfers",
-    icon: "arrow.left.arrow.right",
-  },
-  housing: {
-    label: "Housing",
-    icon: "house.fill",
-  },
-  food: {
-    label: "Groceries & Food",
-    icon: "cart.fill",
-  },
-  utilities: {
-    label: "Utilities",
-    icon: "bolt.fill",
-  },
-  transport: {
-    label: "Transportation",
-    icon: "car.fill",
-  },
-  healthcare: {
-    label: "Healthcare & Insurance",
-    icon: "cross.case.fill",
-  },
-  dining: {
-    label: "Restaurants & Dining",
-    icon: "fork.knife",
-  },
-  shopping: {
-    label: "Shopping & Retail",
-    icon: "bag.fill",
-  },
-  entertainment: {
-    label: "Entertainment",
-    icon: "tv",
-  },
-  personal_care: {
-    label: "Personal Care & Fitness",
-    icon: "figure.run",
-  },
-  other: {
-    label: "Other",
-    icon: "questionmark.circle",
-  },
-};
 
 const formatDate = (dateStr: string): string => {
   const date = new Date(dateStr);
