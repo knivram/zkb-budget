@@ -1,29 +1,22 @@
-import { Input, Label } from "@/components/ui";
-import { db } from "@/db/client";
-import { BILLING_CYCLES, BillingCycle, subscriptions } from "@/db/schema";
-import { DateTimePicker, Host, Picker } from "@expo/ui/swift-ui";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { eq } from "drizzle-orm";
-import { router, Stack, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
-import { z } from "zod";
+import { Input, Label } from '@/components/ui';
+import { db } from '@/db/client';
+import { BILLING_CYCLES, BillingCycle, subscriptions } from '@/db/schema';
+import { DateTimePicker, Host, Picker } from '@expo/ui/swift-ui';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { eq } from 'drizzle-orm';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from 'react-native';
+import { z } from 'zod';
 
 const subscriptionSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z.string().min(1, 'Name is required'),
   price: z
     .string()
-    .min(1, "Price is required")
+    .min(1, 'Price is required')
     .refine((val) => !isNaN(parseFloat(val)) && parseFloat(val) > 0, {
-      message: "Price must be a valid positive number",
+      message: 'Price must be a valid positive number',
     }),
   billingCycleIndex: z
     .number()
@@ -36,20 +29,18 @@ const subscriptionSchema = z.object({
     .refine(
       (val) =>
         !val ||
-        val.trim() === "" ||
-        /^([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/.test(
-          val.trim(),
-        ),
-      { message: "Please enter a valid domain (e.g., netflix.com)" },
+        val.trim() === '' ||
+        /^([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/.test(val.trim()),
+      { message: 'Please enter a valid domain (e.g., netflix.com)' }
     ),
 });
 
 type SubscriptionFormData = z.infer<typeof subscriptionSchema>;
 
 const billingCycleLabels: Record<BillingCycle, string> = {
-  weekly: "per week",
-  monthly: "per month",
-  yearly: "per year",
+  weekly: 'per week',
+  monthly: 'per month',
+  yearly: 'per year',
 };
 
 export default function AddSubscription() {
@@ -67,13 +58,13 @@ export default function AddSubscription() {
   } = useForm<SubscriptionFormData>({
     resolver: zodResolver(subscriptionSchema),
     defaultValues: {
-      name: "",
-      price: "",
+      name: '',
+      price: '',
       billingCycleIndex: 1, // default to monthly
       subscribedAt: new Date(),
-      domain: "",
+      domain: '',
     },
-    mode: "onChange",
+    mode: 'onChange',
   });
 
   useEffect(() => {
@@ -96,11 +87,11 @@ export default function AddSubscription() {
               price: priceString,
               billingCycleIndex: billingCycleIndex >= 0 ? billingCycleIndex : 1,
               subscribedAt: new Date(sub.subscribedAt),
-              domain: sub.domain ?? "",
+              domain: sub.domain ?? '',
             });
           }
         } catch (error) {
-          console.error("Failed to load subscription:", error);
+          console.error('Failed to load subscription:', error);
         } finally {
           setIsLoading(false);
         }
@@ -110,14 +101,13 @@ export default function AddSubscription() {
     }
   }, [isEditing, subscriptionId, reset]);
 
-  const billingCycleText = BILLING_CYCLES[watch("billingCycleIndex") ?? 1];
+  const billingCycleText = BILLING_CYCLES[watch('billingCycleIndex') ?? 1];
   const billingCycleLabel = billingCycleLabels[billingCycleText];
 
   const onSubmit = async (data: SubscriptionFormData) => {
     try {
-      const [dollars, cents = "00"] = data.price.split(".");
-      const priceInCents =
-        parseInt(dollars) * 100 + parseInt(cents.padEnd(2, "0").slice(0, 2));
+      const [dollars, cents = '00'] = data.price.split('.');
+      const priceInCents = parseInt(dollars) * 100 + parseInt(cents.padEnd(2, '0').slice(0, 2));
 
       const subscriptionData = {
         name: data.name.trim(),
@@ -138,14 +128,14 @@ export default function AddSubscription() {
 
       router.back();
     } catch (error) {
-      console.error("Failed to save subscription:", error);
+      console.error('Failed to save subscription:', error);
     }
   };
 
   if (isLoading) {
     return (
       <>
-        <Stack.Screen options={{ title: "Edit Subscription" }} />
+        <Stack.Screen options={{ title: 'Edit Subscription' }} />
         <View className="flex-1 items-center justify-center bg-white dark:bg-zinc-900">
           <Text className="text-zinc-500">Loading subscription...</Text>
         </View>
@@ -157,27 +147,27 @@ export default function AddSubscription() {
     <>
       <Stack.Screen
         options={{
-          title: isEditing ? "Edit Subscription" : "Add Subscription",
+          title: isEditing ? 'Edit Subscription' : 'Add Subscription',
           unstable_headerRightItems: () => [
             {
-              type: "button",
-              label: "Save",
+              type: 'button',
+              label: 'Save',
               icon: {
-                name: "checkmark",
-                type: "sfSymbol",
+                name: 'checkmark',
+                type: 'sfSymbol',
               },
-              variant: "prominent",
+              variant: 'prominent',
               onPress: handleSubmit(onSubmit),
               disabled: !isValid || isSubmitting,
             },
           ],
           unstable_headerLeftItems: () => [
             {
-              type: "button",
-              label: "Cancel",
+              type: 'button',
+              label: 'Cancel',
               icon: {
-                name: "xmark",
-                type: "sfSymbol",
+                name: 'xmark',
+                type: 'sfSymbol',
               },
               onPress: () => router.back(),
             },
@@ -185,9 +175,9 @@ export default function AddSubscription() {
         }}
       />
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1 bg-white dark:bg-zinc-900"
-        keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
       >
         <ScrollView
           className="flex-1 bg-white dark:bg-zinc-900"
@@ -217,9 +207,7 @@ export default function AddSubscription() {
                       textAlignVertical="center"
                     />
                   </View>
-                  <Text className="mt-1 text-sm leading-5 text-zinc-400">
-                    {billingCycleLabel}
-                  </Text>
+                  <Text className="mt-1 text-sm leading-5 text-zinc-400">{billingCycleLabel}</Text>
                   {errors.price && (
                     <Text className="mt-2 text-xs leading-4 text-red-500">
                       {errors.price.message}
@@ -246,9 +234,7 @@ export default function AddSubscription() {
               )}
             />
             {errors.name && (
-              <Text className="mt-1 text-xs leading-4 text-red-500">
-                {errors.name.message}
-              </Text>
+              <Text className="mt-1 text-xs leading-4 text-red-500">{errors.name.message}</Text>
             )}
           </View>
 
@@ -260,11 +246,9 @@ export default function AddSubscription() {
               render={({ field: { onChange, value } }) => (
                 <Host matchContents>
                   <Picker
-                    options={["Weekly", "Monthly", "Yearly"]}
+                    options={['Weekly', 'Monthly', 'Yearly']}
                     selectedIndex={value ?? 0}
-                    onOptionSelected={({ nativeEvent: { index } }) =>
-                      onChange(index)
-                    }
+                    onOptionSelected={({ nativeEvent: { index } }) => onChange(index)}
                     variant="segmented"
                   />
                 </Host>
@@ -310,9 +294,7 @@ export default function AddSubscription() {
               )}
             />
             {errors.domain && (
-              <Text className="mt-1 text-xs leading-4 text-red-500">
-                {errors.domain.message}
-              </Text>
+              <Text className="mt-1 text-xs leading-4 text-red-500">{errors.domain.message}</Text>
             )}
           </View>
         </ScrollView>

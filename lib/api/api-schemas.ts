@@ -1,6 +1,6 @@
-import { subscriptions, transactions } from "@/db/schema";
-import { createSelectSchema } from "drizzle-zod";
-import { z } from "zod";
+import { subscriptions, transactions } from '@/db/schema';
+import { createSelectSchema } from 'drizzle-zod';
+import { z } from 'zod';
 
 export const transactionSchema = createSelectSchema(transactions, {
   // this is needed, because zod expects a date, but in json it is a string
@@ -12,7 +12,7 @@ export type Transaction = z.infer<typeof transactionSchema>;
 // Request schema for detect-subscriptions endpoint
 export const detectSubscriptionsRequestSchema = z.object({
   transactions: z.array(transactionSchema).min(1, {
-    error: "At least one transaction is required",
+    error: 'At least one transaction is required',
   }),
 });
 
@@ -29,11 +29,9 @@ export type SubscriptionForAI = z.infer<typeof subscriptionForAISchema>;
 // Request schema for enrich-transactions endpoint
 export const enrichTransactionsRequestSchema = z.object({
   transactions: z.array(transactionSchema).min(1, {
-    error: "At least one transaction is required",
+    error: 'At least one transaction is required',
   }),
   subscriptions: z.array(subscriptionForAISchema),
 });
 
-export type EnrichTransactionsRequest = z.infer<
-  typeof enrichTransactionsRequestSchema
->;
+export type EnrichTransactionsRequest = z.infer<typeof enrichTransactionsRequestSchema>;

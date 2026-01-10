@@ -1,12 +1,12 @@
-import { Stack } from "expo-router";
-import { useColorScheme } from "react-native";
+import { Stack } from 'expo-router';
+import { useColorScheme } from 'react-native';
 
 export default function TransactionsLayout() {
   const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = colorScheme === 'dark';
 
-  const headerTintColor = isDark ? "#ffffff" : "#000000";
-  const headerLargeTitleStyle = { color: isDark ? "#ffffff" : "#000000" };
+  const headerTintColor = isDark ? '#ffffff' : '#000000';
+  const headerLargeTitleStyle = { color: isDark ? '#ffffff' : '#000000' };
 
   return (
     <Stack
@@ -18,7 +18,7 @@ export default function TransactionsLayout() {
       <Stack.Screen
         name="index"
         options={{
-          title: "Transactions",
+          title: 'Transactions',
           headerLargeTitleEnabled: true,
           headerTransparent: true,
         }}
@@ -26,8 +26,8 @@ export default function TransactionsLayout() {
       <Stack.Screen
         name="import-transactions"
         options={{
-          presentation: "modal",
-          title: "Import Transactions",
+          presentation: 'modal',
+          title: 'Import Transactions',
           headerLargeTitleEnabled: false,
           headerTransparent: true,
         }}

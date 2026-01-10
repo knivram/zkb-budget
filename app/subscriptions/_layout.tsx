@@ -1,12 +1,12 @@
-import { router, Stack } from "expo-router";
-import { useColorScheme } from "react-native";
+import { router, Stack } from 'expo-router';
+import { useColorScheme } from 'react-native';
 
 export default function SubscriptionLayout() {
   const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = colorScheme === 'dark';
 
-  const headerTintColor = isDark ? "#ffffff" : "#000000";
-  const headerLargeTitleStyle = { color: isDark ? "#ffffff" : "#000000" };
+  const headerTintColor = isDark ? '#ffffff' : '#000000';
+  const headerLargeTitleStyle = { color: isDark ? '#ffffff' : '#000000' };
 
   return (
     <Stack
@@ -18,19 +18,19 @@ export default function SubscriptionLayout() {
       <Stack.Screen
         name="index"
         options={{
-          title: "Subscriptions",
+          title: 'Subscriptions',
           headerLargeTitleEnabled: true,
           headerTransparent: true,
           unstable_headerRightItems: () => [
             {
-              type: "button",
-              label: "Add",
+              type: 'button',
+              label: 'Add',
               icon: {
-                name: "plus",
-                type: "sfSymbol",
+                name: 'plus',
+                type: 'sfSymbol',
               },
-              variant: "prominent",
-              onPress: () => router.push("/subscriptions/add-subscription"),
+              variant: 'prominent',
+              onPress: () => router.push('/subscriptions/add-subscription'),
             },
           ],
         }}
@@ -38,8 +38,8 @@ export default function SubscriptionLayout() {
       <Stack.Screen
         name="add-subscription"
         options={{
-          presentation: "modal",
-          title: "Add Subscription",
+          presentation: 'modal',
+          title: 'Add Subscription',
           headerLargeTitleEnabled: false,
           headerTransparent: true,
         }}
@@ -47,7 +47,7 @@ export default function SubscriptionLayout() {
       <Stack.Screen
         name="[id]"
         options={{
-          title: "Subscription",
+          title: 'Subscription',
           headerLargeTitleEnabled: false,
           headerTransparent: true,
         }}
@@ -55,8 +55,8 @@ export default function SubscriptionLayout() {
       <Stack.Screen
         name="review-detected"
         options={{
-          presentation: "modal",
-          title: "Review Subscriptions",
+          presentation: 'modal',
+          title: 'Review Subscriptions',
           headerLargeTitleEnabled: false,
           headerTransparent: true,
         }}

@@ -1,17 +1,17 @@
-import AmountText from "@/components/AmountText";
-import DomainLogo from "@/components/DomainLogo";
-import { db } from "@/db/client";
-import { subscriptions, transactions } from "@/db/schema";
-import { eq } from "drizzle-orm";
-import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { useLocalSearchParams } from "expo-router";
-import { FlatList, Text, View } from "react-native";
+import AmountText from '@/components/AmountText';
+import DomainLogo from '@/components/DomainLogo';
+import { db } from '@/db/client';
+import { subscriptions, transactions } from '@/db/schema';
+import { eq } from 'drizzle-orm';
+import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
+import { useLocalSearchParams } from 'expo-router';
+import { FlatList, Text, View } from 'react-native';
 
 const formatDate = (date: Date): string => {
-  return date.toLocaleDateString("de-CH", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
+  return date.toLocaleDateString('de-CH', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
   });
 };
 
@@ -20,18 +20,11 @@ export default function SubscriptionDetail() {
   const subscriptionId = parseInt(id, 10);
 
   const { data: subscription } = useLiveQuery(
-    db
-      .select()
-      .from(subscriptions)
-      .where(eq(subscriptions.id, subscriptionId))
-      .limit(1),
+    db.select().from(subscriptions).where(eq(subscriptions.id, subscriptionId)).limit(1)
   );
 
   const { data: relatedTransactions } = useLiveQuery(
-    db
-      .select()
-      .from(transactions)
-      .where(eq(transactions.subscriptionId, subscriptionId)),
+    db.select().from(transactions).where(eq(transactions.subscriptionId, subscriptionId))
   );
 
   const sub = subscription?.[0];
@@ -54,25 +47,19 @@ export default function SubscriptionDetail() {
         <View>
           <View className="items-center border-b border-zinc-100 px-4 py-6 dark:border-zinc-800">
             <DomainLogo domain={sub.domain} name={sub.name} size={80} />
-            <Text className="text-2xl font-semibold text-zinc-900 dark:text-white">
-              {sub.name}
-            </Text>
+            <Text className="text-2xl font-semibold text-zinc-900 dark:text-white">{sub.name}</Text>
             <View className="mt-1 flex-row items-center">
               <Text className="text-lg text-zinc-500">
                 <Text className="capitalize">{sub.billingCycle}</Text>
-                {" \u2022 "}
+                {' \u2022 '}
                 <AmountText
                   amountCents={sub.price}
                   className="text-lg font-semibold text-zinc-500 dark:text-zinc-500"
                 />
               </Text>
             </View>
-            <Text className="mt-2 text-sm text-zinc-400">
-              Since {formatDate(sub.subscribedAt)}
-            </Text>
-            {sub.domain && (
-              <Text className="mt-1 text-sm text-blue-500">{sub.domain}</Text>
-            )}
+            <Text className="mt-2 text-sm text-zinc-400">Since {formatDate(sub.subscribedAt)}</Text>
+            {sub.domain && <Text className="mt-1 text-sm text-blue-500">{sub.domain}</Text>}
           </View>
 
           <View className="border-b border-zinc-100 bg-zinc-50 px-4 py-2 dark:border-zinc-800 dark:bg-zinc-800/50">

@@ -1,4 +1,4 @@
-import { Image as SwiftImage } from "@expo/ui/swift-ui";
+import { Image as SwiftImage } from '@expo/ui/swift-ui';
 
 type BaseProps = {
   domain?: string | null;
@@ -10,7 +10,7 @@ export type DomainLogoProps = BaseProps &
   (
     | {
         /** SF Symbol to show when no domain logo is available */
-        fallbackIcon: Parameters<typeof SwiftImage>[0]["systemName"];
+        fallbackIcon: Parameters<typeof SwiftImage>[0]['systemName'];
         name?: never;
       }
     | {

@@ -1,24 +1,22 @@
-import DomainLogo from "@/components/DomainLogo";
-import SpendingByCategory, {
-  CategoryItem,
-} from "@/components/SpendingByCategory";
-import { db } from "@/db/client";
-import { Category, transactions } from "@/db/schema";
-import { Button, Host } from "@expo/ui/swift-ui";
-import { scaleEffect } from "@expo/ui/swift-ui/modifiers";
-import { sql } from "drizzle-orm";
-import { TrendingDown, TrendingUp } from "lucide-react-native";
-import { useEffect, useMemo, useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import DomainLogo from '@/components/DomainLogo';
+import SpendingByCategory, { CategoryItem } from '@/components/SpendingByCategory';
+import { db } from '@/db/client';
+import { Category, transactions } from '@/db/schema';
+import { Button, Host } from '@expo/ui/swift-ui';
+import { scaleEffect } from '@expo/ui/swift-ui/modifiers';
+import { sql } from 'drizzle-orm';
+import { TrendingDown, TrendingUp } from 'lucide-react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { ScrollView, Text, View } from 'react-native';
 
 const formatMonthFull = (monthStr: string): string => {
-  const [year, month] = monthStr.split("-");
+  const [year, month] = monthStr.split('-');
   const date = new Date(parseInt(year), parseInt(month) - 1);
-  return date.toLocaleDateString("de-CH", { month: "long", year: "numeric" });
+  return date.toLocaleDateString('de-CH', { month: 'long', year: 'numeric' });
 };
 
 const formatAmount = (amountCents: number): string => {
-  return (amountCents / 100).toLocaleString("de-CH", {
+  return (amountCents / 100).toLocaleString('de-CH', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   });
@@ -28,35 +26,31 @@ export default function Analytics() {
   // Current month (for limiting forward navigation)
   const currentMonth = useMemo(() => {
     const date = new Date();
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
   }, []);
 
   // Default to previous month (more likely to have complete data)
   const defaultMonth = useMemo(() => {
     const date = new Date();
     date.setMonth(date.getMonth() - 1);
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
   }, []);
 
   const [selectedMonth, setSelectedMonth] = useState(defaultMonth);
 
   // Calculate previous month for comparison
   const previousMonth = useMemo(() => {
-    const [year, month] = selectedMonth.split("-").map(Number);
+    const [year, month] = selectedMonth.split('-').map(Number);
     const date = new Date(year, month - 2);
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
   }, [selectedMonth]);
 
   // TODO: #33 use useQuery to fetch data again
   const [selectedMonthData, setSelectedMonthData] = useState<
     { income: number; expenses: number }[]
   >([]);
-  const [previousMonthData, setPreviousMonthData] = useState<
-    { expenses: number }[]
-  >([]);
-  const [categoryData, setCategoryData] = useState<
-    { category: Category; total: number }[]
-  >([]);
+  const [previousMonthData, setPreviousMonthData] = useState<{ expenses: number }[]>([]);
+  const [categoryData, setCategoryData] = useState<{ category: Category; total: number }[]>([]);
   const [merchantData, setMerchantData] = useState<
     {
       displayName: string | null;
@@ -74,11 +68,11 @@ export default function Analytics() {
         .select({
           income:
             sql<number>`SUM(CASE WHEN ${transactions.creditDebitIndicator} = 'credit' THEN ${transactions.amount} ELSE 0 END)`.as(
-              "income",
+              'income'
             ),
           expenses:
             sql<number>`SUM(CASE WHEN ${transactions.creditDebitIndicator} = 'debit' THEN ${transactions.amount} ELSE 0 END)`.as(
-              "expenses",
+              'expenses'
             ),
         })
         .from(transactions)
@@ -96,7 +90,7 @@ export default function Analytics() {
         .select({
           expenses:
             sql<number>`SUM(CASE WHEN ${transactions.creditDebitIndicator} = 'debit' THEN ${transactions.amount} ELSE 0 END)`.as(
-              "expenses",
+              'expenses'
             ),
         })
         .from(transactions)
@@ -113,11 +107,11 @@ export default function Analytics() {
       const result = await db
         .select({
           category: transactions.category,
-          total: sql<number>`SUM(${transactions.amount})`.as("total"),
+          total: sql<number>`SUM(${transactions.amount})`.as('total'),
         })
         .from(transactions)
         .where(
-          sql`strftime('%Y-%m', ${transactions.date}) = ${selectedMonth} AND ${transactions.creditDebitIndicator} = 'debit'`,
+          sql`strftime('%Y-%m', ${transactions.date}) = ${selectedMonth} AND ${transactions.creditDebitIndicator} = 'debit'`
         )
         .groupBy(transactions.category)
         .orderBy(sql`SUM(${transactions.amount}) DESC`);
@@ -134,12 +128,12 @@ export default function Analytics() {
         .select({
           displayName: transactions.displayName,
           domain: transactions.domain,
-          total: sql<number>`SUM(${transactions.amount})`.as("total"),
-          count: sql<number>`COUNT(*)`.as("count"),
+          total: sql<number>`SUM(${transactions.amount})`.as('total'),
+          count: sql<number>`COUNT(*)`.as('count'),
         })
         .from(transactions)
         .where(
-          sql`strftime('%Y-%m', ${transactions.date}) = ${selectedMonth} AND ${transactions.creditDebitIndicator} = 'debit' AND ${transactions.displayName} IS NOT NULL`,
+          sql`strftime('%Y-%m', ${transactions.date}) = ${selectedMonth} AND ${transactions.creditDebitIndicator} = 'debit' AND ${transactions.displayName} IS NOT NULL`
         )
         .groupBy(transactions.displayName, transactions.domain)
         .orderBy(sql`SUM(${transactions.amount}) DESC`)
@@ -156,8 +150,7 @@ export default function Analytics() {
   // Calculate month-over-month change
   const expenseChange = useMemo(() => {
     if (prevMonthExpenses === 0) return null;
-    const change =
-      ((monthExpenses - prevMonthExpenses) / prevMonthExpenses) * 100;
+    const change = ((monthExpenses - prevMonthExpenses) / prevMonthExpenses) * 100;
     return Math.round(change);
   }, [monthExpenses, prevMonthExpenses]);
 
@@ -166,26 +159,22 @@ export default function Analytics() {
     if (categoryData.length === 0) return [];
 
     return categoryData.filter(
-      (item) => item.category !== "income" && item.category !== "transfer",
+      (item) => item.category !== 'income' && item.category !== 'transfer'
     );
   }, [categoryData]);
 
   const handlePreviousMonth = () => {
-    const [year, month] = selectedMonth.split("-").map(Number);
+    const [year, month] = selectedMonth.split('-').map(Number);
     const date = new Date(year, month - 1);
     date.setMonth(date.getMonth() - 1);
-    setSelectedMonth(
-      `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`,
-    );
+    setSelectedMonth(`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`);
   };
 
   const handleNextMonth = () => {
-    const [year, month] = selectedMonth.split("-").map(Number);
+    const [year, month] = selectedMonth.split('-').map(Number);
     const date = new Date(year, month - 1);
     date.setMonth(date.getMonth() + 1);
-    setSelectedMonth(
-      `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`,
-    );
+    setSelectedMonth(`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`);
   };
 
   const isCurrentMonth = selectedMonth === currentMonth;
@@ -221,17 +210,13 @@ export default function Analytics() {
 
         <View className="mb-4 flex-row justify-between">
           <View className="mr-2 flex-1 rounded-xl bg-emerald-50 p-4 dark:bg-emerald-900/30">
-            <Text className="text-sm text-emerald-600 dark:text-emerald-400">
-              Income
-            </Text>
+            <Text className="text-sm text-emerald-600 dark:text-emerald-400">Income</Text>
             <Text className="text-xl font-bold text-emerald-700 dark:text-emerald-200">
               CHF {formatAmount(monthIncome)}
             </Text>
           </View>
           <View className="ml-2 flex-1 rounded-xl bg-rose-50 p-4 dark:bg-rose-900/30">
-            <Text className="text-sm text-rose-600 dark:text-rose-400">
-              Expenses
-            </Text>
+            <Text className="text-sm text-rose-600 dark:text-rose-400">Expenses</Text>
             <Text className="text-xl font-bold text-rose-700 dark:text-rose-200">
               CHF {formatAmount(monthExpenses)}
             </Text>
@@ -248,15 +233,15 @@ export default function Analytics() {
             <Text
               className={`ml-2 text-sm font-medium ${
                 expenseChange > 0
-                  ? "text-rose-600 dark:text-rose-400"
+                  ? 'text-rose-600 dark:text-rose-400'
                   : expenseChange < 0
-                    ? "text-emerald-600 dark:text-emerald-400"
-                    : "text-zinc-600 dark:text-zinc-400"
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : 'text-zinc-600 dark:text-zinc-400'
               }`}
             >
               {expenseChange === 0
-                ? "Same as last month"
-                : `${Math.abs(expenseChange)}% ${expenseChange > 0 ? "more" : "less"} than last month`}
+                ? 'Same as last month'
+                : `${Math.abs(expenseChange)}% ${expenseChange > 0 ? 'more' : 'less'} than last month`}
             </Text>
           </View>
         )}
@@ -285,11 +270,11 @@ export default function Analytics() {
               {merchantData.map((merchant, index) => (
                 <View
                   key={merchant.displayName ?? index}
-                  className={`flex-row items-center ${index < merchantData.length - 1 ? "mb-3 border-b border-zinc-200 pb-3 dark:border-zinc-700" : ""}`}
+                  className={`flex-row items-center ${index < merchantData.length - 1 ? 'mb-3 border-b border-zinc-200 pb-3 dark:border-zinc-700' : ''}`}
                 >
                   <DomainLogo
                     domain={merchant.domain ?? undefined}
-                    name={merchant.displayName ?? ""}
+                    name={merchant.displayName ?? ''}
                     size={40}
                   />
                   <View className="ml-3 flex-1">
@@ -301,7 +286,7 @@ export default function Analytics() {
                     </Text>
                     <Text className="text-xs text-zinc-500">
                       {merchant.count} transaction
-                      {(merchant.count ?? 0) !== 1 ? "s" : ""}
+                      {(merchant.count ?? 0) !== 1 ? 's' : ''}
                     </Text>
                   </View>
                   <Text className="text-sm font-semibold text-zinc-900 dark:text-white">

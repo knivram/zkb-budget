@@ -1,13 +1,13 @@
-import AmountText from "@/components/AmountText";
-import DomainLogo from "@/components/DomainLogo";
-import { db } from "@/db/client";
-import { subscriptions, transactions } from "@/db/schema";
-import { DetectedSubscription } from "@/lib/api/ai-schemas";
-import { cn } from "@/lib/utils";
-import { inArray } from "drizzle-orm";
-import { router, Stack, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
-import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import AmountText from '@/components/AmountText';
+import DomainLogo from '@/components/DomainLogo';
+import { db } from '@/db/client';
+import { subscriptions, transactions } from '@/db/schema';
+import { DetectedSubscription } from '@/lib/api/ai-schemas';
+import { cn } from '@/lib/utils';
+import { inArray } from 'drizzle-orm';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
+import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 const HIGH_CONFIDENCE_THRESHOLD = 0.8;
 const MEDIUM_CONFIDENCE_THRESHOLD = 0.6;
@@ -15,11 +15,11 @@ const MEDIUM_CONFIDENCE_THRESHOLD = 0.6;
 export default function ReviewDetectedSubscriptions() {
   const params = useLocalSearchParams();
   const detectedSubscriptions: DetectedSubscription[] = JSON.parse(
-    params.detectedSubscriptions as string,
+    params.detectedSubscriptions as string
   );
 
   const [selectedIds, setSelectedIds] = useState<Set<number>>(
-    new Set(detectedSubscriptions.map((_, i) => i)),
+    new Set(detectedSubscriptions.map((_, i) => i))
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -38,9 +38,7 @@ export default function ReviewDetectedSubscriptions() {
   const handleConfirm = async () => {
     setIsSubmitting(true);
     try {
-      const selected = detectedSubscriptions.filter((_, i) =>
-        selectedIds.has(i),
-      );
+      const selected = detectedSubscriptions.filter((_, i) => selectedIds.has(i));
 
       if (selected.length === 0) {
         router.back();
@@ -71,25 +69,25 @@ export default function ReviewDetectedSubscriptions() {
         }
       });
 
-      router.dismissTo("/subscriptions");
+      router.dismissTo('/subscriptions');
     } catch (error) {
-      console.error("Failed to add subscriptions:", error);
-      Alert.alert("Error", "Failed to add subscriptions.");
+      console.error('Failed to add subscriptions:', error);
+      Alert.alert('Error', 'Failed to add subscriptions.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const getConfidenceColor = (confidence: number): string => {
-    if (confidence >= HIGH_CONFIDENCE_THRESHOLD) return "bg-green-500";
-    if (confidence >= MEDIUM_CONFIDENCE_THRESHOLD) return "bg-yellow-500";
-    return "bg-orange-500";
+    if (confidence >= HIGH_CONFIDENCE_THRESHOLD) return 'bg-green-500';
+    if (confidence >= MEDIUM_CONFIDENCE_THRESHOLD) return 'bg-yellow-500';
+    return 'bg-orange-500';
   };
 
   const getConfidenceBadgeText = (confidence: number): string => {
-    if (confidence >= HIGH_CONFIDENCE_THRESHOLD) return "High";
-    if (confidence >= MEDIUM_CONFIDENCE_THRESHOLD) return "Medium";
-    return "Low";
+    if (confidence >= HIGH_CONFIDENCE_THRESHOLD) return 'High';
+    if (confidence >= MEDIUM_CONFIDENCE_THRESHOLD) return 'Medium';
+    return 'Low';
   };
 
   return (
@@ -98,24 +96,24 @@ export default function ReviewDetectedSubscriptions() {
         options={{
           unstable_headerRightItems: () => [
             {
-              type: "button",
-              label: "Save",
+              type: 'button',
+              label: 'Save',
               icon: {
-                name: "checkmark",
-                type: "sfSymbol",
+                name: 'checkmark',
+                type: 'sfSymbol',
               },
-              variant: "prominent",
+              variant: 'prominent',
               onPress: handleConfirm,
               disabled: isSubmitting,
             },
           ],
           unstable_headerLeftItems: () => [
             {
-              type: "button",
-              label: "Cancel",
+              type: 'button',
+              label: 'Cancel',
               icon: {
-                name: "xmark",
-                type: "sfSymbol",
+                name: 'xmark',
+                type: 'sfSymbol',
               },
               onPress: () => router.back(),
             },
@@ -128,8 +126,7 @@ export default function ReviewDetectedSubscriptions() {
       >
         <View className="p-4">
           <Text className="mb-2 text-sm text-zinc-600 dark:text-zinc-400">
-            Review these detected subscriptions and select which ones to add to
-            your account.
+            Review these detected subscriptions and select which ones to add to your account.
           </Text>
           <View className="mt-4 flex-col gap-2">
             {detectedSubscriptions.map((sub, index) => (
@@ -138,18 +135,13 @@ export default function ReviewDetectedSubscriptions() {
                 onPress={() => toggleSelection(index)}
                 className={`rounded-xl border-2 p-4 ${
                   selectedIds.has(index)
-                    ? "border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-950"
-                    : "border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-800"
+                    ? 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-950'
+                    : 'border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-800'
                 }`}
               >
                 <View className="flex-row items-start justify-between">
-                  <View className="flex-row flex-1">
-                    <DomainLogo
-                      domain={sub.domain}
-                      name={sub.name}
-                      size={40}
-                      className="mr-3"
-                    />
+                  <View className="flex-1 flex-row">
+                    <DomainLogo domain={sub.domain} name={sub.name} size={40} className="mr-3" />
                     <View className="flex-1">
                       <View className="mb-2 flex-row items-center gap-2">
                         <Text className="text-lg font-semibold text-zinc-900 dark:text-white">
@@ -170,7 +162,7 @@ export default function ReviewDetectedSubscriptions() {
                           className="text-base font-medium text-zinc-700 dark:text-zinc-300"
                         />
                         <Text className="text-base font-medium text-zinc-700 dark:text-zinc-300">
-                          {" \u2022 "}
+                          {' \u2022 '}
                           <Text className="capitalize">{sub.billingCycle}</Text>
                         </Text>
                       </View>
@@ -188,10 +180,10 @@ export default function ReviewDetectedSubscriptions() {
                   </View>
                   <View
                     className={cn(
-                      "ml-3 h-6 w-6 items-center justify-center rounded-full border-2",
+                      'ml-3 h-6 w-6 items-center justify-center rounded-full border-2',
                       selectedIds.has(index)
-                        ? "border-blue-500 bg-blue-500"
-                        : "border-zinc-300 bg-white dark:border-zinc-600 dark:bg-zinc-700",
+                        ? 'border-blue-500 bg-blue-500'
+                        : 'border-zinc-300 bg-white dark:border-zinc-600 dark:bg-zinc-700'
                     )}
                   >
                     {selectedIds.has(index) && (

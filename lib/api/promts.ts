@@ -1,4 +1,4 @@
-import { Category } from "@/db/schema";
+import { Category } from '@/db/schema';
 
 const subscriptionDetectionSystemPrompt = `you are a financial transaction analyzer specialized in detecting recurring subscription payments from bank transaction data.
 
@@ -44,28 +44,20 @@ export const SUBSCRIPTION_DETECTION = {
 };
 
 const CATEGORY_DESCRIPTIONS: Record<Category, string> = {
-  income:
-    "Salary, wages, freelance income, bonuses, tax returns, gifts received, refunds",
-  transfer: "Transfers between own accounts, moving money to savings",
-  housing:
-    "Rent, mortgage payments, property tax, home insurance, HOA fees, home repairs",
-  food: "Supermarkets, grocery stores, food shopping (Migros, Coop, Lidl, Aldi)",
-  utilities:
-    "Electricity, water, gas, heating, internet, mobile phone, landline",
+  income: 'Salary, wages, freelance income, bonuses, tax returns, gifts received, refunds',
+  transfer: 'Transfers between own accounts, moving money to savings',
+  housing: 'Rent, mortgage payments, property tax, home insurance, HOA fees, home repairs',
+  food: 'Supermarkets, grocery stores, food shopping (Migros, Coop, Lidl, Aldi)',
+  utilities: 'Electricity, water, gas, heating, internet, mobile phone, landline',
   transport:
-    "Fuel, gas stations, public transport, car payments, car insurance, parking, tolls, repairs",
-  healthcare:
-    "Doctor visits, pharmacy, health insurance, medications, dental, optical care",
-  dining:
-    "Restaurants, cafes, bars, food delivery, takeout (McDonald's, Uber Eats, Starbucks)",
-  shopping:
-    "Clothing, electronics, home goods, furniture, books (Amazon, H&M, IKEA, Target)",
+    'Fuel, gas stations, public transport, car payments, car insurance, parking, tolls, repairs',
+  healthcare: 'Doctor visits, pharmacy, health insurance, medications, dental, optical care',
+  dining: "Restaurants, cafes, bars, food delivery, takeout (McDonald's, Uber Eats, Starbucks)",
+  shopping: 'Clothing, electronics, home goods, furniture, books (Amazon, H&M, IKEA, Target)',
   entertainment:
-    "Streaming services, movies, concerts, games, hobbies, sports events (Netflix, Spotify, Cinema)",
-  personal_care:
-    "Gym memberships, haircuts, beauty salons, cosmetics, spa, sports equipment",
-  other:
-    "Transactions that don't clearly fit any category or need manual review",
+    'Streaming services, movies, concerts, games, hobbies, sports events (Netflix, Spotify, Cinema)',
+  personal_care: 'Gym memberships, haircuts, beauty salons, cosmetics, spa, sports equipment',
+  other: "Transactions that don't clearly fit any category or need manual review",
 };
 
 const transactionEnrichmentSystemPrompt = `You are a financial transaction enrichment agent. Your task is to analyze transaction data and enrich each transaction with category, display name, domain, and subscription matching.
@@ -85,7 +77,7 @@ The exact id from the input transaction. Do NOT modify or generate new IDs.
 Classify into ONE of these categories based on the transaction details:
 ${Object.entries(CATEGORY_DESCRIPTIONS)
   .map(([category, description]) => `- ${category}: ${description}`)
-  .join("\n")}
+  .join('\n')}
 
 ### displayName (required)
 Create a clean, human-readable merchant/payee name:
