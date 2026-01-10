@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+.expo/
+android/
+ios/
+web-build/
+
+# Generated files
+drizzle/
+*.lock
+bun.lock
+
+# Environment files
+.env*

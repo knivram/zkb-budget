@@ -1,19 +1,19 @@
-import AmountText from "@/components/AmountText";
-import DomainLogo from "@/components/DomainLogo";
-import { db } from "@/db/client";
-import { transactions, type Transaction } from "@/db/schema";
-import { CATEGORIES } from "@/lib/categories";
-import { Host, Image as SwiftImage } from "@expo/ui/swift-ui";
-import { FlashList } from "@shopify/flash-list";
-import { desc } from "drizzle-orm";
-import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { Stack } from "expo-router";
-import { useMemo, useState } from "react";
-import { Text, View } from "react-native";
-import ImportTransactions from "./import-transactions";
+import AmountText from '@/components/AmountText';
+import DomainLogo from '@/components/DomainLogo';
+import { db } from '@/db/client';
+import { transactions, type Transaction } from '@/db/schema';
+import { CATEGORIES } from '@/lib/categories';
+import { Host, Image as SwiftImage } from '@expo/ui/swift-ui';
+import { FlashList } from '@shopify/flash-list';
+import { desc } from 'drizzle-orm';
+import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
+import { Stack } from 'expo-router';
+import { useMemo, useState } from 'react';
+import { Text, View } from 'react-native';
+import ImportTransactions from './import-transactions';
 
 type SectionHeader = {
-  type: "header";
+  type: 'header';
   month: string;
   year: number;
   key: string;
@@ -21,7 +21,7 @@ type SectionHeader = {
 };
 
 type TransactionItem = {
-  type: "transaction";
+  type: 'transaction';
   data: Transaction;
 };
 
@@ -29,32 +29,28 @@ type ListItem = SectionHeader | TransactionItem;
 
 const formatDate = (dateStr: string): string => {
   const date = new Date(dateStr);
-  return date.toLocaleDateString("de-CH", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
+  return date.toLocaleDateString('de-CH', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
   });
 };
 
-const formatMonthHeader = (
-  dateStr: string,
-): { month: string; year: number } => {
+const formatMonthHeader = (dateStr: string): { month: string; year: number } => {
   const date = new Date(dateStr);
-  const month = date.toLocaleDateString("de-CH", { month: "long" });
+  const month = date.toLocaleDateString('de-CH', { month: 'long' });
   const year = date.getFullYear();
   return { month, year };
 };
 
 const getMonthKey = (dateStr: string): string => {
   const date = new Date(dateStr);
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 };
 
-const groupTransactionsByMonth = (
-  transactionsList: Transaction[],
-): { items: ListItem[] } => {
+const groupTransactionsByMonth = (transactionsList: Transaction[]): { items: ListItem[] } => {
   const items: ListItem[] = [];
-  let currentMonthKey = "";
+  let currentMonthKey = '';
   let currentMonthIndex = 0;
 
   for (const transaction of transactionsList) {
@@ -63,7 +59,7 @@ const groupTransactionsByMonth = (
     if (monthKey !== currentMonthKey) {
       const { month, year } = formatMonthHeader(transaction.date);
       const newLength = items.push({
-        type: "header",
+        type: 'header',
         month,
         year,
         key: monthKey,
@@ -74,14 +70,12 @@ const groupTransactionsByMonth = (
     }
 
     items.push({
-      type: "transaction",
+      type: 'transaction',
       data: transaction,
     });
     items[currentMonthIndex] = {
       ...items[currentMonthIndex],
-      sum:
-        (items[currentMonthIndex] as SectionHeader).sum +
-        transaction.signedAmount,
+      sum: (items[currentMonthIndex] as SectionHeader).sum + transaction.signedAmount,
     } as SectionHeader;
   }
 
@@ -91,9 +85,7 @@ const groupTransactionsByMonth = (
 export default function Transactions() {
   const [isImportOpen, setIsImportOpen] = useState(false);
 
-  const { data } = useLiveQuery(
-    db.select().from(transactions).orderBy(desc(transactions.date)),
-  );
+  const { data } = useLiveQuery(db.select().from(transactions).orderBy(desc(transactions.date)));
 
   const { items } = useMemo(() => groupTransactionsByMonth(data ?? []), [data]);
 
@@ -103,13 +95,13 @@ export default function Transactions() {
         options={{
           unstable_headerRightItems: () => [
             {
-              type: "button",
-              label: "Import",
+              type: 'button',
+              label: 'Import',
               icon: {
-                name: "square.and.arrow.down",
-                type: "sfSymbol",
+                name: 'square.and.arrow.down',
+                type: 'sfSymbol',
               },
-              variant: "prominent",
+              variant: 'prominent',
               onPress: () => setIsImportOpen(true),
             },
           ],
@@ -119,12 +111,10 @@ export default function Transactions() {
         className="flex-1 bg-white dark:bg-zinc-900"
         contentInsetAdjustmentBehavior="automatic"
         data={items}
-        keyExtractor={(item) =>
-          item.type === "header" ? item.key : item.data.id
-        }
+        keyExtractor={(item) => (item.type === 'header' ? item.key : item.data.id)}
         getItemType={(item) => item.type}
         renderItem={({ item }) => {
-          if (item.type === "header") {
+          if (item.type === 'header') {
             return (
               <View className="flex-row justify-between border-b border-zinc-200 bg-zinc-50 px-4 py-2 dark:border-zinc-700 dark:bg-zinc-800">
                 <Text className="text-sm font-semibold text-zinc-600 dark:text-zinc-300">
@@ -136,8 +126,7 @@ export default function Transactions() {
           }
 
           const transaction = item.data;
-          const name =
-            transaction.displayName ?? transaction.transactionAdditionalDetails;
+          const name = transaction.displayName ?? transaction.transactionAdditionalDetails;
           const categoryConfig = CATEGORIES[transaction.category];
 
           return (
@@ -156,9 +145,7 @@ export default function Transactions() {
                 >
                   {name}
                 </Text>
-                <Text className="text-sm text-zinc-500">
-                  {formatDate(transaction.date)}
-                </Text>
+                <Text className="text-sm text-zinc-500">{formatDate(transaction.date)}</Text>
 
                 <View className="mt-1 flex-row flex-wrap gap-1">
                   <View className="flex-row items-center rounded-md bg-zinc-100 px-2 py-0.5 dark:bg-zinc-800">
@@ -172,9 +159,7 @@ export default function Transactions() {
 
                   {transaction.subscriptionId && (
                     <View className="flex-row items-center rounded-md bg-blue-50 px-2 py-0.5 dark:bg-blue-900/30">
-                      <Text className="text-xs text-blue-600 dark:text-blue-400">
-                        Subscription
-                      </Text>
+                      <Text className="text-xs text-blue-600 dark:text-blue-400">Subscription</Text>
                     </View>
                   )}
                 </View>
@@ -195,10 +180,7 @@ export default function Transactions() {
           </View>
         }
       />
-      <ImportTransactions
-        isOpen={isImportOpen}
-        onOpenChange={setIsImportOpen}
-      />
+      <ImportTransactions isOpen={isImportOpen} onOpenChange={setIsImportOpen} />
     </>
   );
 }

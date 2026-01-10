@@ -1,9 +1,9 @@
-import { getLogoUri } from "@/lib/logo-cache";
-import { cn } from "@/lib/utils";
-import { Host, Image as SwiftImage } from "@expo/ui/swift-ui";
-import { useEffect, useState } from "react";
-import { Image, Text, View } from "react-native";
-import { DomainLogoProps } from "./DomainLogo";
+import { getLogoUri } from '@/lib/logo-cache';
+import { cn } from '@/lib/utils';
+import { Host, Image as SwiftImage } from '@expo/ui/swift-ui';
+import { useEffect, useState } from 'react';
+import { Image, Text, View } from 'react-native';
+import { DomainLogoProps } from './DomainLogo';
 
 export default function DomainLogo({
   domain,
@@ -44,29 +44,21 @@ export default function DomainLogo({
         </Host>
       );
     }
-    const fallbackLetter = name?.trim().charAt(0).toUpperCase() || "?";
-    return (
-      <Text className="text-lg text-zinc-400 dark:text-zinc-500">
-        {fallbackLetter}
-      </Text>
-    );
+    const fallbackLetter = name?.trim().charAt(0).toUpperCase() || '?';
+    return <Text className="text-lg text-zinc-400 dark:text-zinc-500">{fallbackLetter}</Text>;
   };
 
   return (
     <View
       className={cn(
-        "items-center justify-center overflow-hidden rounded-xl ",
-        !logoUri ? "bg-zinc-100 dark:bg-zinc-800" : "bg-white",
-        className,
+        'items-center justify-center overflow-hidden rounded-xl ',
+        !logoUri ? 'bg-zinc-100 dark:bg-zinc-800' : 'bg-white',
+        className
       )}
       style={dimensionStyle}
     >
       {logoUri ? (
-        <Image
-          source={{ uri: logoUri }}
-          style={dimensionStyle}
-          resizeMode="cover"
-        />
+        <Image source={{ uri: logoUri }} style={dimensionStyle} resizeMode="cover" />
       ) : (
         renderFallback()
       )}

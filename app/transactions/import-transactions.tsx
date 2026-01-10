@@ -1,8 +1,8 @@
-import { db } from "@/db/client";
-import { subscriptions, transactions } from "@/db/schema";
-import { EnrichedTransaction } from "@/lib/api/ai-schemas";
-import { API_URL } from "@/lib/config";
-import { parseXMLTransactions } from "@/lib/xml-parser";
+import { db } from '@/db/client';
+import { subscriptions, transactions } from '@/db/schema';
+import { EnrichedTransaction } from '@/lib/api/ai-schemas';
+import { API_URL } from '@/lib/config';
+import { parseXMLTransactions } from '@/lib/xml-parser';
 import {
   BottomSheet,
   Button,
@@ -11,30 +11,27 @@ import {
   Spacer,
   Text as SwiftText,
   VStack,
-} from "@expo/ui/swift-ui";
-import { frame, padding } from "@expo/ui/swift-ui/modifiers";
-import { eq } from "drizzle-orm";
-import * as DocumentPicker from "expo-document-picker";
-import { File } from "expo-file-system";
-import { useState } from "react";
-import { Alert } from "react-native";
+} from '@expo/ui/swift-ui';
+import { frame, padding } from '@expo/ui/swift-ui/modifiers';
+import { eq } from 'drizzle-orm';
+import * as DocumentPicker from 'expo-document-picker';
+import { File } from 'expo-file-system';
+import { useState } from 'react';
+import { Alert } from 'react-native';
 
 interface ImportTransactionsProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
 }
 
-export default function ImportTransactions({
-  isOpen,
-  onOpenChange,
-}: ImportTransactionsProps) {
+export default function ImportTransactions({ isOpen, onOpenChange }: ImportTransactionsProps) {
   const [isImporting, setIsImporting] = useState(false);
-  const [loadingMessage, setLoadingMessage] = useState("Importing...");
+  const [loadingMessage, setLoadingMessage] = useState('Importing...');
 
   const handleImport = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
-        type: ["text/xml", "application/xml"],
+        type: ['text/xml', 'application/xml'],
         copyToCacheDirectory: true,
       });
 
@@ -44,17 +41,14 @@ export default function ImportTransactions({
       }
 
       setIsImporting(true);
-      setLoadingMessage("Importing...");
+      setLoadingMessage('Importing...');
 
       const file = new File(selectedFile.uri);
       const xmlContent = await file.text();
       const parsedTransactions = parseXMLTransactions(xmlContent);
 
       if (parsedTransactions.length === 0) {
-        Alert.alert(
-          "No Transactions",
-          "No valid transactions found in the file.",
-        );
+        Alert.alert('No Transactions', 'No valid transactions found in the file.');
         setIsImporting(false);
         return;
       }
@@ -70,15 +64,12 @@ export default function ImportTransactions({
       if (newCount === 0) {
         setIsImporting(false);
         onOpenChange(false);
-        Alert.alert(
-          "No New Transactions",
-          "All transactions in this file already exist.",
-        );
+        Alert.alert('No New Transactions', 'All transactions in this file already exist.');
         return;
       }
 
       // Enrich transactions with AI
-      setLoadingMessage("Enriching transactions...");
+      setLoadingMessage('Enriching transactions...');
       try {
         // Fetch existing subscriptions for matching
         const existingSubscriptions = await db
@@ -90,17 +81,14 @@ export default function ImportTransactions({
           })
           .from(subscriptions);
 
-        const enrichResponse = await fetch(
-          `${API_URL}/api/enrich-transactions`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              transactions: newTransactions,
-              subscriptions: existingSubscriptions,
-            }),
-          },
-        );
+        const enrichResponse = await fetch(`${API_URL}/api/enrich-transactions`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            transactions: newTransactions,
+            subscriptions: existingSubscriptions,
+          }),
+        });
 
         if (enrichResponse.ok) {
           const { transactions: enrichedData } = await enrichResponse.json();
@@ -109,41 +97,35 @@ export default function ImportTransactions({
           if (enrichedData && enrichedData.length > 0) {
             await Promise.all(
               enrichedData.map((enriched: EnrichedTransaction) => {
-                const transaction = newTransactions.find(
-                  (t) => t.id === enriched.id,
-                );
+                const transaction = newTransactions.find((t) => t.id === enriched.id);
                 if (!transaction) {
                   return;
                 }
-                const isTwint =
-                  transaction.transactionAdditionalDetails.includes("TWINT");
+                const isTwint = transaction.transactionAdditionalDetails.includes('TWINT');
 
                 return db
                   .update(transactions)
                   .set({
                     category: enriched.category,
                     displayName: enriched.displayName,
-                    domain: enriched.domain ?? (isTwint ? "twint.ch" : null),
+                    domain: enriched.domain ?? (isTwint ? 'twint.ch' : null),
                     subscriptionId: enriched.subscriptionId ?? null,
                   })
                   .where(eq(transactions.id, enriched.id));
-              }),
+              })
             );
           }
         }
       } catch (error) {
-        console.error("Transaction enrichment failed:", error);
+        console.error('Transaction enrichment failed:', error);
         // Continue - enrichment is non-critical
       }
 
       setIsImporting(false);
       onOpenChange(false);
     } catch (error) {
-      console.error("Import error:", error);
-      Alert.alert(
-        "Import Failed",
-        "An error occurred while importing transactions.",
-      );
+      console.error('Import error:', error);
+      Alert.alert('Import Failed', 'An error occurred while importing transactions.');
     } finally {
       setIsImporting(false);
     }
@@ -174,7 +156,7 @@ export default function ImportTransactions({
               modifiers={[frame({ maxWidth: Infinity })]}
             >
               <SwiftText modifiers={[frame({ maxWidth: Infinity })]}>
-                {isImporting ? loadingMessage : "Choose File"}
+                {isImporting ? loadingMessage : 'Choose File'}
               </SwiftText>
             </Button>
           </VStack>

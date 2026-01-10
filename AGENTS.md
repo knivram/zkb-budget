@@ -1,9 +1,11 @@
 # Repository Guidelines
 
 ## Project Overview
+
 ZKB Budget is a React Native/Expo app for tracking personal finances using transaction data exported from ZKB (Zürcher Kantonalbank). It features AI-powered transaction categorization and subscription detection.
 
 ## Project Structure & Module Organization
+
 - `app/`: Expo Router entry points and screens
   - `api/`: API routes for AI-powered features (`enrich-transactions`, `detect-subscriptions`)
   - `transactions/`: Transaction list, import flow
@@ -21,6 +23,7 @@ ZKB Budget is a React Native/Expo app for tracking personal finances using trans
 - Root configs: `tailwind.config.js` + `global.css` for NativeWind, `eslint.config.js`, `drizzle.config.ts`
 
 ## Tech Stack
+
 - **Framework**: Expo SDK 54, React Native 0.81, Expo Router 6
 - **Language**: TypeScript with React function components
 - **Styling**: NativeWind (TailwindCSS), @expo/ui SwiftUI components
@@ -30,27 +33,33 @@ ZKB Budget is a React Native/Expo app for tracking personal finances using trans
 - **Forms**: react-hook-form with @hookform/resolvers
 
 ## Database Schema
+
 Two main tables in `db/schema.ts`:
+
 - `transactions`: Bank transactions with fields for amount (cents), category, display name, domain, and optional subscription linking
 - `subscriptions`: Tracked subscriptions with name, price (cents), billing cycle (weekly/monthly/yearly), domain
 
 ## Build, Test, and Development Commands
+
 - Install deps: `bun install`
 - Run app: `bun start` for Expo dev server; `bun run android`, `bun run ios`, `bun run web` for platforms
 - Lint: `bun run lint`
 - DB migrations: `bun run db:generate` REQUIRED before committing schema changes
 
 ## Environment Variables
+
 - `OPENROUTER_API_KEY`: Required for AI-powered features (transaction enrichment, subscription detection)
 - `EXPO_PUBLIC_LOGO_DEV_KEY`: Required for logo fetching in development
 
 ## Key Features
+
 1. **Transaction Import**: Import XML files from ZKB bank exports
 2. **AI Transaction Enrichment**: Automatically categorize transactions, extract merchant names, and match to subscriptions
 3. **Subscription Detection**: AI analyzes transaction patterns to detect recurring subscriptions
 4. **Subscription Management**: Manual creation/editing of subscriptions with domain-based logos
 
 ## Coding Style & Naming Conventions
+
 - Use 2-space indentation
 - Components in `PascalCase`; hooks/utilities in `camelCase`
 - File names should match the default export
@@ -59,9 +68,11 @@ Two main tables in `db/schema.ts`:
 - Store currency as integer cents (e.g., `subscriptions.price`, `transactions.amount`)
 
 ## Commit & Pull Request Guidelines
+
 - Commits: short, imperative summaries (e.g., `add subscription detection`, `fix transaction import`)
 - PRs: describe what changed, and why
 
 ## Security & Configuration
+
 - Never hardcode API keys; use environment variables
 - Keep migrations in sync with `db/schema.ts`

@@ -1,7 +1,7 @@
-import { Category } from "@/db/schema";
-import { CATEGORIES } from "@/lib/categories";
-import { Host, Image as SwiftImage } from "@expo/ui/swift-ui";
-import { Text, View } from "react-native";
+import { Category } from '@/db/schema';
+import { CATEGORIES } from '@/lib/categories';
+import { Host, Image as SwiftImage } from '@expo/ui/swift-ui';
+import { Text, View } from 'react-native';
 
 export type CategoryItem = {
   category: Category;
@@ -22,18 +22,13 @@ export default function SpendingByCategory({
   const maxTotal = Math.max(...categories.map((item) => item.total));
 
   return categories.map((item, index) => {
-    const percentage =
-      monthExpenses > 0 ? Math.round((item.total / monthExpenses) * 100) : 0;
-    const relativeWidth =
-      maxTotal > 0 ? Math.round((item.total / maxTotal) * 90) : 0;
+    const percentage = monthExpenses > 0 ? Math.round((item.total / monthExpenses) * 100) : 0;
+    const relativeWidth = maxTotal > 0 ? Math.round((item.total / maxTotal) * 90) : 0;
     const categoryKey = item.category;
     const categoryConfig = CATEGORIES[categoryKey] ?? CATEGORIES.other;
 
     return (
-      <View
-        key={item.category}
-        className={index < categories.length - 1 ? "mb-4" : ""}
-      >
+      <View key={item.category} className={index < categories.length - 1 ? 'mb-4' : ''}>
         <View className="mb-1.5 flex-row items-center justify-between">
           <View className="flex-row items-center">
             <View
@@ -44,9 +39,7 @@ export default function SpendingByCategory({
                 <SwiftImage systemName={categoryConfig.icon} size={14} />
               </Host>
             </View>
-            <Text className="text-sm text-zinc-700 dark:text-zinc-300">
-              {categoryConfig.label}
-            </Text>
+            <Text className="text-sm text-zinc-700 dark:text-zinc-300">{categoryConfig.label}</Text>
           </View>
           <Text className="text-sm font-medium text-zinc-900 dark:text-white">
             CHF {formatAmount(item.total)}

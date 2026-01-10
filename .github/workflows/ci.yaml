@@ -1,21 +1,52 @@
-name: preview
+name: CI
 on:
   pull_request:
     branches:
       - main
     paths:
-      - "**/*.ts"
-      - "**/*.tsx"
-      - "**/*.js"
-      - "**/*.jsx"
-      - "package.json"
-      - "app.json"
-      - "app.config.js"
-      - "tailwind.config.js"
+      - '**/*.ts'
+      - '**/*.tsx'
+      - '**/*.js'
+      - '**/*.jsx'
+      - 'package.json'
+      - 'app.json'
+      - 'app.config.js'
+      - 'tailwind.config.js'
 
 jobs:
-  update:
+  ci:
+    name: Lint, Format & Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Run ESLint
+        run: bun run lint
+
+      - name: Check formatting
+        run: bun run format:check
+
+      - name: Run TypeScript check
+        run: bun run typecheck
+
+      - name: Build TypeScript bundle
+        run: bunx expo export --platform web --no-ssg --no-minify
+        env:
+          EXPO_PUBLIC_API_URL: https://example.com
+          EXPO_PUBLIC_LOGO_DEV_KEY: test
+
+  preview:
     name: EAS Update
+    needs: ci
     runs-on: ubuntu-latest
     permissions:
       contents: read

@@ -1,22 +1,22 @@
-import AmountText from "@/components/AmountText";
-import DomainLogo from "@/components/DomainLogo";
-import { db } from "@/db/client";
-import { BillingCycle, Subscription, subscriptions } from "@/db/schema";
-import { Button, ContextMenu, Host } from "@expo/ui/swift-ui";
-import { eq } from "drizzle-orm";
-import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { router, Stack } from "expo-router";
-import { useState } from "react";
-import { Alert, Pressable, ScrollView, Text, View } from "react-native";
-import DetectSubscriptions from "./detect-subscriptions";
+import AmountText from '@/components/AmountText';
+import DomainLogo from '@/components/DomainLogo';
+import { db } from '@/db/client';
+import { BillingCycle, Subscription, subscriptions } from '@/db/schema';
+import { Button, ContextMenu, Host } from '@expo/ui/swift-ui';
+import { eq } from 'drizzle-orm';
+import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
+import { router, Stack } from 'expo-router';
+import { useState } from 'react';
+import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
+import DetectSubscriptions from './detect-subscriptions';
 
 const toMonthlyCents = (price: number, billingCycle: BillingCycle): number => {
   switch (billingCycle) {
-    case "weekly":
+    case 'weekly':
       return price * (52 / 12);
-    case "monthly":
+    case 'monthly':
       return price;
-    case "yearly":
+    case 'yearly':
       return price / 12;
   }
 };
@@ -25,32 +25,23 @@ export default function Subscriptions() {
   const [isDetectOpen, setIsDetectOpen] = useState(false);
   const { data } = useLiveQuery(db.select().from(subscriptions));
   const monthlyTotal =
-    data?.reduce(
-      (sum, sub) => sum + toMonthlyCents(sub.price, sub.billingCycle),
-      0,
-    ) ?? 0;
+    data?.reduce((sum, sub) => sum + toMonthlyCents(sub.price, sub.billingCycle), 0) ?? 0;
 
   const handleDelete = (subscription: Subscription) => {
-    Alert.alert(
-      "Delete Subscription",
-      `Are you sure you want to delete ${subscription.name}?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await db
-                .delete(subscriptions)
-                .where(eq(subscriptions.id, subscription.id));
-            } catch (error) {
-              console.error("Failed to delete subscription:", error);
-            }
-          },
+    Alert.alert('Delete Subscription', `Are you sure you want to delete ${subscription.name}?`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await db.delete(subscriptions).where(eq(subscriptions.id, subscription.id));
+          } catch (error) {
+            console.error('Failed to delete subscription:', error);
+          }
         },
-      ],
-    );
+      },
+    ]);
   };
 
   return (
@@ -59,23 +50,23 @@ export default function Subscriptions() {
         options={{
           unstable_headerRightItems: () => [
             {
-              type: "button",
-              label: "Detect",
+              type: 'button',
+              label: 'Detect',
               icon: {
-                name: "sparkles",
-                type: "sfSymbol",
+                name: 'sparkles',
+                type: 'sfSymbol',
               },
               onPress: () => setIsDetectOpen(true),
             },
             {
-              type: "button",
-              label: "Add",
+              type: 'button',
+              label: 'Add',
               icon: {
-                name: "plus",
-                type: "sfSymbol",
+                name: 'plus',
+                type: 'sfSymbol',
               },
-              variant: "prominent",
-              onPress: () => router.push("/subscriptions/add-subscription"),
+              variant: 'prominent',
+              onPress: () => router.push('/subscriptions/add-subscription'),
             },
           ],
         }}
@@ -86,9 +77,7 @@ export default function Subscriptions() {
       >
         <View className="min-h-full bg-white dark:bg-zinc-900">
           <View className="items-center py-8">
-            <Text className="text-lg text-zinc-400 dark:text-zinc-500">
-              CHF
-            </Text>
+            <Text className="text-lg text-zinc-400 dark:text-zinc-500">CHF</Text>
             <AmountText
               amountCents={monthlyTotal}
               showCurrency={false}
@@ -105,7 +94,7 @@ export default function Subscriptions() {
                       systemImage="pencil"
                       onPress={() =>
                         router.push({
-                          pathname: "/subscriptions/add-subscription",
+                          pathname: '/subscriptions/add-subscription',
                           params: { id: subscription.id },
                         })
                       }
@@ -124,7 +113,7 @@ export default function Subscriptions() {
                     <Pressable
                       onPress={() =>
                         router.push({
-                          pathname: "/subscriptions/[id]",
+                          pathname: '/subscriptions/[id]',
                           params: { id: subscription.id },
                         })
                       }
@@ -157,10 +146,7 @@ export default function Subscriptions() {
           })}
         </View>
       </ScrollView>
-      <DetectSubscriptions
-        isOpen={isDetectOpen}
-        onOpenChange={setIsDetectOpen}
-      />
+      <DetectSubscriptions isOpen={isDetectOpen} onOpenChange={setIsDetectOpen} />
     </>
   );
 }
