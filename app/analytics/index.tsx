@@ -1,8 +1,10 @@
 import DomainLogo from "@/components/DomainLogo";
+import SpendingByCategory, {
+  CategoryItem,
+} from "@/components/SpendingByCategory";
 import { db } from "@/db/client";
-import { transactions } from "@/db/schema";
-import { CATEGORIES } from "@/lib/categories";
-import { Button, Host, Image as SwiftImage } from "@expo/ui/swift-ui";
+import { Category, transactions } from "@/db/schema";
+import { Button, Host } from "@expo/ui/swift-ui";
 import { scaleEffect } from "@expo/ui/swift-ui/modifiers";
 import { sql } from "drizzle-orm";
 import { TrendingDown, TrendingUp } from "lucide-react-native";
@@ -45,28 +47,29 @@ export default function Analytics() {
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
   }, [selectedMonth]);
 
-  // State for query results
+  // TODO: #33 use useQuery to fetch data again
   const [selectedMonthData, setSelectedMonthData] = useState<
-    { income: number | null; expenses: number | null }[]
+    { income: number; expenses: number }[]
   >([]);
   const [previousMonthData, setPreviousMonthData] = useState<
-    { expenses: number | null }[]
+    { expenses: number }[]
   >([]);
   const [categoryData, setCategoryData] = useState<
-    { category: string | null; total: number | null }[]
+    { category: Category; total: number }[]
   >([]);
   const [merchantData, setMerchantData] = useState<
     {
       displayName: string | null;
       domain: string | null;
-      total: number | null;
-      count: number | null;
+      total: number;
+      count: number;
     }[]
   >([]);
 
   // Fetch selected month income/expenses
   useEffect(() => {
     const fetchData = async () => {
+      // TODO: #32 handle error case
       const result = await db
         .select({
           income:
@@ -88,6 +91,7 @@ export default function Analytics() {
   // Fetch previous month expenses (for comparison)
   useEffect(() => {
     const fetchData = async () => {
+      // TODO: #32 handle error case
       const result = await db
         .select({
           expenses:
@@ -105,6 +109,7 @@ export default function Analytics() {
   // Fetch category breakdown for selected month (expenses only)
   useEffect(() => {
     const fetchData = async () => {
+      // TODO: #32 handle error case
       const result = await db
         .select({
           category: transactions.category,
@@ -124,6 +129,7 @@ export default function Analytics() {
   // Fetch top merchants
   useEffect(() => {
     const fetchData = async () => {
+      // TODO: #32 handle error case
       const result = await db
         .select({
           displayName: transactions.displayName,
@@ -143,9 +149,9 @@ export default function Analytics() {
     fetchData();
   }, [selectedMonth]);
 
-  const monthIncome = selectedMonthData?.[0]?.income ?? 0;
-  const monthExpenses = selectedMonthData?.[0]?.expenses ?? 0;
-  const prevMonthExpenses = previousMonthData?.[0]?.expenses ?? 0;
+  const monthIncome = selectedMonthData[0]?.income ?? 0;
+  const monthExpenses = selectedMonthData[0]?.expenses ?? 0;
+  const prevMonthExpenses = previousMonthData[0]?.expenses ?? 0;
 
   // Calculate month-over-month change
   const expenseChange = useMemo(() => {
@@ -156,8 +162,8 @@ export default function Analytics() {
   }, [monthExpenses, prevMonthExpenses]);
 
   // Filter and process category data for display
-  const displayCategories = useMemo(() => {
-    if (!categoryData || categoryData.length === 0) return [];
+  const displayCategories: CategoryItem[] = useMemo(() => {
+    if (categoryData.length === 0) return [];
 
     return categoryData.filter(
       (item) => item.category !== "income" && item.category !== "transfer",
@@ -190,7 +196,6 @@ export default function Analytics() {
       contentInsetAdjustmentBehavior="automatic"
     >
       <View className="p-4">
-        {/* Month Switcher */}
         <View className="mb-6 flex-row items-center justify-between">
           <Host matchContents>
             <Button
@@ -214,7 +219,6 @@ export default function Analytics() {
           </Host>
         </View>
 
-        {/* Month-specific Income/Expense Cards */}
         <View className="mb-4 flex-row justify-between">
           <View className="mr-2 flex-1 rounded-xl bg-emerald-50 p-4 dark:bg-emerald-900/30">
             <Text className="text-sm text-emerald-600 dark:text-emerald-400">
@@ -234,7 +238,6 @@ export default function Analytics() {
           </View>
         </View>
 
-        {/* Month-over-Month Comparison */}
         {expenseChange !== null && (
           <View className="mb-6 flex-row items-center justify-center rounded-xl bg-zinc-50 p-3 dark:bg-zinc-800">
             {expenseChange > 0 ? (
@@ -258,83 +261,21 @@ export default function Analytics() {
           </View>
         )}
 
-        {/* Category Breakdown */}
         {displayCategories.length > 0 && (
           <View className="mb-6">
             <Text className="mb-4 text-lg font-semibold text-zinc-900 dark:text-white">
               Spending by Category
             </Text>
             <View className="rounded-xl bg-zinc-50 p-4 dark:bg-zinc-800">
-              {(() => {
-                // Find max value for relative bar widths
-                const maxTotal = Math.max(
-                  ...displayCategories.map((item) => item.total ?? 0),
-                );
-
-                return displayCategories.map((item, index) => {
-                  const percentage =
-                    monthExpenses > 0
-                      ? Math.round(((item.total ?? 0) / monthExpenses) * 100)
-                      : 0;
-                  // Bar width relative to max category (highest = ~90%)
-                  const relativeWidth =
-                    maxTotal > 0
-                      ? Math.round(((item.total ?? 0) / maxTotal) * 90)
-                      : 0;
-                  const categoryKey = (item.category ??
-                    "other") as keyof typeof CATEGORIES;
-                  const categoryConfig =
-                    CATEGORIES[categoryKey] ?? CATEGORIES.other;
-
-                  return (
-                    <View
-                      key={item.category ?? index}
-                      className={
-                        index < displayCategories.length - 1 ? "mb-4" : ""
-                      }
-                    >
-                      <View className="mb-1.5 flex-row items-center justify-between">
-                        <View className="flex-row items-center">
-                          <View
-                            className="mr-2 h-8 w-8 items-center justify-center rounded"
-                            style={{ backgroundColor: categoryConfig.color }}
-                          >
-                            <Host matchContents>
-                              <SwiftImage
-                                systemName={categoryConfig.icon}
-                                size={14}
-                              />
-                            </Host>
-                          </View>
-                          <Text className="text-sm text-zinc-700 dark:text-zinc-300">
-                            {categoryConfig.label}
-                          </Text>
-                        </View>
-                        <Text className="text-sm font-medium text-zinc-900 dark:text-white">
-                          CHF {formatAmount(item.total ?? 0)}
-                        </Text>
-                      </View>
-                      <View className="h-2 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700">
-                        <View
-                          className="h-full rounded-full"
-                          style={{
-                            backgroundColor: categoryConfig.color,
-                            width: `${relativeWidth}%`,
-                          }}
-                        />
-                      </View>
-                      <Text className="mt-1 text-xs text-zinc-500">
-                        {percentage}%
-                      </Text>
-                    </View>
-                  );
-                });
-              })()}
+              <SpendingByCategory
+                categories={displayCategories}
+                monthExpenses={monthExpenses}
+                formatAmount={formatAmount}
+              />
             </View>
           </View>
         )}
 
-        {/* Top Merchants */}
         {merchantData && merchantData.length > 0 && (
           <View className="mb-6">
             <Text className="mb-4 text-lg font-semibold text-zinc-900 dark:text-white">
@@ -372,18 +313,14 @@ export default function Analytics() {
           </View>
         )}
 
-        {/* Empty State */}
-        {(!displayCategories || displayCategories.length === 0) &&
-          (!merchantData || merchantData.length === 0) && (
-            <View className="items-center justify-center py-20">
-              <Text className="text-zinc-500">
-                No transaction data available
-              </Text>
-              <Text className="mt-2 text-sm text-zinc-400">
-                Import transactions to see your spending analytics
-              </Text>
-            </View>
-          )}
+        {displayCategories.length === 0 && merchantData.length === 0 ? (
+          <View className="items-center justify-center py-20">
+            <Text className="text-zinc-500">No transaction data available</Text>
+            <Text className="mt-2 text-sm text-zinc-400">
+              Import transactions to see your spending analytics
+            </Text>
+          </View>
+        ) : null}
       </View>
     </ScrollView>
   );
