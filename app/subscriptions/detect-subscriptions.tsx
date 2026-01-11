@@ -66,7 +66,7 @@ export default function DetectSubscriptions({ isOpen, onOpenChange }: DetectSubs
       setIsDetecting(false);
       onOpenChange(false);
 
-      if (!result.subscriptions || result.subscriptions.length === 0) {
+      if (result.subscriptions.length === 0) {
         Alert.alert(
           'No Subscriptions Found',
           'No recurring subscriptions were detected in your transactions.'

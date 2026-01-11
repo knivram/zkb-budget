@@ -101,7 +101,7 @@ export default function AddSubscription() {
     }
   }, [isEditing, subscriptionId, reset]);
 
-  const billingCycleText = BILLING_CYCLES[watch('billingCycleIndex') ?? 1];
+  const billingCycleText = BILLING_CYCLES[watch('billingCycleIndex')];
   const billingCycleLabel = billingCycleLabels[billingCycleText];
 
   const onSubmit = async (data: SubscriptionFormData) => {
@@ -247,7 +247,7 @@ export default function AddSubscription() {
                 <Host matchContents>
                   <Picker
                     options={['Weekly', 'Monthly', 'Yearly']}
-                    selectedIndex={value ?? 0}
+                    selectedIndex={value}
                     onOptionSelected={({ nativeEvent: { index } }) => onChange(index)}
                     variant="segmented"
                   />

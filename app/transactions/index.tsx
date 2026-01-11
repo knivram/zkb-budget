@@ -87,7 +87,7 @@ export default function Transactions() {
 
   const { data } = useLiveQuery(db.select().from(transactions).orderBy(desc(transactions.date)));
 
-  const { items } = useMemo(() => groupTransactionsByMonth(data ?? []), [data]);
+  const { items } = useMemo(() => groupTransactionsByMonth(data), [data]);
 
   return (
     <>

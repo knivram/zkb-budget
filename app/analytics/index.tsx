@@ -1,13 +1,13 @@
 import AmountText from '@/components/AmountText';
 import DomainLogo from '@/components/DomainLogo';
-import SpendingByCategory, { CategoryItem } from '@/components/SpendingByCategory';
+import SpendingByCategory from '@/components/SpendingByCategory';
 import { db } from '@/db/client';
 import { transactions } from '@/db/schema';
 import { formatYearMonth } from '@/lib/date';
 import { cn } from '@/lib/utils';
 import { Button, Host } from '@expo/ui/swift-ui';
 import { scaleEffect } from '@expo/ui/swift-ui/modifiers';
-import { and, count, desc, eq, isNotNull, sql, sum } from 'drizzle-orm';
+import { and, count, desc, eq, isNotNull, notInArray, sql, sum } from 'drizzle-orm';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { TrendingDown, TrendingUp } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
@@ -71,7 +71,13 @@ export default function Analytics() {
         total: sum(transactions.amount).mapWith(Number),
       })
       .from(transactions)
-      .where(and(monthFilter(selectedMonth), eq(transactions.creditDebitIndicator, 'debit')))
+      .where(
+        and(
+          monthFilter(selectedMonth),
+          eq(transactions.creditDebitIndicator, 'debit'),
+          notInArray(transactions.category, ['income', 'transfer'])
+        )
+      )
       .groupBy(transactions.category)
       .orderBy(desc(sum(transactions.amount))),
     [selectedMonth]
@@ -99,26 +105,15 @@ export default function Analytics() {
     [selectedMonth]
   );
 
-  const monthIncome = selectedMonthData?.[0]?.income ?? 0;
-  const monthExpenses = selectedMonthData?.[0]?.expenses ?? 0;
-  const prevMonthExpenses = previousMonthData?.[0]?.expenses ?? 0;
+  const monthIncome = selectedMonthData[0]?.income ?? 0;
+  const monthExpenses = selectedMonthData[0]?.expenses ?? 0;
+  const prevMonthExpenses = previousMonthData[0]?.expenses ?? 0;
 
   const expenseChange = useMemo(() => {
     if (prevMonthExpenses === 0) return null;
     const change = ((monthExpenses - prevMonthExpenses) / prevMonthExpenses) * 100;
     return Math.round(change);
   }, [monthExpenses, prevMonthExpenses]);
-
-  const displayCategories: CategoryItem[] = useMemo(() => {
-    if (!categoryData || categoryData.length === 0) return [];
-
-    return categoryData
-      .filter((item) => item.category !== 'income' && item.category !== 'transfer')
-      .map((item) => ({
-        category: item.category,
-        total: item.total ?? 0,
-      }));
-  }, [categoryData]);
 
   const handlePreviousMonth = () => {
     const [year, month] = selectedMonth.split('-').map(Number);
@@ -207,18 +202,18 @@ export default function Analytics() {
           </View>
         )}
 
-        {displayCategories.length > 0 && (
+        {categoryData.length > 0 && (
           <View className="mb-6">
             <Text className="mb-4 text-lg font-semibold text-zinc-900 dark:text-white">
               Spending by Category
             </Text>
             <View className="rounded-xl bg-zinc-50 p-4 dark:bg-zinc-800">
-              <SpendingByCategory categories={displayCategories} monthExpenses={monthExpenses} />
+              <SpendingByCategory categories={categoryData} monthExpenses={monthExpenses} />
             </View>
           </View>
         )}
 
-        {merchantData && merchantData.length > 0 && (
+        {merchantData.length > 0 && (
           <View className="mb-6">
             <Text className="mb-4 text-lg font-semibold text-zinc-900 dark:text-white">
               Top Merchants
@@ -261,7 +256,7 @@ export default function Analytics() {
           </View>
         )}
 
-        {displayCategories.length === 0 && (!merchantData || merchantData.length === 0) ? (
+        {categoryData.length === 0 && merchantData.length === 0 ? (
           <View className="items-center justify-center py-20">
             <Text className="text-zinc-500">No transaction data available</Text>
             <Text className="mt-2 text-sm text-zinc-400">
