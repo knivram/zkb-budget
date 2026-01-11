@@ -1,7 +1,10 @@
+import AmountText from '@/components/AmountText';
 import DomainLogo from '@/components/DomainLogo';
 import SpendingByCategory, { CategoryItem } from '@/components/SpendingByCategory';
 import { db } from '@/db/client';
 import { transactions } from '@/db/schema';
+import { formatYearMonth } from '@/lib/date';
+import { cn } from '@/lib/utils';
 import { Button, Host } from '@expo/ui/swift-ui';
 import { scaleEffect } from '@expo/ui/swift-ui/modifiers';
 import { and, count, desc, eq, isNotNull, sql, sum } from 'drizzle-orm';
@@ -16,40 +19,24 @@ const formatMonthFull = (monthStr: string): string => {
   return date.toLocaleDateString('de-CH', { month: 'long', year: 'numeric' });
 };
 
-const formatAmount = (amountCents: number): string => {
-  return (amountCents / 100).toLocaleString('de-CH', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  });
-};
+const monthFilter = (month: string) => sql`strftime('%Y-%m', ${transactions.date}) = ${month}`;
 
 export default function Analytics() {
-  // Current month (for limiting forward navigation)
-  const currentMonth = useMemo(() => {
+  const { currentMonth, defaultMonth } = useMemo(() => {
     const date = new Date();
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-  }, []);
-
-  // Default to previous month (more likely to have complete data)
-  const defaultMonth = useMemo(() => {
-    const date = new Date();
+    const currentMonth = formatYearMonth(date);
     date.setMonth(date.getMonth() - 1);
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    return { currentMonth, defaultMonth: formatYearMonth(date) };
   }, []);
 
   const [selectedMonth, setSelectedMonth] = useState(defaultMonth);
 
-  // Calculate previous month for comparison
   const previousMonth = useMemo(() => {
     const [year, month] = selectedMonth.split('-').map(Number);
     const date = new Date(year, month - 2);
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    return formatYearMonth(date);
   }, [selectedMonth]);
 
-  // Helper to filter by month using strftime
-  const monthFilter = (month: string) => sql`strftime('%Y-%m', ${transactions.date}) = ${month}`;
-
-  // Query: Selected month income/expenses
   const { data: selectedMonthData } = useLiveQuery(
     db
       .select({
@@ -65,7 +52,6 @@ export default function Analytics() {
     [selectedMonth]
   );
 
-  // Query: Previous month expenses (for comparison)
   const { data: previousMonthData } = useLiveQuery(
     db
       .select({
@@ -78,7 +64,6 @@ export default function Analytics() {
     [previousMonth]
   );
 
-  // Query: Category breakdown for selected month (expenses only)
   const { data: categoryData } = useLiveQuery(
     db
       .select({
@@ -92,7 +77,6 @@ export default function Analytics() {
     [selectedMonth]
   );
 
-  // Query: Top merchants for selected month
   const { data: merchantData } = useLiveQuery(
     db
       .select({
@@ -119,14 +103,12 @@ export default function Analytics() {
   const monthExpenses = selectedMonthData?.[0]?.expenses ?? 0;
   const prevMonthExpenses = previousMonthData?.[0]?.expenses ?? 0;
 
-  // Calculate month-over-month change
   const expenseChange = useMemo(() => {
     if (prevMonthExpenses === 0) return null;
     const change = ((monthExpenses - prevMonthExpenses) / prevMonthExpenses) * 100;
     return Math.round(change);
   }, [monthExpenses, prevMonthExpenses]);
 
-  // Filter and process category data for display
   const displayCategories: CategoryItem[] = useMemo(() => {
     if (!categoryData || categoryData.length === 0) return [];
 
@@ -142,14 +124,14 @@ export default function Analytics() {
     const [year, month] = selectedMonth.split('-').map(Number);
     const date = new Date(year, month - 1);
     date.setMonth(date.getMonth() - 1);
-    setSelectedMonth(`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`);
+    setSelectedMonth(formatYearMonth(date));
   };
 
   const handleNextMonth = () => {
     const [year, month] = selectedMonth.split('-').map(Number);
     const date = new Date(year, month - 1);
     date.setMonth(date.getMonth() + 1);
-    setSelectedMonth(`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`);
+    setSelectedMonth(formatYearMonth(date));
   };
 
   const isCurrentMonth = selectedMonth === currentMonth;
@@ -186,15 +168,19 @@ export default function Analytics() {
         <View className="mb-4 flex-row justify-between">
           <View className="mr-2 flex-1 rounded-xl bg-emerald-50 p-4 dark:bg-emerald-900/30">
             <Text className="text-sm text-emerald-600 dark:text-emerald-400">Income</Text>
-            <Text className="text-xl font-bold text-emerald-700 dark:text-emerald-200">
-              CHF {formatAmount(monthIncome)}
-            </Text>
+            <AmountText
+              amountCents={monthIncome}
+              roundToDollars={true}
+              className="text-xl font-bold text-emerald-700 dark:text-emerald-200"
+            />
           </View>
           <View className="ml-2 flex-1 rounded-xl bg-rose-50 p-4 dark:bg-rose-900/30">
             <Text className="text-sm text-rose-600 dark:text-rose-400">Expenses</Text>
-            <Text className="text-xl font-bold text-rose-700 dark:text-rose-200">
-              CHF {formatAmount(monthExpenses)}
-            </Text>
+            <AmountText
+              amountCents={monthExpenses}
+              roundToDollars={true}
+              className="text-xl font-bold text-rose-700 dark:text-rose-200"
+            />
           </View>
         </View>
 
@@ -227,11 +213,7 @@ export default function Analytics() {
               Spending by Category
             </Text>
             <View className="rounded-xl bg-zinc-50 p-4 dark:bg-zinc-800">
-              <SpendingByCategory
-                categories={displayCategories}
-                monthExpenses={monthExpenses}
-                formatAmount={formatAmount}
-              />
+              <SpendingByCategory categories={displayCategories} monthExpenses={monthExpenses} />
             </View>
           </View>
         )}
@@ -265,12 +247,14 @@ export default function Analytics() {
                     </Text>
                     <Text className="text-xs text-zinc-500">
                       {merchant.count} transaction
-                      {(merchant.count ?? 0) !== 1 ? 's' : ''}
+                      {merchant.count !== 1 ? 's' : ''}
                     </Text>
                   </View>
-                  <Text className="text-sm font-semibold text-zinc-900 dark:text-white">
-                    CHF {formatAmount(merchant.total ?? 0)}
-                  </Text>
+                  <AmountText
+                    amountCents={merchant.total}
+                    roundToDollars={true}
+                    className="text-sm font-semibold text-zinc-900 dark:text-white"
+                  />
                 </View>
               ))}
             </View>

@@ -2,6 +2,7 @@ import { Category } from '@/db/schema';
 import { CATEGORIES } from '@/lib/categories';
 import { Host, Image as SwiftImage } from '@expo/ui/swift-ui';
 import { Text, View } from 'react-native';
+import AmountText from './AmountText';
 
 export type CategoryItem = {
   category: Category;
@@ -11,14 +12,9 @@ export type CategoryItem = {
 type SpendingByCategoryProps = {
   categories: CategoryItem[];
   monthExpenses: number;
-  formatAmount: (amountCents: number) => string;
 };
 
-export default function SpendingByCategory({
-  categories,
-  monthExpenses,
-  formatAmount,
-}: SpendingByCategoryProps) {
+export default function SpendingByCategory({ categories, monthExpenses }: SpendingByCategoryProps) {
   const maxTotal = Math.max(...categories.map((item) => item.total));
 
   return categories.map((item, index) => {
@@ -41,9 +37,11 @@ export default function SpendingByCategory({
             </View>
             <Text className="text-sm text-zinc-700 dark:text-zinc-300">{categoryConfig.label}</Text>
           </View>
-          <Text className="text-sm font-medium text-zinc-900 dark:text-white">
-            CHF {formatAmount(item.total)}
-          </Text>
+          <AmountText
+            amountCents={item.total}
+            roundToDollars={true}
+            className="text-sm font-medium text-zinc-900 dark:text-white"
+          />
         </View>
         <View className="h-2 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700">
           <View

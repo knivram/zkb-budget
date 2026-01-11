@@ -6,11 +6,20 @@ type AmountTextProps = {
   className?: string;
   showCurrency?: boolean;
   currency?: string;
+  roundToDollars?: boolean;
 };
 
-const formatAmount = (amountCents: number, showCurrency: boolean, currency: string): string => {
+const formatAmount = (
+  amountCents: number,
+  showCurrency: boolean,
+  currency: string,
+  roundToDollars: boolean
+): string => {
   const rounded = Math.round(amountCents);
-  const formatted = (rounded / 100).toFixed(2);
+  const formatted = (rounded / 100).toLocaleString('de-CH', {
+    minimumFractionDigits: roundToDollars ? 0 : 2,
+    maximumFractionDigits: roundToDollars ? 0 : 2,
+  });
   return showCurrency ? `${currency} ${formatted}` : formatted;
 };
 
@@ -19,6 +28,7 @@ export default function AmountText({
   className,
   showCurrency = true,
   currency = 'CHF',
+  roundToDollars = false,
 }: AmountTextProps) {
   return (
     <Text
@@ -30,7 +40,7 @@ export default function AmountText({
         className
       )}
     >
-      {formatAmount(amountCents, showCurrency, currency)}
+      {formatAmount(amountCents, showCurrency, currency, roundToDollars)}
     </Text>
   );
 }
