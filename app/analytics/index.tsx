@@ -23,10 +23,10 @@ const monthFilter = (month: string) => sql`strftime('%Y-%m', ${transactions.date
 
 export default function Analytics() {
   const { currentMonth, defaultMonth } = useMemo(() => {
-    const date = new Date();
-    const currentMonth = formatYearMonth(date);
-    date.setMonth(date.getMonth() - 1);
-    return { currentMonth, defaultMonth: formatYearMonth(date) };
+    const now = new Date();
+    const lastMonth = new Date(now);
+    lastMonth.setMonth(lastMonth.getMonth() - 1);
+    return { currentMonth: formatYearMonth(now), defaultMonth: formatYearMonth(lastMonth) };
   }, []);
 
   const [selectedMonth, setSelectedMonth] = useState(defaultMonth);
@@ -79,7 +79,7 @@ export default function Analytics() {
         )
       )
       .groupBy(transactions.category)
-      .orderBy(desc(sum(transactions.amount))),
+      .orderBy((ctx) => desc(ctx.total)),
     [selectedMonth]
   );
 
@@ -100,7 +100,7 @@ export default function Analytics() {
         )
       )
       .groupBy(transactions.displayName, transactions.domain)
-      .orderBy(desc(sum(transactions.amount)))
+      .orderBy((ctx) => desc(ctx.total))
       .limit(6),
     [selectedMonth]
   );
