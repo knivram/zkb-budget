@@ -1,13 +1,13 @@
 import DomainLogo from '@/components/DomainLogo';
-import { cn } from '@/lib/utils';
 import SpendingByCategory, { CategoryItem } from '@/components/SpendingByCategory';
 import { db } from '@/db/client';
-import { Category, transactions } from '@/db/schema';
+import { transactions } from '@/db/schema';
 import { Button, Host } from '@expo/ui/swift-ui';
 import { scaleEffect } from '@expo/ui/swift-ui/modifiers';
-import { sql } from 'drizzle-orm';
+import { and, count, desc, eq, isNotNull, sql, sum } from 'drizzle-orm';
+import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { TrendingDown, TrendingUp } from 'lucide-react-native';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 
 const formatMonthFull = (monthStr: string): string => {
@@ -46,107 +46,78 @@ export default function Analytics() {
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
   }, [selectedMonth]);
 
-  // TODO: #33 use useQuery to fetch data again
-  const [selectedMonthData, setSelectedMonthData] = useState<
-    { income: number; expenses: number }[]
-  >([]);
-  const [previousMonthData, setPreviousMonthData] = useState<{ expenses: number }[]>([]);
-  const [categoryData, setCategoryData] = useState<{ category: Category; total: number }[]>([]);
-  const [merchantData, setMerchantData] = useState<
-    {
-      displayName: string | null;
-      domain: string | null;
-      total: number;
-      count: number;
-    }[]
-  >([]);
+  // Helper to filter by month using strftime
+  const monthFilter = (month: string) => sql`strftime('%Y-%m', ${transactions.date}) = ${month}`;
 
-  // Fetch selected month income/expenses
-  useEffect(() => {
-    const fetchData = async () => {
-      // TODO: #32 handle error case
-      const result = await db
-        .select({
-          income:
-            sql<number>`SUM(CASE WHEN ${transactions.creditDebitIndicator} = 'credit' THEN ${transactions.amount} ELSE 0 END)`.as(
-              'income'
-            ),
-          expenses:
-            sql<number>`SUM(CASE WHEN ${transactions.creditDebitIndicator} = 'debit' THEN ${transactions.amount} ELSE 0 END)`.as(
-              'expenses'
-            ),
-        })
-        .from(transactions)
-        .where(sql`strftime('%Y-%m', ${transactions.date}) = ${selectedMonth}`);
-      setSelectedMonthData(result);
-    };
-    fetchData();
-  }, [selectedMonth]);
+  // Query: Selected month income/expenses
+  const { data: selectedMonthData } = useLiveQuery(
+    db
+      .select({
+        income: sum(
+          sql`CASE WHEN ${transactions.creditDebitIndicator} = 'credit' THEN ${transactions.amount} ELSE 0 END`
+        ).mapWith(Number),
+        expenses: sum(
+          sql`CASE WHEN ${transactions.creditDebitIndicator} = 'debit' THEN ${transactions.amount} ELSE 0 END`
+        ).mapWith(Number),
+      })
+      .from(transactions)
+      .where(monthFilter(selectedMonth)),
+    [selectedMonth]
+  );
 
-  // Fetch previous month expenses (for comparison)
-  useEffect(() => {
-    const fetchData = async () => {
-      // TODO: #32 handle error case
-      const result = await db
-        .select({
-          expenses:
-            sql<number>`SUM(CASE WHEN ${transactions.creditDebitIndicator} = 'debit' THEN ${transactions.amount} ELSE 0 END)`.as(
-              'expenses'
-            ),
-        })
-        .from(transactions)
-        .where(sql`strftime('%Y-%m', ${transactions.date}) = ${previousMonth}`);
-      setPreviousMonthData(result);
-    };
-    fetchData();
-  }, [previousMonth]);
+  // Query: Previous month expenses (for comparison)
+  const { data: previousMonthData } = useLiveQuery(
+    db
+      .select({
+        expenses: sum(
+          sql`CASE WHEN ${transactions.creditDebitIndicator} = 'debit' THEN ${transactions.amount} ELSE 0 END`
+        ).mapWith(Number),
+      })
+      .from(transactions)
+      .where(monthFilter(previousMonth)),
+    [previousMonth]
+  );
 
-  // Fetch category breakdown for selected month (expenses only)
-  useEffect(() => {
-    const fetchData = async () => {
-      // TODO: #32 handle error case
-      const result = await db
-        .select({
-          category: transactions.category,
-          total: sql<number>`SUM(${transactions.amount})`.as('total'),
-        })
-        .from(transactions)
-        .where(
-          sql`strftime('%Y-%m', ${transactions.date}) = ${selectedMonth} AND ${transactions.creditDebitIndicator} = 'debit'`
+  // Query: Category breakdown for selected month (expenses only)
+  const { data: categoryData } = useLiveQuery(
+    db
+      .select({
+        category: transactions.category,
+        total: sum(transactions.amount).mapWith(Number),
+      })
+      .from(transactions)
+      .where(and(monthFilter(selectedMonth), eq(transactions.creditDebitIndicator, 'debit')))
+      .groupBy(transactions.category)
+      .orderBy(desc(sum(transactions.amount))),
+    [selectedMonth]
+  );
+
+  // Query: Top merchants for selected month
+  const { data: merchantData } = useLiveQuery(
+    db
+      .select({
+        displayName: transactions.displayName,
+        domain: transactions.domain,
+        total: sum(transactions.amount).mapWith(Number),
+        count: count().mapWith(Number),
+      })
+      .from(transactions)
+      .where(
+        and(
+          monthFilter(selectedMonth),
+          eq(transactions.creditDebitIndicator, 'debit'),
+          isNotNull(transactions.displayName)
         )
-        .groupBy(transactions.category)
-        .orderBy(sql`SUM(${transactions.amount}) DESC`);
-      setCategoryData(result);
-    };
-    fetchData();
-  }, [selectedMonth]);
+      )
+      .groupBy(transactions.displayName, transactions.domain)
+      .orderBy(desc(sum(transactions.amount)))
+      .limit(6),
+    [selectedMonth]
+  );
 
-  // Fetch top merchants
-  useEffect(() => {
-    const fetchData = async () => {
-      // TODO: #32 handle error case
-      const result = await db
-        .select({
-          displayName: transactions.displayName,
-          domain: transactions.domain,
-          total: sql<number>`SUM(${transactions.amount})`.as('total'),
-          count: sql<number>`COUNT(*)`.as('count'),
-        })
-        .from(transactions)
-        .where(
-          sql`strftime('%Y-%m', ${transactions.date}) = ${selectedMonth} AND ${transactions.creditDebitIndicator} = 'debit' AND ${transactions.displayName} IS NOT NULL`
-        )
-        .groupBy(transactions.displayName, transactions.domain)
-        .orderBy(sql`SUM(${transactions.amount}) DESC`)
-        .limit(6);
-      setMerchantData(result);
-    };
-    fetchData();
-  }, [selectedMonth]);
-
-  const monthIncome = selectedMonthData[0]?.income ?? 0;
-  const monthExpenses = selectedMonthData[0]?.expenses ?? 0;
-  const prevMonthExpenses = previousMonthData[0]?.expenses ?? 0;
+  const monthIncome = selectedMonthData?.[0]?.income ?? 0;
+  const monthExpenses = selectedMonthData?.[0]?.expenses ?? 0;
+  const prevMonthExpenses = previousMonthData?.[0]?.expenses ?? 0;
 
   // Calculate month-over-month change
   const expenseChange = useMemo(() => {
@@ -157,11 +128,14 @@ export default function Analytics() {
 
   // Filter and process category data for display
   const displayCategories: CategoryItem[] = useMemo(() => {
-    if (categoryData.length === 0) return [];
+    if (!categoryData || categoryData.length === 0) return [];
 
-    return categoryData.filter(
-      (item) => item.category !== 'income' && item.category !== 'transfer'
-    );
+    return categoryData
+      .filter((item) => item.category !== 'income' && item.category !== 'transfer')
+      .map((item) => ({
+        category: item.category,
+        total: item.total ?? 0,
+      }));
   }, [categoryData]);
 
   const handlePreviousMonth = () => {
@@ -303,7 +277,7 @@ export default function Analytics() {
           </View>
         )}
 
-        {displayCategories.length === 0 && merchantData.length === 0 ? (
+        {displayCategories.length === 0 && (!merchantData || merchantData.length === 0) ? (
           <View className="items-center justify-center py-20">
             <Text className="text-zinc-500">No transaction data available</Text>
             <Text className="mt-2 text-sm text-zinc-400">
