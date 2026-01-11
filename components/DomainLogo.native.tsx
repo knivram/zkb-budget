@@ -44,7 +44,7 @@ export default function DomainLogo({
         </Host>
       );
     }
-    const fallbackLetter = name?.trim().charAt(0).toUpperCase() || '?';
+    const fallbackLetter = name.trim().charAt(0).toUpperCase() || '?';
     return <Text className="text-lg text-zinc-400 dark:text-zinc-500">{fallbackLetter}</Text>;
   };
 

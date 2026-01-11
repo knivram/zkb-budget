@@ -27,9 +27,7 @@ export default function SubscriptionDetail() {
     db.select().from(transactions).where(eq(transactions.subscriptionId, subscriptionId))
   );
 
-  const sub = subscription?.[0];
-
-  if (!sub) {
+  if (subscription.length === 0) {
     return (
       <View className="flex-1 items-center justify-center bg-white dark:bg-zinc-900">
         <Text className="text-zinc-500">Subscription not found</Text>
@@ -37,6 +35,7 @@ export default function SubscriptionDetail() {
     );
   }
 
+  const sub = subscription[0];
   return (
     <FlatList
       className="flex-1 bg-white dark:bg-zinc-900"
@@ -64,7 +63,7 @@ export default function SubscriptionDetail() {
 
           <View className="border-b border-zinc-100 bg-zinc-50 px-4 py-2 dark:border-zinc-800 dark:bg-zinc-800/50">
             <Text className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
-              Transactions ({relatedTransactions?.length ?? 0})
+              Transactions ({relatedTransactions.length})
             </Text>
           </View>
         </View>

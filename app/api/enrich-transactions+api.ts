@@ -30,7 +30,7 @@ async function processBatch(
     prompt: TRANSACTION_ENRICHMENT.user(toonTransactions, toonSubscriptions),
   });
 
-  return result.output?.transactions ?? [];
+  return result.output.transactions;
 }
 
 async function processWithRetry(

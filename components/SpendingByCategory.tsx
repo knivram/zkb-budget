@@ -20,8 +20,7 @@ export default function SpendingByCategory({ categories, monthExpenses }: Spendi
   return categories.map((item, index) => {
     const percentage = monthExpenses > 0 ? Math.round((item.total / monthExpenses) * 100) : 0;
     const relativeWidth = maxTotal > 0 ? Math.round((item.total / maxTotal) * 90) : 0;
-    const categoryKey = item.category;
-    const categoryConfig = CATEGORIES[categoryKey] ?? CATEGORIES.other;
+    const categoryConfig = CATEGORIES[item.category];
 
     return (
       <View key={item.category} className={index < categories.length - 1 ? 'mb-4' : ''}>

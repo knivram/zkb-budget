@@ -24,8 +24,10 @@ const toMonthlyCents = (price: number, billingCycle: BillingCycle): number => {
 export default function Subscriptions() {
   const [isDetectOpen, setIsDetectOpen] = useState(false);
   const { data } = useLiveQuery(db.select().from(subscriptions));
-  const monthlyTotal =
-    data?.reduce((sum, sub) => sum + toMonthlyCents(sub.price, sub.billingCycle), 0) ?? 0;
+  const monthlyTotal = data.reduce(
+    (sum, sub) => sum + toMonthlyCents(sub.price, sub.billingCycle),
+    0
+  );
 
   const handleDelete = (subscription: Subscription) => {
     Alert.alert('Delete Subscription', `Are you sure you want to delete ${subscription.name}?`, [
@@ -85,7 +87,7 @@ export default function Subscriptions() {
             />
             <Text className="mt-1 text-sm text-zinc-400">per month</Text>
           </View>
-          {data?.map((subscription: Subscription) => {
+          {data.map((subscription: Subscription) => {
             return (
               <Host key={subscription.id}>
                 <ContextMenu activationMethod="longPress">
