@@ -1,6 +1,5 @@
 {
   "lockfileVersion": 1,
-  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "zkb-budget",
@@ -42,7 +41,6 @@
         "fast-xml-parser": "^5.3.3",
         "lucide-react-native": "^0.562.0",
         "nativewind": "^4.2.1",
-        "prettier-plugin-tailwindcss": "^0.5.11",
         "react": "19.1.0",
         "react-dom": "19.1.0",
         "react-hook-form": "^7.69.0",
@@ -68,6 +66,7 @@
         "eslint-config-expo": "~10.0.0",
         "eslint-config-prettier": "^10.1.8",
         "prettier": "^3.7.4",
+        "prettier-plugin-tailwindcss": "^0.5.14",
         "typescript": "~5.9.2",
       },
     },
