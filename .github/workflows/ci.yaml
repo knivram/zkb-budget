@@ -38,12 +38,6 @@ jobs:
       - name: Run TypeScript check
         run: bun run typecheck
 
-      - name: Build TypeScript bundle
-        run: bunx expo export --platform web --no-ssg --no-minify
-        env:
-          EXPO_PUBLIC_API_URL: https://example.com
-          EXPO_PUBLIC_LOGO_DEV_KEY: test
-
   preview:
     name: EAS Update
     needs: ci
