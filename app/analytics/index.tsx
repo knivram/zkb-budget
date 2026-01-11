@@ -1,4 +1,5 @@
 import DomainLogo from '@/components/DomainLogo';
+import { cn } from '@/lib/utils';
 import SpendingByCategory, { CategoryItem } from '@/components/SpendingByCategory';
 import { db } from '@/db/client';
 import { Category, transactions } from '@/db/schema';
@@ -270,7 +271,11 @@ export default function Analytics() {
               {merchantData.map((merchant, index) => (
                 <View
                   key={merchant.displayName ?? index}
-                  className={`flex-row items-center ${index < merchantData.length - 1 ? 'mb-3 border-b border-zinc-200 pb-3 dark:border-zinc-700' : ''}`}
+                  className={cn(
+                    'flex-row items-center',
+                    index < merchantData.length - 1 &&
+                      'mb-3 border-b border-zinc-200 pb-3 dark:border-zinc-700'
+                  )}
                 >
                   <DomainLogo
                     domain={merchant.domain ?? undefined}
