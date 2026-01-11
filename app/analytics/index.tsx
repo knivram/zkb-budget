@@ -83,7 +83,7 @@ export default function Analytics() {
         displayName: transactions.displayName,
         domain: transactions.domain,
         total: sum(transactions.amount).mapWith(Number),
-        count: count().mapWith(Number),
+        count: count(),
       })
       .from(transactions)
       .where(
