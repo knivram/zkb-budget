@@ -1,6 +1,7 @@
 import { Input, Label } from '@/components/ui';
 import { db } from '@/db/client';
 import { BILLING_CYCLES, BillingCycle, subscriptions } from '@/db/schema';
+import { parsePriceToCents } from '@/lib/price';
 import { DateTimePicker, Host, Picker } from '@expo/ui/swift-ui';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { eq } from 'drizzle-orm';
@@ -9,29 +10,6 @@ import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from 'react-native';
 import { z } from 'zod';
-
-const parsePriceToCents = (input: string): number | null => {
-  const normalized = input.trim().replace(/\s+/g, '').replace(',', '.');
-
-  if (normalized === '') return null;
-
-  const match = normalized.match(/^(\d*)(?:\.(\d{0,2}))?$/);
-  if (!match) return null;
-
-  const dollarsPart = match.at(1) ?? '';
-  const centsPart = match.at(2) ?? '';
-
-  if (dollarsPart === '' && centsPart === '') return null;
-
-  const dollars = dollarsPart === '' ? 0 : parseInt(dollarsPart, 10);
-  if (!Number.isFinite(dollars)) return null;
-
-  const centsTwoDigits = centsPart.padEnd(2, '0');
-  const cents = centsTwoDigits === '' ? 0 : parseInt(centsTwoDigits, 10);
-  if (!Number.isFinite(cents)) return null;
-
-  return dollars * 100 + cents;
-};
 
 const subscriptionSchema = z.object({
   name: z.string().min(1, 'Name is required'),
