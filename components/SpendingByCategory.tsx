@@ -2,7 +2,7 @@ import { Category } from '@/db/schema';
 import { CATEGORIES } from '@/lib/categories';
 import { Host, Image as SwiftImage } from '@expo/ui/swift-ui';
 import { Text, View } from 'react-native';
-import AmountText from './AmountText';
+import AmountText from './ui/amount-text';
 
 export type CategoryItem = {
   category: Category;

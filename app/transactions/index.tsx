@@ -1,5 +1,5 @@
-import AmountText from '@/components/AmountText';
-import DomainLogo from '@/components/DomainLogo';
+import AmountText from '@/components/ui/amount-text';
+import DomainLogo from '@/components/ui/domain-logo';
 import { db } from '@/db/client';
 import { transactions, type Transaction } from '@/db/schema';
 import { CATEGORIES } from '@/lib/categories';

@@ -1,78 +1,144 @@
-# Repository Guidelines
+# AGENTS.md (ZKB Budget)
 
-## Project Overview
+This file is guidance for agentic coding assistants working in this repo.
 
-ZKB Budget is a React Native/Expo app for tracking personal finances using transaction data exported from ZKB (Zürcher Kantonalbank). It features AI-powered transaction categorization and subscription detection.
+## Project Summary
 
-## Project Structure & Module Organization
+ZKB Budget is a React Native / Expo app (Expo Router) for importing ZKB XML exports,
+tracking transactions, and using AI to enrich/categorize transactions and detect subscriptions.
 
-- `app/`: Expo Router entry points and screens
-  - `api/`: API routes for AI-powered features (`enrich-transactions`, `detect-subscriptions`)
-  - `transactions/`: Transaction list, import flow
-  - `subscriptions/`: Subscription management, detection, and review screens
-- `db/`: Drizzle ORM schema (`schema.ts`) and Expo SQLite client (`client.ts`)
-- `drizzle/`: Auto-generated SQL migrations. Never hand-edit generated files.
-- `lib/`: Shared utilities
-  - `api/`: API schemas (Zod), AI response schemas, prompts, validation helpers
-  - `xml-parser.ts`: Parses ZKB XML transaction exports
-  - `toon-converter.ts`: Converts data to TOON format for token-efficient AI calls
-  - `logo-cache.ts`: Caches company logos fetched by domain
-  - `utils.ts`: General utilities (cn, chunkArray, etc.)
-- `components/`: Reusable UI components (`DomainLogo`, form inputs, `AmountText`)
-- `assets/`: Images/fonts; reference via Expo asset system
-- Root configs: `tailwind.config.js` + `global.css` for NativeWind, `eslint.config.js`, `drizzle.config.ts`
+## Key Directories
 
-## Tech Stack
+- `app/`: Expo Router routes and screens
+  - `app/api/*+api.ts`: server-like API handlers (Edge-style `Request`/`Response`)
+  - `app/transactions/`: transaction list + import flow
+  - `app/subscriptions/`: subscription management + detection review
+  - `app/analytics/`: analytics views
+- `components/`: reusable React components
+  - `components/ui/`: UI-only primitives (e.g. inputs, labels, buttons, text)
+- `lib/`: shared utilities and business logic
+  - Prefer putting reusable helpers here (parsing, formatting, mapping, validation)
+  - `lib/api/`: Zod schemas, prompts, AI response validation
+- `db/`: Drizzle ORM schema + Expo SQLite client
+- `drizzle/`: generated migrations (never edit by hand)
 
-- **Framework**: Expo SDK 54, React Native 0.81, Expo Router 6
-- **Language**: TypeScript with React function components
-- **Styling**: NativeWind (TailwindCSS), @expo/ui SwiftUI components
-- **Database**: Expo SQLite with Drizzle ORM
-- **AI**: OpenRouter SDK with Google Gemini for transaction enrichment
-- **Validation**: Zod for schema validation, drizzle-zod for DB integration
-- **Forms**: react-hook-form with @hookform/resolvers
+## Commands (Build / Lint / Format / Typecheck)
 
-## Database Schema
+This repo uses Bun and Expo.
 
-Two main tables in `db/schema.ts`:
+- Install dependencies: `bun install`
+- Start dev server: `bun start` (same as `expo start`)
+- Run on devices:
+  - Android: `bun run android`
+  - iOS: `bun run ios`
+  - Web: `bun run web`
 
-- `transactions`: Bank transactions with fields for amount (cents), category, display name, domain, and optional subscription linking
-- `subscriptions`: Tracked subscriptions with name, price (cents), billing cycle (weekly/monthly/yearly), domain
+Lint / format / types:
 
-## Build, Test, and Development Commands
+- Lint: `bun run lint` (runs `expo lint`)
+- Typecheck: `bun run typecheck` (runs `tsc --noEmit`)
+- Format: `bun run format` (Prettier)
+- Check formatting: `bun run format:check`
 
-- Install deps: `bun install`
-- Run app: `bun start` for Expo dev server; `bun run android`, `bun run ios`, `bun run web` for platforms
-- Lint: `bun run lint`
-- DB migrations: `bun run db:generate` REQUIRED before committing schema changes
+Target a single file (useful while iterating):
+
+- Lint one file: `bunx eslint app/api/enrich-transactions+api.ts`
+- Format one file: `bunx prettier --write app/api/enrich-transactions+api.ts`
+- Typecheck whole project (no single-file mode configured): `bun run typecheck`
+
+Database:
+
+- Generate migrations after schema changes: `bun run db:generate`
+- Open Drizzle Studio: `bun run db:studio`
+
+## Tests
+
+- No dedicated test runner is configured right now:
+  - No `test` script in `package.json`
+  - No `jest`/`vitest` config files detected
+
+If/when tests are added, keep them easy to run locally and in CI:
+
+- Prefer a single-test workflow (examples, depending on chosen runner):
+  - Vitest: `bunx vitest run path/to/file.test.ts`
+  - Jest: `bunx jest path/to/file.test.ts -t "test name"`
+
+(Only add the above scripts once the project actually adopts that runner.)
 
 ## Environment Variables
 
-- `OPENROUTER_API_KEY`: Required for AI-powered features (transaction enrichment, subscription detection)
-- `EXPO_PUBLIC_LOGO_DEV_KEY`: Required for logo fetching in development
+- `OPENROUTER_API_KEY`: required for AI API routes (`app/api/*`)
+- `EXPO_PUBLIC_LOGO_DEV_KEY`: required for logo fetching in development
+- `EXPO_PUBLIC_API_URL`: referenced by `lib/config.ts`
 
-## Key Features
+Never hardcode secrets; use env vars.
 
-1. **Transaction Import**: Import XML files from ZKB bank exports
-2. **AI Transaction Enrichment**: Automatically categorize transactions, extract merchant names, and match to subscriptions
-3. **Subscription Detection**: AI analyzes transaction patterns to detect recurring subscriptions
-4. **Subscription Management**: Manual creation/editing of subscriptions with domain-based logos
+## Imports
 
-## Coding Style & Naming Conventions
+- Prefer path alias imports using `@/*` (configured in `tsconfig.json`).
+- Avoid deep relative imports like `../../../`.
+- Use type-only imports when applicable: `import type { Foo } from '...'`.
+- Keep imports grouped and readable:
+  1. React / React Native / Expo
+  2. third-party libraries
+  3. internal alias imports (`@/...`)
+  4. local relative imports (`./...`)
 
-- Use 2-space indentation
-- Components in `PascalCase`; hooks/utilities in `camelCase`
-- File names should match the default export
-- Use NativeWind `className` utilities for styling
-- Use alias paths (`@/foo/bar`) instead of relative imports
-- Store currency as integer cents (e.g., `subscriptions.price`, `transactions.amount`)
+## Formatting
 
-## Commit & Pull Request Guidelines
+- Prettier is configured via `.prettierrc`:
+  - `tabWidth: 2`, `singleQuote: true`, `semi: true`, `printWidth: 100`
+  - `prettier-plugin-tailwindcss` is enabled (keeps class ordering stable)
+- Use 2-space indentation.
 
-- Commits: short, imperative summaries (e.g., `add subscription detection`, `fix transaction import`)
-- PRs: describe what changed, and why
+## TypeScript Guidelines
 
-## Security & Configuration
+- Use `strict: true` TypeScript; avoid `any`.
+- Narrow `unknown` errors before using:
+  - `error instanceof Error ? error.message : String(error)`
+- Prefer explicit return types for public utilities in `lib/` and API handlers.
+- Prefer `as const` for string literal sets (see `db/schema.ts`).
 
-- Never hardcode API keys; use environment variables
-- Keep migrations in sync with `db/schema.ts`
+## Component Architecture
+
+- Keep screen/routes thin: push reusable logic into `lib/`.
+- When adding a helper that could be reused by multiple screens/components, put it in `lib/`.
+- If a component grows too large:
+  - split it into smaller components
+  - put reusable smaller components in `components/`
+  - put UI-only primitives in `components/ui/`
+
+## Styling (NativeWind)
+
+- Prefer NativeWind `className` over inline styles when possible.
+- Tailwind content sources are `app/**/*` and `components/**/*` (see `tailwind.config.js`).
+
+## Error Handling
+
+API routes (`app/api/*+api.ts`):
+
+- Validate inputs with Zod and `validateRequest` (`lib/api/api-validation.ts`).
+- On validation errors, return a `400` with structured JSON.
+- On server errors, return `500` with a stable `error` message; include `details` only as strings.
+- Use `console.error` for unexpected errors and `console.warn` for recoverable issues.
+
+UI code:
+
+- Don’t swallow errors silently. Log with context and show a user-friendly message.
+- Prefer pure helpers in `lib/` that are easy to unit test later.
+
+## Database & Money
+
+- Store currency amounts as integer cents (e.g. `subscriptions.price`, `transactions.amount`).
+- Drizzle migrations in `drizzle/` are generated; do not edit them manually.
+
+## AI / API Conventions
+
+- Prompts and schemas live in `lib/api/`.
+- Always validate AI outputs with Zod schemas before using them.
+- Keep token-heavy transformations in utilities (e.g. TOON conversion in `lib/toon-converter.ts`).
+
+## Lint Rules
+
+- Lint is configured via `eslint.config.js` using Expo’s flat config.
+- Notable project rule: `@typescript-eslint/no-unnecessary-condition` is `error`.
