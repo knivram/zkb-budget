@@ -1,5 +1,5 @@
-import AmountText from '@/components/AmountText';
-import DomainLogo from '@/components/DomainLogo';
+import AmountText from '@/components/ui/amount-text';
+import DomainLogo from '@/components/ui/domain-logo';
 import { db } from '@/db/client';
 import { subscriptions, transactions } from '@/db/schema';
 import { eq } from 'drizzle-orm';

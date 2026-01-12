@@ -1,5 +1,5 @@
-import AmountText from '@/components/AmountText';
-import DomainLogo from '@/components/DomainLogo';
+import AmountText from '@/components/ui/amount-text';
+import DomainLogo from '@/components/ui/domain-logo';
 import { db } from '@/db/client';
 import { BillingCycle, Subscription, subscriptions } from '@/db/schema';
 import { Button, ContextMenu, Host } from '@expo/ui/swift-ui';

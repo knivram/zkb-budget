@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 import { Host, Image as SwiftImage } from '@expo/ui/swift-ui';
 import { useEffect, useState } from 'react';
 import { Image, Text, View } from 'react-native';
-import { DomainLogoProps } from './DomainLogo';
+import { DomainLogoProps } from './domain-logo';
 
 export default function DomainLogo({
   domain,

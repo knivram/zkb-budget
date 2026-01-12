@@ -1,6 +1,6 @@
-import AmountText from '@/components/AmountText';
-import DomainLogo from '@/components/DomainLogo';
 import SpendingByCategory from '@/components/SpendingByCategory';
+import AmountText from '@/components/ui/amount-text';
+import DomainLogo from '@/components/ui/domain-logo';
 import { db } from '@/db/client';
 import { transactions } from '@/db/schema';
 import { formatYearMonth } from '@/lib/date';
