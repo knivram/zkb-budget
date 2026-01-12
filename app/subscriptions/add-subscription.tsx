@@ -10,14 +10,43 @@ import { Controller, useForm } from 'react-hook-form';
 import { KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from 'react-native';
 import { z } from 'zod';
 
+const parsePriceToCents = (input: string): number | null => {
+  const normalized = input.trim().replace(/\s+/g, '').replace(',', '.');
+
+  if (normalized === '') return null;
+
+  const match = normalized.match(/^(\d*)(?:\.(\d{0,2}))?$/);
+  if (!match) return null;
+
+  const dollarsPart = match.at(1) ?? '';
+  const centsPart = match.at(2) ?? '';
+
+  if (dollarsPart === '' && centsPart === '') return null;
+
+  const dollars = dollarsPart === '' ? 0 : parseInt(dollarsPart, 10);
+  if (!Number.isFinite(dollars)) return null;
+
+  const centsTwoDigits = centsPart.padEnd(2, '0');
+  const cents = centsTwoDigits === '' ? 0 : parseInt(centsTwoDigits, 10);
+  if (!Number.isFinite(cents)) return null;
+
+  return dollars * 100 + cents;
+};
+
 const subscriptionSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   price: z
     .string()
     .min(1, 'Price is required')
-    .refine((val) => !isNaN(parseFloat(val)) && parseFloat(val) > 0, {
-      message: 'Price must be a valid positive number',
-    }),
+    .refine(
+      (val) => {
+        const cents = parsePriceToCents(val);
+        return cents !== null && cents > 0;
+      },
+      {
+        message: 'Price must be at least 0.01',
+      }
+    ),
   billingCycleIndex: z
     .number()
     .min(0)
@@ -64,7 +93,7 @@ export default function AddSubscription() {
       subscribedAt: new Date(),
       domain: '',
     },
-    mode: 'onChange',
+    mode: 'onBlur',
   });
 
   useEffect(() => {
@@ -106,8 +135,10 @@ export default function AddSubscription() {
 
   const onSubmit = async (data: SubscriptionFormData) => {
     try {
-      const [dollars, cents = '00'] = data.price.split('.');
-      const priceInCents = parseInt(dollars) * 100 + parseInt(cents.padEnd(2, '0').slice(0, 2));
+      const priceInCents = parsePriceToCents(data.price);
+      if (priceInCents === null) {
+        throw new Error('Invalid price');
+      }
 
       const subscriptionData = {
         name: data.name.trim(),
