@@ -70,6 +70,8 @@ If/when tests are added, keep them easy to run locally and in CI:
 - `OPENROUTER_API_KEY`: required for AI API routes (`app/api/*`)
 - `EXPO_PUBLIC_LOGO_DEV_KEY`: required for logo fetching in development
 - `EXPO_PUBLIC_API_URL`: referenced by `lib/config.ts`
+- `POSTHOG_API_KEY`: optional, enables AI analytics tracking via PostHog
+- `POSTHOG_HOST`: optional, PostHog instance URL (e.g. `https://us.i.posthog.com`)
 
 Never hardcode secrets; use env vars.
 
