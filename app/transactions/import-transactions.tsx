@@ -1,7 +1,15 @@
+import { Effect } from "effect";
 import { db } from "@/db/client";
 import { subscriptions, transactions } from "@/db/schema";
 import { EnrichedTransaction } from "@/lib/api/ai-schemas";
 import { API_URL } from "@/lib/config";
+import {
+  ApiResponseError,
+  DatabaseQueryError,
+  FileReadError,
+  NetworkError,
+  XmlParseError,
+} from "@/lib/errors";
 import { parseXMLTransactions } from "@/lib/xml-parser";
 import {
   BottomSheet,
@@ -19,10 +27,202 @@ import { File } from "expo-file-system";
 import { useState } from "react";
 import { Alert } from "react-native";
 
+// ============================================================================
+// Types
+// ============================================================================
+
 interface ImportTransactionsProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
 }
+
+type ImportError =
+  | FileReadError
+  | XmlParseError
+  | DatabaseQueryError
+  | NetworkError
+  | ApiResponseError;
+
+// ============================================================================
+// Effect-based import operations
+// ============================================================================
+
+/**
+ * Read file contents from a URI.
+ */
+const readFileContent = (
+  uri: string
+): Effect.Effect<string, FileReadError> =>
+  Effect.tryPromise({
+    try: async () => {
+      const file = new File(uri);
+      return await file.text();
+    },
+    catch: (error) => new FileReadError({ path: uri, cause: error }),
+  });
+
+/**
+ * Parse XML content into transactions.
+ * Uses the synchronous parser but wraps any errors.
+ */
+const parseTransactions = (
+  xmlContent: string
+): Effect.Effect<ReturnType<typeof parseXMLTransactions>, XmlParseError> =>
+  Effect.try({
+    try: () => {
+      const parsed = parseXMLTransactions(xmlContent);
+      if (parsed.length === 0) {
+        throw new Error("No valid transactions found");
+      }
+      return parsed;
+    },
+    catch: () =>
+      new XmlParseError({
+        reason: "invalid_xml",
+        details: "No valid transactions found in the file",
+      }),
+  });
+
+/**
+ * Insert transactions into the database.
+ */
+const insertTransactions = (
+  parsedTransactions: ReturnType<typeof parseXMLTransactions>
+): Effect.Effect<typeof transactions.$inferSelect[], DatabaseQueryError> =>
+  Effect.tryPromise({
+    try: async () => {
+      return await db
+        .insert(transactions)
+        .values(parsedTransactions)
+        .onConflictDoNothing()
+        .returning();
+    },
+    catch: (error) =>
+      new DatabaseQueryError({ operation: "insert transactions", cause: error }),
+  });
+
+/**
+ * Fetch existing subscriptions for AI matching.
+ */
+const fetchSubscriptions = (): Effect.Effect<
+  { id: number; name: string; price: number; billingCycle: string }[],
+  DatabaseQueryError
+> =>
+  Effect.tryPromise({
+    try: async () => {
+      return await db
+        .select({
+          id: subscriptions.id,
+          name: subscriptions.name,
+          price: subscriptions.price,
+          billingCycle: subscriptions.billingCycle,
+        })
+        .from(subscriptions);
+    },
+    catch: (error) =>
+      new DatabaseQueryError({ operation: "fetch subscriptions", cause: error }),
+  });
+
+/**
+ * Call the enrichment API.
+ */
+const callEnrichmentApi = (
+  newTransactions: typeof transactions.$inferSelect[],
+  existingSubscriptions: { id: number; name: string; price: number; billingCycle: string }[]
+): Effect.Effect<EnrichedTransaction[], NetworkError | ApiResponseError> =>
+  Effect.tryPromise({
+    try: async () => {
+      const response = await fetch(`${API_URL}/api/enrich-transactions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          transactions: newTransactions,
+          subscriptions: existingSubscriptions,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new ApiResponseError({
+          status: response.status,
+          message: error.error || "Failed to enrich transactions",
+        });
+      }
+
+      const { transactions: enrichedData } = await response.json();
+      return enrichedData ?? [];
+    },
+    catch: (error) => {
+      if (error instanceof ApiResponseError) {
+        return error;
+      }
+      return new NetworkError({
+        url: `${API_URL}/api/enrich-transactions`,
+        cause: error,
+      });
+    },
+  });
+
+/**
+ * Update transactions with enriched data.
+ */
+const updateWithEnrichedData = (
+  newTransactions: typeof transactions.$inferSelect[],
+  enrichedData: EnrichedTransaction[]
+): Effect.Effect<void, DatabaseQueryError> =>
+  Effect.tryPromise({
+    try: async () => {
+      if (enrichedData.length === 0) return;
+
+      await Promise.all(
+        enrichedData.map((enriched: EnrichedTransaction) => {
+          const transaction = newTransactions.find((t) => t.id === enriched.id);
+          if (!transaction) return;
+
+          const isTwint =
+            transaction.transactionAdditionalDetails.includes("TWINT");
+
+          return db
+            .update(transactions)
+            .set({
+              category: enriched.category,
+              displayName: enriched.displayName,
+              domain: enriched.domain ?? (isTwint ? "twint.ch" : null),
+              subscriptionId: enriched.subscriptionId ?? null,
+            })
+            .where(eq(transactions.id, enriched.id));
+        })
+      );
+    },
+    catch: (error) =>
+      new DatabaseQueryError({ operation: "update transactions", cause: error }),
+  });
+
+/**
+ * Enrich transactions with AI (non-critical operation).
+ * Failures are logged but don't fail the overall import.
+ */
+const enrichTransactions = (
+  newTransactions: typeof transactions.$inferSelect[]
+): Effect.Effect<void> =>
+  Effect.gen(function* () {
+    const existingSubscriptions = yield* fetchSubscriptions().pipe(
+      Effect.catchAll(() => Effect.succeed([]))
+    );
+
+    const enrichedData = yield* callEnrichmentApi(
+      newTransactions,
+      existingSubscriptions
+    ).pipe(Effect.catchAll(() => Effect.succeed([] as EnrichedTransaction[])));
+
+    yield* updateWithEnrichedData(newTransactions, enrichedData).pipe(
+      Effect.catchAll(() => Effect.succeed(undefined))
+    );
+  });
+
+// ============================================================================
+// Component
+// ============================================================================
 
 export default function ImportTransactions({
   isOpen,
@@ -32,121 +232,78 @@ export default function ImportTransactions({
   const [loadingMessage, setLoadingMessage] = useState("Importing...");
 
   const handleImport = async () => {
-    try {
-      const result = await DocumentPicker.getDocumentAsync({
-        type: ["text/xml", "application/xml"],
-        copyToCacheDirectory: true,
-      });
+    // Pick document (outside Effect since it's user interaction)
+    const result = await DocumentPicker.getDocumentAsync({
+      type: ["text/xml", "application/xml"],
+      copyToCacheDirectory: true,
+    });
 
-      const selectedFile = result.assets?.[0];
-      if (result.canceled || !selectedFile) {
-        return;
-      }
+    const selectedFile = result.assets?.[0];
+    if (result.canceled || !selectedFile) {
+      return;
+    }
 
-      setIsImporting(true);
-      setLoadingMessage("Importing...");
+    setIsImporting(true);
+    setLoadingMessage("Importing...");
 
-      const file = new File(selectedFile.uri);
-      const xmlContent = await file.text();
-      const parsedTransactions = parseXMLTransactions(xmlContent);
+    // Define the import pipeline
+    const importPipeline = Effect.gen(function* () {
+      // Read file
+      const xmlContent = yield* readFileContent(selectedFile.uri);
 
-      if (parsedTransactions.length === 0) {
-        Alert.alert(
-          "No Transactions",
-          "No valid transactions found in the file.",
-        );
-        setIsImporting(false);
-        return;
-      }
+      // Parse transactions
+      const parsedTransactions = yield* parseTransactions(xmlContent);
 
-      const newTransactions = await db
-        .insert(transactions)
-        .values(parsedTransactions)
-        .onConflictDoNothing()
-        .returning();
+      // Insert into database
+      const newTransactions = yield* insertTransactions(parsedTransactions);
 
-      const newCount = newTransactions.length;
+      return newTransactions;
+    });
 
-      if (newCount === 0) {
-        setIsImporting(false);
-        onOpenChange(false);
-        Alert.alert(
-          "No New Transactions",
-          "All transactions in this file already exist.",
-        );
-        return;
-      }
+    // Run the import pipeline
+    const importResult = await Effect.runPromiseExit(importPipeline);
 
-      // Enrich transactions with AI
-      setLoadingMessage("Enriching transactions...");
-      try {
-        // Fetch existing subscriptions for matching
-        const existingSubscriptions = await db
-          .select({
-            id: subscriptions.id,
-            name: subscriptions.name,
-            price: subscriptions.price,
-            billingCycle: subscriptions.billingCycle,
-          })
-          .from(subscriptions);
+    if (importResult._tag === "Failure") {
+      setIsImporting(false);
 
-        const enrichResponse = await fetch(
-          `${API_URL}/api/enrich-transactions`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              transactions: newTransactions,
-              subscriptions: existingSubscriptions,
-            }),
-          },
-        );
+      // Extract error from Cause
+      const cause = importResult.cause;
+      let errorMessage = "An error occurred while importing transactions.";
 
-        if (enrichResponse.ok) {
-          const { transactions: enrichedData } = await enrichResponse.json();
-
-          // Update transactions with enriched data
-          if (enrichedData && enrichedData.length > 0) {
-            await Promise.all(
-              enrichedData.map((enriched: EnrichedTransaction) => {
-                const transaction = newTransactions.find(
-                  (t) => t.id === enriched.id,
-                );
-                if (!transaction) {
-                  return;
-                }
-                const isTwint =
-                  transaction.transactionAdditionalDetails.includes("TWINT");
-
-                return db
-                  .update(transactions)
-                  .set({
-                    category: enriched.category,
-                    displayName: enriched.displayName,
-                    domain: enriched.domain ?? (isTwint ? "twint.ch" : null),
-                    subscriptionId: enriched.subscriptionId ?? null,
-                  })
-                  .where(eq(transactions.id, enriched.id));
-              }),
-            );
-          }
+      if (cause._tag === "Fail") {
+        const error = cause.error as ImportError;
+        if (error instanceof XmlParseError) {
+          errorMessage = "No valid transactions found in the file.";
+        } else if (error instanceof FileReadError) {
+          errorMessage = "Failed to read the selected file.";
+        } else if (error instanceof DatabaseQueryError) {
+          errorMessage = "Failed to save transactions to database.";
         }
-      } catch (error) {
-        console.error("Transaction enrichment failed:", error);
-        // Continue - enrichment is non-critical
       }
 
+      Alert.alert("Import Failed", errorMessage);
+      return;
+    }
+
+    const newTransactions = importResult.value;
+
+    // Handle no new transactions
+    if (newTransactions.length === 0) {
       setIsImporting(false);
       onOpenChange(false);
-    } catch (error) {
-      console.error("Import error:", error);
       Alert.alert(
-        "Import Failed",
-        "An error occurred while importing transactions.",
+        "No New Transactions",
+        "All transactions in this file already exist."
       );
-    } finally {
-      setIsImporting(false);
+      return;
     }
+
+    // Enrich transactions (non-critical)
+    setLoadingMessage("Enriching transactions...");
+    await Effect.runPromise(enrichTransactions(newTransactions));
+
+    setIsImporting(false);
+    onOpenChange(false);
   };
 
   return (

@@ -26,6 +26,7 @@
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.1",
     "drizzle-zod": "^0.8.3",
+    "effect": "^3.19.14",
     "expo": "~54.0.30",
     "expo-constants": "~18.0.12",
     "expo-dev-client": "~6.0.20",
