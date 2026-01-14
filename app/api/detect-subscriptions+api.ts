@@ -2,6 +2,7 @@ import { subscriptionDetectionResponseSchema } from '@/lib/api/ai-schemas';
 import { detectSubscriptionsRequestSchema } from '@/lib/api/api-schemas';
 import { validateRequest } from '@/lib/api/api-validation';
 import { SUBSCRIPTION_DETECTION } from '@/lib/api/promts';
+import { wrapModelWithTracing } from '@/lib/posthog';
 import { convertTransactionsToToon } from '@/lib/toon-converter';
 import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 import { generateText, Output } from 'ai';
@@ -15,6 +16,9 @@ export async function POST(request: Request): Promise<Response> {
     apiKey: process.env.OPENROUTER_API_KEY,
   });
 
+  const baseModel = openrouter.chat('google/gemini-3-flash-preview');
+  const model = wrapModelWithTracing(baseModel, 'detect-subscriptions');
+
   try {
     const validation = await validateRequest(request, detectSubscriptionsRequestSchema);
     if (!validation.success) {
@@ -26,7 +30,7 @@ export async function POST(request: Request): Promise<Response> {
     const toonData = convertTransactionsToToon(transactions);
 
     const result = await generateText({
-      model: openrouter.chat('google/gemini-3-flash-preview'),
+      model,
       output: Output.object({
         schema: subscriptionDetectionResponseSchema,
       }),
