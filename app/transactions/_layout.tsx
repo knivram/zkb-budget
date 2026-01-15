@@ -24,6 +24,23 @@ export default function TransactionsLayout() {
         }}
       />
       <Stack.Screen
+        name="[id]"
+        options={{
+          title: 'Transaction',
+          headerLargeTitleEnabled: false,
+          headerTransparent: true,
+        }}
+      />
+      <Stack.Screen
+        name="edit-transaction"
+        options={{
+          presentation: 'modal',
+          title: 'Edit Transaction',
+          headerLargeTitleEnabled: false,
+          headerTransparent: true,
+        }}
+      />
+      <Stack.Screen
         name="import-transactions"
         options={{
           presentation: 'modal',
