@@ -1,3 +1,4 @@
+import ItemActionMenu from '@/components/ItemActionMenu';
 import AmountText from '@/components/ui/amount-text';
 import DomainLogo from '@/components/ui/domain-logo';
 import { db } from '@/db/client';
@@ -5,11 +6,11 @@ import { transactions, type Transaction } from '@/db/schema';
 import { CATEGORIES } from '@/lib/categories';
 import { Host, Image as SwiftImage } from '@expo/ui/swift-ui';
 import { FlashList } from '@shopify/flash-list';
-import { desc } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
-import { Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Text, View } from 'react-native';
+import { Alert, Pressable, Text, View } from 'react-native';
 import ImportTransactions from './import-transactions';
 
 type SectionHeader = {
@@ -89,6 +90,24 @@ export default function Transactions() {
 
   const { items } = useMemo(() => groupTransactionsByMonth(data), [data]);
 
+  const handleDelete = (transaction: Transaction) => {
+    const name = transaction.displayName ?? transaction.transactionAdditionalDetails;
+    Alert.alert('Delete Transaction', `Are you sure you want to delete "${name}"?`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await db.delete(transactions).where(eq(transactions.id, transaction.id));
+          } catch (error) {
+            console.error('Failed to delete transaction:', error);
+          }
+        },
+      },
+    ]);
+  };
+
   return (
     <>
       <Stack.Screen
@@ -130,45 +149,66 @@ export default function Transactions() {
           const categoryConfig = CATEGORIES[transaction.category];
 
           return (
-            <View className="flex-row border-b border-zinc-100 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
-              <DomainLogo
-                domain={transaction.domain}
-                fallbackIcon={categoryConfig.icon}
-                size={40}
-                className="mr-3"
-              />
+            <ItemActionMenu
+              onEdit={() =>
+                router.push({
+                  pathname: '/transactions/edit-transaction',
+                  params: { id: transaction.id },
+                })
+              }
+              onDelete={() => handleDelete(transaction)}
+            >
+              <Pressable
+                onPress={() =>
+                  router.push({
+                    pathname: '/transactions/[id]',
+                    params: { id: transaction.id },
+                  })
+                }
+              >
+                <View className="flex-row border-b border-zinc-100 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
+                  <DomainLogo
+                    domain={transaction.domain}
+                    fallbackIcon={categoryConfig.icon}
+                    size={40}
+                    className="mr-3"
+                  />
 
-              <View className="flex-1">
-                <Text
-                  className="text-base font-medium text-zinc-900 dark:text-white"
-                  numberOfLines={1}
-                >
-                  {name}
-                </Text>
-                <Text className="text-sm text-zinc-500">{formatDate(transaction.date)}</Text>
-
-                <View className="mt-1 flex-row flex-wrap gap-1">
-                  <View className="flex-row items-center rounded-md bg-zinc-100 px-2 py-0.5 dark:bg-zinc-800">
-                    <Host matchContents>
-                      <SwiftImage systemName={categoryConfig.icon} size={12} />
-                    </Host>
-                    <Text className="ml-1 text-xs text-zinc-600 dark:text-zinc-400">
-                      {categoryConfig.label}
+                  <View className="flex-1">
+                    <Text
+                      className="text-base font-medium text-zinc-900 dark:text-white"
+                      numberOfLines={1}
+                    >
+                      {name}
                     </Text>
+                    <Text className="text-sm text-zinc-500">{formatDate(transaction.date)}</Text>
+
+                    <View className="mt-1 flex-row flex-wrap gap-1">
+                      <View className="flex-row items-center rounded-md bg-zinc-100 px-2 py-0.5 dark:bg-zinc-800">
+                        <Host matchContents>
+                          <SwiftImage systemName={categoryConfig.icon} size={12} />
+                        </Host>
+                        <Text className="ml-1 text-xs text-zinc-600 dark:text-zinc-400">
+                          {categoryConfig.label}
+                        </Text>
+                      </View>
+
+                      {transaction.subscriptionId && (
+                        <View className="flex-row items-center rounded-md bg-blue-50 px-2 py-0.5 dark:bg-blue-900/30">
+                          <Text className="text-xs text-blue-600 dark:text-blue-400">
+                            Subscription
+                          </Text>
+                        </View>
+                      )}
+                    </View>
                   </View>
 
-                  {transaction.subscriptionId && (
-                    <View className="flex-row items-center rounded-md bg-blue-50 px-2 py-0.5 dark:bg-blue-900/30">
-                      <Text className="text-xs text-blue-600 dark:text-blue-400">Subscription</Text>
-                    </View>
-                  )}
+                  <View className="items-end justify-center">
+                    <AmountText amountCents={transaction.signedAmount} />
+                  </View>
                 </View>
-              </View>
-
-              <View className="items-end justify-center">
-                <AmountText amountCents={transaction.signedAmount} />
-              </View>
-            </View>
+              </Pressable>
+            </ItemActionMenu>
           );
         }}
         ListEmptyComponent={
