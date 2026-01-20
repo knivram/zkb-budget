@@ -81,9 +81,11 @@ jobs:
       - name: Build server routes
         run: bunx expo export --platform web --no-ssg
 
-      - name: Remove old deployment
+      - name: Remove old previews
         continue-on-error: true
-        run: eas deploy:delete "pr-${{ github.event.pull_request.number }}" --non-interactive
+        run: |
+          eas branch:delete "pr-${{ github.event.pull_request.number }}" --non-interactive || true
+          eas deploy:delete "pr-${{ github.event.pull_request.number }}" --non-interactive || true
 
       - name: Deploy preview server routes
         run: eas deploy --id "pr-${{ github.event.pull_request.number }}" --environment preview --non-interactive
