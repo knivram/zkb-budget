@@ -62,11 +62,7 @@ export default function EditTransaction() {
   useEffect(() => {
     const loadTransaction = async () => {
       try {
-        const result = await db
-          .select()
-          .from(transactions)
-          .where(eq(transactions.id, id))
-          .limit(1);
+        const result = await db.select().from(transactions).where(eq(transactions.id, id)).limit(1);
 
         if (result.length > 0) {
           const tx = result[0];

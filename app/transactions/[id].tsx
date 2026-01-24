@@ -152,10 +152,7 @@ export default function TransactionDetail() {
           >
             {displayName}
           </Text>
-          <AmountText
-            amountCents={transaction.signedAmount}
-            className="mt-2 text-3xl font-bold"
-          />
+          <AmountText amountCents={transaction.signedAmount} className="mt-2 text-3xl font-bold" />
           <Text className="mt-1 text-sm text-zinc-500">{formatDate(transaction.date)}</Text>
 
           {/* Category Badge */}
@@ -194,7 +191,10 @@ export default function TransactionDetail() {
               label="Type"
               value={transaction.creditDebitIndicator === 'credit' ? 'Income' : 'Expense'}
             />
-            <DetailRow label="Payment Method" value={formatSubtype(transaction.transactionSubtype)} />
+            <DetailRow
+              label="Payment Method"
+              value={formatSubtype(transaction.transactionSubtype)}
+            />
             <DetailRow label="Currency" value={transaction.currency} />
             {transaction.domain && <DetailRow label="Domain" value={transaction.domain} />}
           </View>
