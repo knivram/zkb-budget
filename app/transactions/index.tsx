@@ -110,7 +110,10 @@ export default function Transactions() {
     [data, searchQuery]
   );
 
-  const { items } = useMemo(() => groupTransactionsByMonth(filteredTransactions), [filteredTransactions]);
+  const { items } = useMemo(
+    () => groupTransactionsByMonth(filteredTransactions),
+    [filteredTransactions]
+  );
 
   return (
     <>
@@ -220,9 +223,7 @@ export default function Transactions() {
             {searchQuery.length > 0 ? (
               <>
                 <Text className="text-zinc-500">No transactions found</Text>
-                <Text className="mt-2 text-sm text-zinc-400">
-                  Try a different search term
-                </Text>
+                <Text className="mt-2 text-sm text-zinc-400">Try a different search term</Text>
               </>
             ) : (
               <>
