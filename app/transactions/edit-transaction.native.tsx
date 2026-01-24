@@ -1,14 +1,14 @@
 import { Input, Label } from '@/components/ui';
 import { db } from '@/db/client';
 import { CATEGORIES as CATEGORY_ENUM, transactions } from '@/db/schema';
-import { CATEGORIES, type CategoryConfig } from '@/lib/categories';
-import { Host, Picker } from '@expo/ui/swift-ui';
+import { CATEGORIES } from '@/lib/categories';
+import { Button, ContextMenu, Host, Image as SwiftImage } from '@expo/ui/swift-ui';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { eq } from 'drizzle-orm';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { z } from 'zod';
 
 const transactionEditSchema = z.object({
@@ -30,14 +30,6 @@ const transactionEditSchema = z.object({
 });
 
 type TransactionEditFormData = z.infer<typeof transactionEditSchema>;
-
-const categoryOptions: { key: string; label: string; config: CategoryConfig }[] = CATEGORY_ENUM.map(
-  (key) => ({
-    key,
-    label: CATEGORIES[key].label,
-    config: CATEGORIES[key],
-  })
-);
 
 export default function EditTransaction() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -192,18 +184,58 @@ export default function EditTransaction() {
             <Controller
               control={control}
               name="categoryIndex"
-              render={({ field: { onChange, value } }) => (
-                <View className="mt-1 overflow-hidden rounded-xl bg-zinc-100 dark:bg-zinc-800">
-                  <Host matchContents>
-                    <Picker
-                      options={categoryOptions.map((opt) => opt.label)}
-                      selectedIndex={value}
-                      onOptionSelected={({ nativeEvent: { index } }) => onChange(index)}
-                      variant="menu"
-                    />
+              render={({ field: { onChange, value } }) => {
+                const selectedCategory = CATEGORY_ENUM[value];
+                const config = CATEGORIES[selectedCategory];
+
+                return (
+                  <Host>
+                    <ContextMenu activationMethod="singlePress">
+                      <ContextMenu.Items>
+                        {CATEGORY_ENUM.map((cat, index) => {
+                          const catConfig = CATEGORIES[cat];
+                          return (
+                            <Button
+                              key={cat}
+                              systemImage={catConfig.icon}
+                              onPress={() => onChange(index)}
+                            >
+                              {catConfig.label}
+                            </Button>
+                          );
+                        })}
+                      </ContextMenu.Items>
+                      <ContextMenu.Trigger>
+                        <Pressable>
+                          <View
+                            className="mt-1 flex-row items-center rounded-xl px-4 py-3"
+                            style={{ backgroundColor: `${config.color}15` }}
+                          >
+                            <View
+                              className="mr-3 h-10 w-10 items-center justify-center rounded-full"
+                              style={{ backgroundColor: `${config.color}25` }}
+                            >
+                              <Host matchContents>
+                                <SwiftImage systemName={config.icon} size={20} />
+                              </Host>
+                            </View>
+                            <Text
+                              className="flex-1 text-base font-medium"
+                              style={{ color: config.color }}
+                              numberOfLines={1}
+                            >
+                              {config.label}
+                            </Text>
+                            <Host matchContents>
+                              <SwiftImage systemName="chevron.up.chevron.down" size={14} />
+                            </Host>
+                          </View>
+                        </Pressable>
+                      </ContextMenu.Trigger>
+                    </ContextMenu>
                   </Host>
-                </View>
-              )}
+                );
+              }}
             />
           </View>
 
