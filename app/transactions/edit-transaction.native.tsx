@@ -193,14 +193,16 @@ export default function EditTransaction() {
               control={control}
               name="categoryIndex"
               render={({ field: { onChange, value } }) => (
-                <Host matchContents>
-                  <Picker
-                    options={categoryOptions.map((opt) => opt.label)}
-                    selectedIndex={value}
-                    onOptionSelected={({ nativeEvent: { index } }) => onChange(index)}
-                    variant="wheel"
-                  />
-                </Host>
+                <View className="mt-1 overflow-hidden rounded-xl bg-zinc-100 dark:bg-zinc-800">
+                  <Host matchContents>
+                    <Picker
+                      options={categoryOptions.map((opt) => opt.label)}
+                      selectedIndex={value}
+                      onOptionSelected={({ nativeEvent: { index } }) => onChange(index)}
+                      variant="menu"
+                    />
+                  </Host>
+                </View>
               )}
             />
           </View>
