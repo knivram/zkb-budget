@@ -1,18 +1,22 @@
 import { Input, Label } from '@/components/ui';
 import { db } from '@/db/client';
 import { CATEGORIES as CATEGORY_ENUM, transactions } from '@/db/schema';
-import { CATEGORIES } from '@/lib/categories';
+import { CATEGORIES, type CategoryConfig } from '@/lib/categories';
+import { Host, Picker } from '@expo/ui/swift-ui';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { eq } from 'drizzle-orm';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
 import { z } from 'zod';
 
 const transactionEditSchema = z.object({
   displayName: z.string().optional(),
-  category: z.enum(CATEGORY_ENUM),
+  categoryIndex: z
+    .number()
+    .min(0)
+    .max(CATEGORY_ENUM.length - 1),
   domain: z
     .string()
     .optional()
@@ -26,6 +30,14 @@ const transactionEditSchema = z.object({
 });
 
 type TransactionEditFormData = z.infer<typeof transactionEditSchema>;
+
+const categoryOptions: { key: string; label: string; config: CategoryConfig }[] = CATEGORY_ENUM.map(
+  (key) => ({
+    key,
+    label: CATEGORIES[key].label,
+    config: CATEGORIES[key],
+  })
+);
 
 export default function EditTransaction() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -41,7 +53,7 @@ export default function EditTransaction() {
     resolver: zodResolver(transactionEditSchema),
     defaultValues: {
       displayName: '',
-      category: 'other',
+      categoryIndex: CATEGORY_ENUM.indexOf('other'),
       domain: '',
     },
     mode: 'onBlur',
@@ -55,10 +67,11 @@ export default function EditTransaction() {
         if (result.length > 0) {
           const tx = result[0];
           setOriginalDescription(tx.transactionAdditionalDetails);
+          const categoryIndex = CATEGORY_ENUM.indexOf(tx.category);
 
           reset({
             displayName: tx.displayName ?? '',
-            category: tx.category,
+            categoryIndex: categoryIndex >= 0 ? categoryIndex : CATEGORY_ENUM.indexOf('other'),
             domain: tx.domain ?? '',
           });
         }
@@ -76,7 +89,7 @@ export default function EditTransaction() {
     try {
       const updateData = {
         displayName: data.displayName?.trim() || null,
-        category: data.category,
+        category: CATEGORY_ENUM[data.categoryIndex],
         domain: data.domain?.trim() || null,
       };
 
@@ -100,7 +113,35 @@ export default function EditTransaction() {
 
   return (
     <>
-      <Stack.Screen options={{ title: 'Edit Transaction' }} />
+      <Stack.Screen
+        options={{
+          title: 'Edit Transaction',
+          unstable_headerRightItems: () => [
+            {
+              type: 'button',
+              label: 'Save',
+              icon: {
+                name: 'checkmark',
+                type: 'sfSymbol',
+              },
+              variant: 'prominent',
+              onPress: handleSubmit(onSubmit),
+              disabled: !isValid || isSubmitting,
+            },
+          ],
+          unstable_headerLeftItems: () => [
+            {
+              type: 'button',
+              label: 'Cancel',
+              icon: {
+                name: 'xmark',
+                type: 'sfSymbol',
+              },
+              onPress: () => router.back(),
+            },
+          ],
+        }}
+      />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1 bg-white dark:bg-zinc-900"
@@ -150,33 +191,16 @@ export default function EditTransaction() {
             <Label>Category</Label>
             <Controller
               control={control}
-              name="category"
+              name="categoryIndex"
               render={({ field: { onChange, value } }) => (
-                <View className="flex-row flex-wrap gap-2">
-                  {CATEGORY_ENUM.map((cat) => {
-                    const config = CATEGORIES[cat];
-                    const isSelected = value === cat;
-                    return (
-                      <Pressable
-                        key={cat}
-                        onPress={() => onChange(cat)}
-                        className="rounded-lg px-3 py-2"
-                        style={{
-                          backgroundColor: isSelected ? `${config.color}20` : '#f4f4f5',
-                          borderWidth: isSelected ? 2 : 0,
-                          borderColor: config.color,
-                        }}
-                      >
-                        <Text
-                          className="text-sm font-medium"
-                          style={{ color: isSelected ? config.color : '#71717a' }}
-                        >
-                          {config.label}
-                        </Text>
-                      </Pressable>
-                    );
-                  })}
-                </View>
+                <Host matchContents>
+                  <Picker
+                    options={categoryOptions.map((opt) => opt.label)}
+                    selectedIndex={value}
+                    onOptionSelected={({ nativeEvent: { index } }) => onChange(index)}
+                    variant="wheel"
+                  />
+                </Host>
               )}
             />
           </View>
@@ -205,24 +229,6 @@ export default function EditTransaction() {
             <Text className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
               Used to display the merchant logo
             </Text>
-          </View>
-
-          {/* Action Buttons */}
-          <View className="mt-4 flex-row gap-2">
-            <Pressable
-              className="flex-1 items-center rounded-lg bg-zinc-100 py-3 dark:bg-zinc-800"
-              onPress={() => router.back()}
-            >
-              <Text className="font-medium text-zinc-900 dark:text-white">Cancel</Text>
-            </Pressable>
-            <Pressable
-              className="flex-1 items-center rounded-lg bg-blue-500 py-3"
-              onPress={handleSubmit(onSubmit)}
-              disabled={!isValid || isSubmitting}
-              style={{ opacity: !isValid || isSubmitting ? 0.5 : 1 }}
-            >
-              <Text className="font-medium text-white">Save</Text>
-            </Pressable>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
