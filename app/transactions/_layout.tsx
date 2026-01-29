@@ -26,7 +26,7 @@ export default function TransactionsLayout() {
       <Stack.Screen
         name="[id]"
         options={{
-          title: 'Transaction',
+          headerBackButtonDisplayMode: 'minimal',
           headerLargeTitleEnabled: false,
           headerTransparent: true,
         }}

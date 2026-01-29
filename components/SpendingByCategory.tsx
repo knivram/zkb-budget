@@ -1,7 +1,7 @@
 import { Category } from '@/db/schema';
 import { CATEGORIES } from '@/lib/categories';
 import { Host, Image as SwiftImage } from '@expo/ui/swift-ui';
-import { Text, View } from 'react-native';
+import { Text, View, useColorScheme } from 'react-native';
 import AmountText from './ui/amount-text';
 
 export type CategoryItem = {
@@ -15,6 +15,9 @@ type SpendingByCategoryProps = {
 };
 
 export default function SpendingByCategory({ categories, monthExpenses }: SpendingByCategoryProps) {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const iconColor = isDark ? '#000000' : '#ffffff';
   const maxTotal = Math.max(...categories.map((item) => item.total));
 
   return categories.map((item, index) => {
@@ -31,7 +34,7 @@ export default function SpendingByCategory({ categories, monthExpenses }: Spendi
               style={{ backgroundColor: categoryConfig.color }}
             >
               <Host matchContents>
-                <SwiftImage systemName={categoryConfig.icon} size={14} />
+                <SwiftImage systemName={categoryConfig.icon} size={14} color={iconColor} />
               </Host>
             </View>
             <Text className="text-sm text-zinc-700 dark:text-zinc-300">{categoryConfig.label}</Text>
