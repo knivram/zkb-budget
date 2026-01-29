@@ -95,7 +95,42 @@ export default function TransactionDetail() {
 
   return (
     <>
-      <Stack.Screen options={{ title: 'Transaction' }} />
+      <Stack.Screen
+        options={{
+          title: displayName,
+          unstable_headerRightItems: () => [
+            {
+              type: 'menu',
+              label: 'Actions',
+              icon: {
+                name: 'ellipsis',
+                type: 'sfSymbol',
+              },
+              menu: {
+                items: [
+                  {
+                    type: 'action',
+                    systemImage: 'pencil',
+                    label: 'Edit',
+                    onPress: () =>
+                      router.push({
+                        pathname: '/transactions/edit-transaction',
+                        params: { id: transaction.id },
+                      }),
+                  },
+                  {
+                    type: 'action',
+                    systemImage: 'trash',
+                    label: 'Delete',
+                    attributes: { destructive: true },
+                    onPress: handleDelete,
+                  },
+                ],
+              },
+            },
+          ],
+        }}
+      />
       <ScrollView
         className="flex-1 bg-white dark:bg-zinc-900"
         contentInsetAdjustmentBehavior="automatic"
@@ -116,6 +151,7 @@ export default function TransactionDetail() {
           >
             {displayName}
           </Text>
+          <AmountText amountCents={transaction.signedAmount} className="mt-2 text-3xl font-bold" />
           <AmountText amountCents={transaction.signedAmount} className="mt-2 text-3xl font-bold" />
           <Text className="mt-1 text-sm text-zinc-500">{formatDate(transaction.date)}</Text>
 
@@ -169,6 +205,10 @@ export default function TransactionDetail() {
             <DetailRow
               label="Type"
               value={transaction.creditDebitIndicator === 'credit' ? 'Income' : 'Expense'}
+            />
+            <DetailRow
+              label="Payment Method"
+              value={formatSubtype(transaction.transactionSubtype)}
             />
             <DetailRow
               label="Payment Method"

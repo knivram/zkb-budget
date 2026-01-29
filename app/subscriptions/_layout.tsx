@@ -48,6 +48,7 @@ export default function SubscriptionLayout() {
         name="[id]"
         options={{
           title: 'Subscription',
+          headerBackButtonDisplayMode: 'minimal',
           headerLargeTitleEnabled: false,
           headerTransparent: true,
         }}
