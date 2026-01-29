@@ -1,11 +1,14 @@
 import AmountText from '@/components/ui/amount-text';
+import DomainLogo from '@/components/ui/domain-logo';
 import { db } from '@/db/client';
 import { subscriptions, transactions } from '@/db/schema';
 import { CATEGORIES } from '@/lib/categories';
+import { Host, Image as SwiftImage } from '@expo/ui/swift-ui';
 import { eq } from 'drizzle-orm';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
-import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
+import React from 'react';
+import { Alert, ScrollView, Text, View } from 'react-native';
 
 const formatDate = (dateStr: string): string => {
   const date = new Date(dateStr);
@@ -137,21 +140,18 @@ export default function TransactionDetail() {
       >
         {/* Header Section */}
         <View className="items-center border-b border-zinc-100 px-4 py-6 dark:border-zinc-800">
-          <View
-            className="mb-3 h-20 w-20 items-center justify-center rounded-xl"
-            style={{ backgroundColor: `${categoryConfig.color}20` }}
-          >
-            <Text className="text-2xl" style={{ color: categoryConfig.color }}>
-              {displayName.charAt(0).toUpperCase()}
-            </Text>
-          </View>
+          <DomainLogo
+            domain={transaction.domain}
+            fallbackIcon={categoryConfig.icon}
+            size={80}
+            className="mb-3"
+          />
           <Text
             className="text-center text-xl font-semibold text-zinc-900 dark:text-white"
             numberOfLines={2}
           >
             {displayName}
           </Text>
-          <AmountText amountCents={transaction.signedAmount} className="mt-2 text-3xl font-bold" />
           <AmountText amountCents={transaction.signedAmount} className="mt-2 text-3xl font-bold" />
           <Text className="mt-1 text-sm text-zinc-500">{formatDate(transaction.date)}</Text>
 
@@ -160,7 +160,10 @@ export default function TransactionDetail() {
             className="mt-4 flex-row items-center rounded-full px-4 py-2"
             style={{ backgroundColor: `${categoryConfig.color}20` }}
           >
-            <Text className="text-sm font-medium" style={{ color: categoryConfig.color }}>
+            <Host matchContents>
+              <SwiftImage systemName={categoryConfig.icon} size={16} />
+            </Host>
+            <Text className="ml-2 text-sm font-medium" style={{ color: categoryConfig.color }}>
               {categoryConfig.label}
             </Text>
           </View>
@@ -168,32 +171,14 @@ export default function TransactionDetail() {
           {/* Subscription Badge */}
           {subscriptionData.length > 0 && (
             <View className="mt-2 flex-row items-center rounded-full bg-blue-100 px-4 py-2 dark:bg-blue-900/30">
-              <Text className="text-sm font-medium text-blue-600 dark:text-blue-400">
+              <Host matchContents>
+                <SwiftImage systemName="repeat" size={14} />
+              </Host>
+              <Text className="ml-2 text-sm font-medium text-blue-600 dark:text-blue-400">
                 {subscriptionData[0].name}
               </Text>
             </View>
           )}
-        </View>
-
-        {/* Action Buttons */}
-        <View className="flex-row gap-2 px-4 py-4">
-          <Pressable
-            className="flex-1 items-center rounded-lg bg-zinc-100 py-3 dark:bg-zinc-800"
-            onPress={() =>
-              router.push({
-                pathname: '/transactions/edit-transaction',
-                params: { id: transaction.id },
-              })
-            }
-          >
-            <Text className="font-medium text-zinc-900 dark:text-white">Edit</Text>
-          </Pressable>
-          <Pressable
-            className="flex-1 items-center rounded-lg bg-red-100 py-3 dark:bg-red-900/30"
-            onPress={handleDelete}
-          >
-            <Text className="font-medium text-red-600 dark:text-red-400">Delete</Text>
-          </Pressable>
         </View>
 
         {/* Transaction Details */}
