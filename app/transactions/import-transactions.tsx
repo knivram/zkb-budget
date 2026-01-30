@@ -144,10 +144,7 @@ export default function ImportTransactions({ isOpen, onOpenChange }: ImportTrans
 
   return (
     <Host>
-      <BottomSheet
-        isPresented={isOpen}
-        onIsPresentedChange={onOpenChange}
-      >
+      <BottomSheet isPresented={isOpen} onIsPresentedChange={onOpenChange}>
         <Group
           modifiers={[
             presentationDetents([{ fraction: 0.2 }]),

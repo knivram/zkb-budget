@@ -104,10 +104,7 @@ export default function DetectSubscriptions({ isOpen, onOpenChange }: DetectSubs
 
   return (
     <Host>
-      <BottomSheet
-        isPresented={isOpen}
-        onIsPresentedChange={onOpenChange}
-      >
+      <BottomSheet isPresented={isOpen} onIsPresentedChange={onOpenChange}>
         <Group
           modifiers={[
             presentationDetents([{ fraction: 0.23 }]),
