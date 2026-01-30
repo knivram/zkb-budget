@@ -4,7 +4,7 @@
     "": {
       "name": "zkb-budget",
       "dependencies": {
-        "@expo/ui": "~55.0.0-beta.2",
+        "@expo/ui": "^55.0.0-beta.3",
         "@hookform/resolvers": "^5.2.2",
         "@openrouter/ai-sdk-provider": "^1.5.4",
         "@react-navigation/bottom-tabs": "^7.4.0",
@@ -408,7 +408,7 @@
 
     "@expo/sudo-prompt": ["@expo/sudo-prompt@9.3.2", "", {}, "sha512-HHQigo3rQWKMDzYDLkubN5WQOYXJJE2eNqIQC2axC2iO3mHdwnIR7FgZVvHWtBwAdzBgAP0ECp8KqS8TiMKvgw=="],
 
-    "@expo/ui": ["@expo/ui@55.0.0-canary-20260128-67ce8d5", "", { "dependencies": { "sf-symbols-typescript": "^2.1.0" }, "peerDependencies": { "expo": "*", "react": "*", "react-native": "*" } }, "sha512-YNVKre5tBoe4JcjCqwbDkQHitjeARpXBvdCiOC1dixEnVfrR3nMngwW9NiZKnfi8MI5w9WJ5WmImuCGBXApmqw=="],
+    "@expo/ui": ["@expo/ui@55.0.0-beta.3", "", { "dependencies": { "sf-symbols-typescript": "^2.1.0" }, "peerDependencies": { "expo": "*", "react": "*", "react-native": "*" } }, "sha512-JUkOH2i8FRkiF+6mzpPCVRvnqJ8wM0LjhYdcHRWqc+FslyS5z3ghTYnwbPF7h7aTCjKs8iTzsNiAP2wNEu6wAg=="],
 
     "@expo/vector-icons": ["@expo/vector-icons@15.0.3", "", { "peerDependencies": { "expo-font": ">=14.0.4", "react": "*", "react-native": "*" } }, "sha512-SBUyYKphmlfUBqxSfDdJ3jAdEVSALS2VUPOUyqn48oZmb2TL/O7t7/PQm5v4NQujYEPLPMTLn9KVw6H7twwbTA=="],
 

@@ -6,7 +6,7 @@ import { transactions } from '@/db/schema';
 import { formatYearMonth } from '@/lib/date';
 import { cn } from '@/lib/utils';
 import { Button, Host } from '@expo/ui/swift-ui';
-import { buttonStyle, disabled, scaleEffect } from '@expo/ui/swift-ui/modifiers';
+import { buttonStyle, controlSize, disabled, labelStyle } from '@expo/ui/swift-ui/modifiers';
 import { and, count, desc, eq, isNotNull, notInArray, sql, sum } from 'drizzle-orm';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { TrendingDown, TrendingUp } from 'lucide-react-native';
@@ -141,8 +141,9 @@ export default function Analytics() {
           <Host matchContents>
             <Button
               onPress={handlePreviousMonth}
+              label="Previous"
               systemImage="chevron.left"
-              modifiers={[buttonStyle('glass'), scaleEffect(1.1)]}
+              modifiers={[buttonStyle('glass'), controlSize('small'), labelStyle('iconOnly')]}
             />
           </Host>
           <Text className="text-lg font-semibold text-zinc-900 dark:text-white">
@@ -151,8 +152,14 @@ export default function Analytics() {
           <Host matchContents>
             <Button
               onPress={handleNextMonth}
+              label="Next"
               systemImage="chevron.right"
-              modifiers={[buttonStyle('glass'), disabled(isCurrentMonth), scaleEffect(1.1)]}
+              modifiers={[
+                buttonStyle('glass'),
+                controlSize('small'),
+                labelStyle('iconOnly'),
+                disabled(isCurrentMonth),
+              ]}
             />
           </Host>
         </View>
