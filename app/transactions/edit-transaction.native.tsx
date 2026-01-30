@@ -2,7 +2,7 @@ import { Input, Label } from '@/components/ui';
 import { db } from '@/db/client';
 import { CATEGORIES as CATEGORY_ENUM, transactions } from '@/db/schema';
 import { CATEGORIES } from '@/lib/categories';
-import { Button, ContextMenu, Host, Image as SwiftImage } from '@expo/ui/swift-ui';
+import { Button, Host, Image as SwiftImage, Menu } from '@expo/ui/swift-ui';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { eq } from 'drizzle-orm';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
@@ -190,22 +190,8 @@ export default function EditTransaction() {
 
                 return (
                   <Host>
-                    <ContextMenu activationMethod="singlePress">
-                      <ContextMenu.Items>
-                        {CATEGORY_ENUM.map((cat, index) => {
-                          const catConfig = CATEGORIES[cat];
-                          return (
-                            <Button
-                              key={cat}
-                              systemImage={catConfig.icon}
-                              onPress={() => onChange(index)}
-                            >
-                              {catConfig.label}
-                            </Button>
-                          );
-                        })}
-                      </ContextMenu.Items>
-                      <ContextMenu.Trigger>
+                    <Menu
+                      label={
                         <Pressable>
                           <View
                             className="mt-1 flex-row items-center rounded-xl px-4 py-3"
@@ -231,8 +217,20 @@ export default function EditTransaction() {
                             </Host>
                           </View>
                         </Pressable>
-                      </ContextMenu.Trigger>
-                    </ContextMenu>
+                      }
+                    >
+                      {CATEGORY_ENUM.map((cat, index) => {
+                        const catConfig = CATEGORIES[cat];
+                        return (
+                          <Button
+                            key={cat}
+                            systemImage={catConfig.icon}
+                            label={catConfig.label}
+                            onPress={() => onChange(index)}
+                          />
+                        );
+                      })}
+                    </Menu>
                   </Host>
                 );
               }}

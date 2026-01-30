@@ -18,17 +18,13 @@ export default function ItemActionMenu({
 }: ItemActionMenuProps) {
   return (
     <Host>
-      <ContextMenu activationMethod="longPress">
+      <ContextMenu>
         <ContextMenu.Items>
           {onEdit && (
-            <Button systemImage="pencil" onPress={onEdit}>
-              {editLabel}
-            </Button>
+            <Button systemImage="pencil" label={editLabel} onPress={onEdit} />
           )}
           {onDelete && (
-            <Button systemImage="trash" onPress={onDelete} role="destructive">
-              {deleteLabel}
-            </Button>
+            <Button systemImage="trash" label={deleteLabel} onPress={onDelete} role="destructive" />
           )}
         </ContextMenu.Items>
         <ContextMenu.Trigger>{children}</ContextMenu.Trigger>
