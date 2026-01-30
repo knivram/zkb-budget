@@ -6,7 +6,7 @@ import { transactions } from '@/db/schema';
 import { formatYearMonth } from '@/lib/date';
 import { cn } from '@/lib/utils';
 import { Button, Host } from '@expo/ui/swift-ui';
-import { scaleEffect } from '@expo/ui/swift-ui/modifiers';
+import { buttonStyle, disabled, scaleEffect } from '@expo/ui/swift-ui/modifiers';
 import { and, count, desc, eq, isNotNull, notInArray, sql, sum } from 'drizzle-orm';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { TrendingDown, TrendingUp } from 'lucide-react-native';
@@ -142,8 +142,7 @@ export default function Analytics() {
             <Button
               onPress={handlePreviousMonth}
               systemImage="chevron.left"
-              variant="glass"
-              modifiers={[scaleEffect(1.1)]}
+              modifiers={[buttonStyle('glass'), scaleEffect(1.1)]}
             />
           </Host>
           <Text className="text-lg font-semibold text-zinc-900 dark:text-white">
@@ -153,9 +152,7 @@ export default function Analytics() {
             <Button
               onPress={handleNextMonth}
               systemImage="chevron.right"
-              disabled={isCurrentMonth}
-              variant="glass"
-              modifiers={[scaleEffect(1.1)]}
+              modifiers={[buttonStyle('glass'), disabled(isCurrentMonth), scaleEffect(1.1)]}
             />
           </Host>
         </View>

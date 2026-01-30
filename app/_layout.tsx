@@ -3,7 +3,7 @@ import migrations from '@/drizzle/migrations';
 import '@/global.css';
 import { registerDevMenuItems } from '@/lib/devMenu';
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
-import { Icon, Label, NativeTabs } from 'expo-router/unstable-native-tabs';
+import { NativeTabs } from 'expo-router/unstable-native-tabs';
 import { Text, View } from 'react-native';
 
 export default function RootLayout() {
@@ -31,16 +31,16 @@ export default function RootLayout() {
   return (
     <NativeTabs>
       <NativeTabs.Trigger name="transactions">
-        <Icon sf="list.bullet" />
-        <Label>Transactions</Label>
+        <NativeTabs.Trigger.Icon sf="list.bullet" />
+        <NativeTabs.Trigger.Label>Transactions</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="subscriptions">
-        <Icon sf="repeat" />
-        <Label>Subscriptions</Label>
+        <NativeTabs.Trigger.Icon sf="repeat" />
+        <NativeTabs.Trigger.Label>Subscriptions</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="analytics">
-        <Icon sf="chart.bar.fill" />
-        <Label>Analytics</Label>
+        <NativeTabs.Trigger.Icon sf="chart.bar.fill" />
+        <NativeTabs.Trigger.Label>Analytics</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
     </NativeTabs>
   );
