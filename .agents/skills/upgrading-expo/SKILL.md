@@ -21,7 +21,7 @@ Beta versions use `.preview` suffix (e.g., `55.0.0-preview.2`), published under 
 Check if latest is beta: https://exp.host/--/api/v2/versions (look for `-preview` in `expoVersion`)
 
 ```bash
-npx expo install expo@next --fix  # install beta
+bunx expo install expo@next --fix  # install beta
 ```
 
 ## Step-by-Step Upgrade Process
@@ -29,16 +29,16 @@ npx expo install expo@next --fix  # install beta
 1. Upgrade Expo and dependencies
 
 ```bash
-npx expo install expo@latest
-npx expo install --fix
+bunx expo install expo@latest
+bunx expo install --fix
 ```
 
-2. Run diagnostics: `npx expo-doctor`
+2. Run diagnostics: `bunx expo-doctor`
 
 3. Clear caches and reinstall
 
 ```bash
-npx expo export -p ios --clear
+bunx expo export -p ios --clear
 rm -rf node_modules .expo
 watchman watch-del-all
 ```
@@ -56,7 +56,7 @@ watchman watch-del-all
 If upgrading requires native changes:
 
 ```bash
-npx expo prebuild --clean
+bunx expo prebuild --clean
 ```
 
 This regenerates the `ios` and `android` directories. Ensure the project is not a bare workflow app before running this command.
@@ -64,7 +64,7 @@ This regenerates the `ios` and `android` directories. Ensure the project is not 
 ## Clear caches for bare workflow
 
 - Clear the cocoapods cache for iOS: `cd ios && pod install --repo-update`
-- Clear derived data for Xcode: `npx expo run:ios --no-build-cache`
+- Clear derived data for Xcode: `bunx expo run:ios --no-build-cache`
 - Clear the Gradle cache for Android: `cd android && ./gradlew clean`
 
 ## Housekeeping

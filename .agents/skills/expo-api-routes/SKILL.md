@@ -198,7 +198,7 @@ export async function POST(request: Request) {
 Start the development server with API routes:
 
 ```bash
-npx expo serve
+bunx expo serve
 ```
 
 This starts a local server at `http://localhost:8081` with full API route support.
@@ -215,7 +215,7 @@ curl -X POST http://localhost:8081/api/users -H "Content-Type: application/json"
 ### Prerequisites
 
 ```bash
-npm install -g eas-cli
+bun install -g eas-cli
 eas login
 ```
 
