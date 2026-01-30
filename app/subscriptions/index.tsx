@@ -90,26 +90,24 @@ export default function Subscriptions() {
           {data.map((subscription: Subscription) => {
             return (
               <Host key={subscription.id}>
-                <ContextMenu activationMethod="longPress">
+                <ContextMenu>
                   <ContextMenu.Items>
                     <Button
                       systemImage="pencil"
+                      label="Edit"
                       onPress={() =>
                         router.push({
                           pathname: '/subscriptions/add-subscription',
                           params: { id: subscription.id },
                         })
                       }
-                    >
-                      Edit
-                    </Button>
+                    />
                     <Button
                       systemImage="trash"
+                      label="Delete"
                       onPress={() => handleDelete(subscription)}
                       role="destructive"
-                    >
-                      Delete
-                    </Button>
+                    />
                   </ContextMenu.Items>
                   <ContextMenu.Trigger>
                     <Pressable

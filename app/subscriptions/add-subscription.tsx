@@ -2,7 +2,8 @@ import { Input, Label } from '@/components/ui';
 import { db } from '@/db/client';
 import { BILLING_CYCLES, BillingCycle, subscriptions } from '@/db/schema';
 import { parsePriceToCents } from '@/lib/price';
-import { DateTimePicker, Host, Picker } from '@expo/ui/swift-ui';
+import { DatePicker, Host, Picker, Text as SwiftText } from '@expo/ui/swift-ui';
+import { pickerStyle, tag } from '@expo/ui/swift-ui/modifiers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { eq } from 'drizzle-orm';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
@@ -255,11 +256,14 @@ export default function AddSubscription() {
               render={({ field: { onChange, value } }) => (
                 <Host matchContents>
                   <Picker
-                    options={['Weekly', 'Monthly', 'Yearly']}
-                    selectedIndex={value}
-                    onOptionSelected={({ nativeEvent: { index } }) => onChange(index)}
-                    variant="segmented"
-                  />
+                    selection={value}
+                    onSelectionChange={(selection) => onChange(selection as number)}
+                    modifiers={[pickerStyle('segmented')]}
+                  >
+                    <SwiftText modifiers={[tag(0)]}>Weekly</SwiftText>
+                    <SwiftText modifiers={[tag(1)]}>Monthly</SwiftText>
+                    <SwiftText modifiers={[tag(2)]}>Yearly</SwiftText>
+                  </Picker>
                 </Host>
               )}
             />
@@ -272,13 +276,12 @@ export default function AddSubscription() {
               name="subscribedAt"
               render={({ field: { onChange, value } }) => (
                 <Host matchContents>
-                  <DateTimePicker
-                    onDateSelected={(date) => {
+                  <DatePicker
+                    onDateChange={(date: Date) => {
                       onChange(date);
                     }}
-                    displayedComponents="date"
-                    initialDate={value.toISOString()}
-                    variant="compact"
+                    displayedComponents={['date']}
+                    selection={value}
                   />
                 </Host>
               )}
