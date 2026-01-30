@@ -143,7 +143,7 @@ export default function Analytics() {
               onPress={handlePreviousMonth}
               label="Previous"
               systemImage="chevron.left"
-              modifiers={[buttonStyle('glass'), controlSize('small'), labelStyle('iconOnly')]}
+              modifiers={[buttonStyle('glass'), controlSize('regular'), labelStyle('iconOnly')]}
             />
           </Host>
           <Text className="text-lg font-semibold text-zinc-900 dark:text-white">
@@ -156,7 +156,7 @@ export default function Analytics() {
               systemImage="chevron.right"
               modifiers={[
                 buttonStyle('glass'),
-                controlSize('small'),
+                controlSize('regular'),
                 labelStyle('iconOnly'),
                 disabled(isCurrentMonth),
               ]}
