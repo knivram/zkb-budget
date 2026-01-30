@@ -144,7 +144,7 @@ export default function TransactionDetail() {
             style={{ backgroundColor: `${categoryConfig.color}20` }}
           >
             <Host matchContents>
-              <SwiftImage systemName={categoryConfig.icon} size={16} />
+              <SwiftImage systemName={categoryConfig.icon} size={16} color={categoryConfig.color} />
             </Host>
             <Text className="ml-2 text-sm font-medium" style={{ color: categoryConfig.color }}>
               {categoryConfig.label}

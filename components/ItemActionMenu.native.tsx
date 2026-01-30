@@ -20,9 +20,7 @@ export default function ItemActionMenu({
     <Host>
       <ContextMenu>
         <ContextMenu.Items>
-          {onEdit && (
-            <Button systemImage="pencil" label={editLabel} onPress={onEdit} />
-          )}
+          {onEdit && <Button systemImage="pencil" label={editLabel} onPress={onEdit} />}
           {onDelete && (
             <Button systemImage="trash" label={deleteLabel} onPress={onDelete} role="destructive" />
           )}

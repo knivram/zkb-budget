@@ -2,6 +2,7 @@ import { Input, Label } from '@/components/ui';
 import { db } from '@/db/client';
 import { CATEGORIES as CATEGORY_ENUM, transactions } from '@/db/schema';
 import { CATEGORIES } from '@/lib/categories';
+import { Button, Host, Menu, Image as SwiftImage } from '@expo/ui/swift-ui';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { eq } from 'drizzle-orm';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
@@ -12,7 +13,10 @@ import { z } from 'zod';
 
 const transactionEditSchema = z.object({
   displayName: z.string().optional(),
-  category: z.enum(CATEGORY_ENUM),
+  categoryIndex: z
+    .number()
+    .min(0)
+    .max(CATEGORY_ENUM.length - 1),
   domain: z
     .string()
     .optional()
@@ -41,7 +45,7 @@ export default function EditTransaction() {
     resolver: zodResolver(transactionEditSchema),
     defaultValues: {
       displayName: '',
-      category: 'other',
+      categoryIndex: CATEGORY_ENUM.indexOf('other'),
       domain: '',
     },
     mode: 'onBlur',
@@ -55,10 +59,11 @@ export default function EditTransaction() {
         if (result.length > 0) {
           const tx = result[0];
           setOriginalDescription(tx.transactionAdditionalDetails);
+          const categoryIndex = CATEGORY_ENUM.indexOf(tx.category);
 
           reset({
             displayName: tx.displayName ?? '',
-            category: tx.category,
+            categoryIndex: categoryIndex >= 0 ? categoryIndex : CATEGORY_ENUM.indexOf('other'),
             domain: tx.domain ?? '',
           });
         }
@@ -76,7 +81,7 @@ export default function EditTransaction() {
     try {
       const updateData = {
         displayName: data.displayName?.trim() || null,
-        category: data.category,
+        category: CATEGORY_ENUM[data.categoryIndex],
         domain: data.domain?.trim() || null,
       };
 
@@ -101,6 +106,21 @@ export default function EditTransaction() {
   return (
     <>
       <Stack.Screen options={{ title: 'Edit Transaction' }} />
+      <Stack.Toolbar placement="left">
+        <Stack.Toolbar.Button icon="xmark" onPress={() => router.back()}>
+          Cancel
+        </Stack.Toolbar.Button>
+      </Stack.Toolbar>
+      <Stack.Toolbar placement="right">
+        <Stack.Toolbar.Button
+          icon="checkmark"
+          variant="prominent"
+          onPress={handleSubmit(onSubmit)}
+          disabled={!isValid || isSubmitting}
+        >
+          Save
+        </Stack.Toolbar.Button>
+      </Stack.Toolbar>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1 bg-white dark:bg-zinc-900"
@@ -150,34 +170,54 @@ export default function EditTransaction() {
             <Label>Category</Label>
             <Controller
               control={control}
-              name="category"
-              render={({ field: { onChange, value } }) => (
-                <View className="flex-row flex-wrap gap-2">
-                  {CATEGORY_ENUM.map((cat) => {
-                    const config = CATEGORIES[cat];
-                    const isSelected = value === cat;
-                    return (
-                      <Pressable
-                        key={cat}
-                        onPress={() => onChange(cat)}
-                        className="rounded-lg px-3 py-2"
-                        style={{
-                          backgroundColor: isSelected ? `${config.color}20` : '#f4f4f5',
-                          borderWidth: isSelected ? 2 : 0,
-                          borderColor: config.color,
-                        }}
-                      >
-                        <Text
-                          className="text-sm font-medium"
-                          style={{ color: isSelected ? config.color : '#71717a' }}
-                        >
-                          {config.label}
-                        </Text>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-              )}
+              name="categoryIndex"
+              render={({ field: { onChange, value } }) => {
+                const selectedCategory = CATEGORY_ENUM[value];
+                const config = CATEGORIES[selectedCategory];
+
+                return (
+                  <Host>
+                    <Menu
+                      label={
+                        <Pressable>
+                          <View className="mt-1 flex-row items-center rounded-xl bg-zinc-100 px-4 py-3 dark:bg-zinc-800">
+                            <View className="mr-3">
+                              <Host matchContents>
+                                <SwiftImage
+                                  systemName={config.icon}
+                                  size={20}
+                                  color={config.color}
+                                />
+                              </Host>
+                            </View>
+                            <Text
+                              className="flex-1 text-base font-medium text-zinc-900 dark:text-zinc-100"
+                              numberOfLines={1}
+                            >
+                              {config.label}
+                            </Text>
+                            <Host matchContents>
+                              <SwiftImage systemName="chevron.up.chevron.down" size={14} />
+                            </Host>
+                          </View>
+                        </Pressable>
+                      }
+                    >
+                      {CATEGORY_ENUM.map((cat, index) => {
+                        const catConfig = CATEGORIES[cat];
+                        return (
+                          <Button
+                            key={cat}
+                            systemImage={catConfig.icon}
+                            label={catConfig.label}
+                            onPress={() => onChange(index)}
+                          />
+                        );
+                      })}
+                    </Menu>
+                  </Host>
+                );
+              }}
             />
           </View>
 
@@ -205,24 +245,6 @@ export default function EditTransaction() {
             <Text className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
               Used to display the merchant logo
             </Text>
-          </View>
-
-          {/* Action Buttons */}
-          <View className="mt-4 flex-row gap-2">
-            <Pressable
-              className="flex-1 items-center rounded-lg bg-zinc-100 py-3 dark:bg-zinc-800"
-              onPress={() => router.back()}
-            >
-              <Text className="font-medium text-zinc-900 dark:text-white">Cancel</Text>
-            </Pressable>
-            <Pressable
-              className="flex-1 items-center rounded-lg bg-blue-500 py-3"
-              onPress={handleSubmit(onSubmit)}
-              disabled={!isValid || isSubmitting}
-              style={{ opacity: !isValid || isSubmitting ? 0.5 : 1 }}
-            >
-              <Text className="font-medium text-white">Save</Text>
-            </Pressable>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
