@@ -19,7 +19,7 @@
 ## Installation
 
 ```bash
-npm install react-native-wgpu@^0.4.1 three@0.172.0 @react-three/fiber@^9.4.0 wgpu-matrix@^3.0.2 @types/three@0.172.0 --legacy-peer-deps
+bun install react-native-wgpu@^0.4.1 three@0.172.0 @react-three/fiber@^9.4.0 wgpu-matrix@^3.0.2 @types/three@0.172.0 --legacy-peer-deps
 ```
 
 **Note:** `--legacy-peer-deps` may be required due to peer dependency conflicts with canary Expo versions.
@@ -468,12 +468,12 @@ await state.gl.init();
 
 ### 5. Peer Dependency Errors
 
-**Problem:** npm install fails with ERESOLVE
+**Problem:** bun install fails with ERESOLVE
 
 **Solution:** Use `--legacy-peer-deps`:
 
 ```bash
-npm install <packages> --legacy-peer-deps
+bun install <packages> --legacy-peer-deps
 ```
 
 ## Building
@@ -481,8 +481,8 @@ npm install <packages> --legacy-peer-deps
 WebGPU requires a custom build:
 
 ```bash
-npx expo prebuild
-npx expo run:ios
+bunx expo prebuild
+bunx expo run:ios
 ```
 
 **Note:** WebGPU does NOT work in Expo Go.
