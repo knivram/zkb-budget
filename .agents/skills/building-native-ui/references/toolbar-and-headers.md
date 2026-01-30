@@ -7,17 +7,14 @@ Add native iOS toolbar items to Stack screens. Items can be placed in the header
 ## Notes app example
 
 ```tsx
-import { Stack } from "expo-router";
-import { ScrollView } from "react-native";
+import { Stack } from 'expo-router';
+import { ScrollView } from 'react-native';
 
 export default function FoldersScreen() {
   return (
     <>
       {/* ScrollView must be the first child of the screen */}
-      <ScrollView
-        style={{ flex: 1 }}
-        contentInsetAdjustmentBehavior="automatic"
-      >
+      <ScrollView style={{ flex: 1 }} contentInsetAdjustmentBehavior="automatic">
         {/* Screen content */}
       </ScrollView>
       <Stack.Screen.Title large>Folders</Stack.Screen.Title>
@@ -31,11 +28,7 @@ export default function FoldersScreen() {
       {/* Bottom toolbar */}
       <Stack.Toolbar placement="bottom">
         <Stack.Toolbar.SearchBarSlot />
-        <Stack.Toolbar.Button
-          icon="square.and.pencil"
-          onPress={() => {}}
-          separateBackground
-        />
+        <Stack.Toolbar.Button icon="square.and.pencil" onPress={() => {}} separateBackground />
       </Stack.Toolbar>
     </>
   );
@@ -45,9 +38,9 @@ export default function FoldersScreen() {
 ## Mail inbox example
 
 ```tsx
-import { Color, Stack } from "expo-router";
-import { useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { Color, Stack } from 'expo-router';
+import { useState } from 'react';
+import { ScrollView, Text, View } from 'react-native';
 
 export default function InboxScreen() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -69,14 +62,10 @@ export default function InboxScreen() {
         <Stack.Toolbar.Menu icon="ellipsis">
           <Stack.Toolbar.Menu inline>
             <Stack.Toolbar.Menu inline title="Sort By">
-              <Stack.Toolbar.MenuAction isOn>
-                Categories
-              </Stack.Toolbar.MenuAction>
+              <Stack.Toolbar.MenuAction isOn>Categories</Stack.Toolbar.MenuAction>
               <Stack.Toolbar.MenuAction>List</Stack.Toolbar.MenuAction>
             </Stack.Toolbar.Menu>
-            <Stack.Toolbar.MenuAction icon="info.circle">
-              About categories
-            </Stack.Toolbar.MenuAction>
+            <Stack.Toolbar.MenuAction icon="info.circle">About categories</Stack.Toolbar.MenuAction>
           </Stack.Toolbar.Menu>
           <Stack.Toolbar.MenuAction icon="person.circle">
             Show Contact Photos
@@ -92,7 +81,7 @@ export default function InboxScreen() {
           onPress={() => setIsFilterOpen((prev) => !prev)}
         />
         <Stack.Toolbar.View hidden={!isFilterOpen}>
-          <View style={{ width: 70, height: 32, justifyContent: "center" }}>
+          <View style={{ width: 70, height: 32, justifyContent: 'center' }}>
             <Text style={{ fontSize: 12, fontWeight: 700 }}>Filter by</Text>
             <Text
               style={{
@@ -107,11 +96,7 @@ export default function InboxScreen() {
         </Stack.Toolbar.View>
         <Stack.Toolbar.Spacer />
         <Stack.Toolbar.SearchBarSlot />
-        <Stack.Toolbar.Button
-          icon="square.and.pencil"
-          onPress={() => {}}
-          separateBackground
-        />
+        <Stack.Toolbar.Button icon="square.and.pencil" onPress={() => {}} separateBackground />
       </Stack.Toolbar>
     </>
   );
@@ -141,9 +126,7 @@ Dropdown menu for grouping actions.
 <Stack.Toolbar.Menu icon="ellipsis">
   <Stack.Toolbar.Menu inline>
     <Stack.Toolbar.MenuAction>Sort by Recently Added</Stack.Toolbar.MenuAction>
-    <Stack.Toolbar.MenuAction isOn>
-      Sort by Date Captured
-    </Stack.Toolbar.MenuAction>
+    <Stack.Toolbar.MenuAction isOn>Sort by Date Captured</Stack.Toolbar.MenuAction>
   </Stack.Toolbar.Menu>
   <Stack.Toolbar.Menu title="Filter">
     <Stack.Toolbar.Menu inline>
@@ -177,7 +160,7 @@ Embed custom React Native components. When adding a custom view make sure that t
 
 ```tsx
 <Stack.Toolbar.View>
-  <View style={{ width: 70, height: 32, justifyContent: "center" }}>
+  <View style={{ width: 70, height: 32, justifyContent: 'center' }}>
     <Text style={{ fontSize: 12, fontWeight: 700 }}>Filter by</Text>
   </View>
 </Stack.Toolbar.View>
