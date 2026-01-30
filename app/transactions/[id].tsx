@@ -98,42 +98,25 @@ export default function TransactionDetail() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          title: displayName,
-          unstable_headerRightItems: () => [
-            {
-              type: 'menu',
-              label: 'Actions',
-              icon: {
-                name: 'ellipsis',
-                type: 'sfSymbol',
-              },
-              menu: {
-                items: [
-                  {
-                    type: 'action',
-                    systemImage: 'pencil',
-                    label: 'Edit',
-                    onPress: () =>
-                      router.push({
-                        pathname: '/transactions/edit-transaction',
-                        params: { id: transaction.id },
-                      }),
-                  },
-                  {
-                    type: 'action',
-                    systemImage: 'trash',
-                    label: 'Delete',
-                    attributes: { destructive: true },
-                    onPress: handleDelete,
-                  },
-                ],
-              },
-            },
-          ],
-        }}
-      />
+      <Stack.Screen options={{ title: displayName }} />
+      <Stack.Toolbar placement="right">
+        <Stack.Toolbar.Menu icon="ellipsis">
+          <Stack.Toolbar.MenuAction
+            icon="pencil"
+            onPress={() =>
+              router.push({
+                pathname: '/transactions/edit-transaction',
+                params: { id: transaction.id },
+              })
+            }
+          >
+            Edit
+          </Stack.Toolbar.MenuAction>
+          <Stack.Toolbar.MenuAction icon="trash" destructive onPress={handleDelete}>
+            Delete
+          </Stack.Toolbar.MenuAction>
+        </Stack.Toolbar.Menu>
+      </Stack.Toolbar>
       <ScrollView
         className="flex-1 bg-white dark:bg-zinc-900"
         contentInsetAdjustmentBehavior="automatic"
@@ -190,10 +173,6 @@ export default function TransactionDetail() {
             <DetailRow
               label="Type"
               value={transaction.creditDebitIndicator === 'credit' ? 'Income' : 'Expense'}
-            />
-            <DetailRow
-              label="Payment Method"
-              value={formatSubtype(transaction.transactionSubtype)}
             />
             <DetailRow
               label="Payment Method"
