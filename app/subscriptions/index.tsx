@@ -1,13 +1,13 @@
+import { useState } from 'react';
+import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
+import { router, Stack } from 'expo-router';
+import { Button, ContextMenu, Host } from '@expo/ui/swift-ui';
+import { eq } from 'drizzle-orm';
+import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import AmountText from '@/components/ui/amount-text';
 import DomainLogo from '@/components/ui/domain-logo';
 import { db } from '@/db/client';
 import { BillingCycle, Subscription, subscriptions } from '@/db/schema';
-import { Button, ContextMenu, Host } from '@expo/ui/swift-ui';
-import { eq } from 'drizzle-orm';
-import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
-import { router, Stack } from 'expo-router';
-import { useState } from 'react';
-import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
 import DetectSubscriptions from './detect-subscriptions';
 
 const toMonthlyCents = (price: number, billingCycle: BillingCycle): number => {
@@ -74,18 +74,20 @@ export default function Subscriptions() {
         }}
       />
       <ScrollView
-        className="flex-1 flex-grow bg-white dark:bg-zinc-900"
+        className="flex-1 flex-grow bg-canvas dark:bg-canvas-dark"
         contentInsetAdjustmentBehavior="automatic"
       >
-        <View className="min-h-full bg-white dark:bg-zinc-900">
+        <View className="min-h-full bg-canvas dark:bg-canvas-dark">
           <View className="items-center py-8">
-            <Text className="text-lg text-zinc-400 dark:text-zinc-500">CHF</Text>
+            <Text className="text-xs font-semibold uppercase tracking-wide text-subtle dark:text-subtle-dark">
+              CHF
+            </Text>
             <AmountText
               amountCents={monthlyTotal}
               showCurrency={false}
-              className="text-5xl font-semibold text-zinc-900 dark:text-white"
+              className="text-5xl font-semibold text-ink dark:text-ink-dark"
             />
-            <Text className="mt-1 text-sm text-zinc-400">per month</Text>
+            <Text className="mt-1 text-sm text-muted dark:text-muted-dark">per month</Text>
           </View>
           {data.map((subscription: Subscription) => {
             return (
@@ -118,7 +120,7 @@ export default function Subscriptions() {
                         })
                       }
                     >
-                      <View className="flex-row items-center border-b border-zinc-100 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
+                      <View className="flex-row items-center border-b border-border bg-surface px-4 py-4 dark:border-border-dark dark:bg-surface-dark">
                         <DomainLogo
                           domain={subscription.domain}
                           name={subscription.name}
@@ -126,16 +128,16 @@ export default function Subscriptions() {
                           className="mr-3"
                         />
                         <View className="flex-1">
-                          <Text className="text-base font-medium text-zinc-900 dark:text-white">
+                          <Text className="text-base font-semibold text-ink dark:text-ink-dark">
                             {subscription.name}
                           </Text>
-                          <Text className="text-sm capitalize text-zinc-500">
+                          <Text className="text-sm capitalize text-muted dark:text-muted-dark">
                             {subscription.billingCycle}
                           </Text>
                         </View>
                         <AmountText
                           amountCents={subscription.price}
-                          className="text-zinc-900 dark:text-white"
+                          className="text-ink dark:text-ink-dark"
                         />
                       </View>
                     </Pressable>

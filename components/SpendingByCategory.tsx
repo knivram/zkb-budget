@@ -34,15 +34,15 @@ export default function SpendingByCategory({ categories, monthExpenses }: Spendi
                 <SwiftImage systemName={categoryConfig.icon} size={14} color={'#ffffff'} />
               </Host>
             </View>
-            <Text className="text-sm text-zinc-700 dark:text-zinc-300">{categoryConfig.label}</Text>
+            <Text className="text-sm text-ink dark:text-ink-dark">{categoryConfig.label}</Text>
           </View>
           <AmountText
             amountCents={item.total}
             roundToDollars={true}
-            className="text-sm font-medium text-zinc-900 dark:text-white"
+            className="text-sm font-semibold text-ink dark:text-ink-dark"
           />
         </View>
-        <View className="h-2 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700">
+        <View className="h-2 overflow-hidden rounded-full bg-border dark:bg-border-dark">
           <View
             className="h-full rounded-full"
             style={{
@@ -51,7 +51,7 @@ export default function SpendingByCategory({ categories, monthExpenses }: Spendi
             }}
           />
         </View>
-        <Text className="mt-1 text-xs text-zinc-500">{percentage}%</Text>
+        <Text className="mt-1 text-xs text-subtle dark:text-subtle-dark">{percentage}%</Text>
       </View>
     );
   });

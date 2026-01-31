@@ -5,8 +5,8 @@ export default function TransactionsLayout() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
 
-  const headerTintColor = isDark ? '#ffffff' : '#000000';
-  const headerLargeTitleStyle = { color: isDark ? '#ffffff' : '#000000' };
+  const headerTintColor = isDark ? '#f5f7fb' : '#17223b';
+  const headerLargeTitleStyle = { color: isDark ? '#f5f7fb' : '#17223b' };
 
   return (
     <Stack

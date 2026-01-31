@@ -45,14 +45,16 @@ export default function DomainLogo({
       );
     }
     const fallbackLetter = name.trim().charAt(0).toUpperCase() || '?';
-    return <Text className="text-lg text-zinc-400 dark:text-zinc-500">{fallbackLetter}</Text>;
+    return <Text className="text-lg text-subtle dark:text-subtle-dark">{fallbackLetter}</Text>;
   };
 
   return (
     <View
       className={cn(
-        'items-center justify-center overflow-hidden rounded-xl ',
-        !logoUri ? 'bg-zinc-100 dark:bg-zinc-800' : 'bg-white',
+        'items-center justify-center overflow-hidden rounded-2xl border border-border',
+        !logoUri
+          ? 'bg-surface-muted dark:border-border-dark dark:bg-surface-muted-dark'
+          : 'bg-surface dark:border-border-dark dark:bg-surface-dark',
         className
       )}
       style={dimensionStyle}

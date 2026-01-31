@@ -1,16 +1,16 @@
-import { Input, Label } from '@/components/ui';
-import { db } from '@/db/client';
-import { BILLING_CYCLES, BillingCycle, subscriptions } from '@/db/schema';
-import { parsePriceToCents } from '@/lib/price';
+import { useEffect, useState } from 'react';
+import { KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from 'react-native';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { DatePicker, Host, Picker, Text as SwiftText } from '@expo/ui/swift-ui';
 import { pickerStyle, tag } from '@expo/ui/swift-ui/modifiers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { eq } from 'drizzle-orm';
-import { router, Stack, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from 'react-native';
 import { z } from 'zod';
+import { Input, Label } from '@/components/ui';
+import { db } from '@/db/client';
+import { BILLING_CYCLES, BillingCycle, subscriptions } from '@/db/schema';
+import { parsePriceToCents } from '@/lib/price';
 
 const subscriptionSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -146,8 +146,8 @@ export default function AddSubscription() {
     return (
       <>
         <Stack.Screen options={{ title: 'Edit Subscription' }} />
-        <View className="flex-1 items-center justify-center bg-white dark:bg-zinc-900">
-          <Text className="text-zinc-500">Loading subscription...</Text>
+        <View className="flex-1 items-center justify-center bg-canvas dark:bg-canvas-dark">
+          <Text className="text-muted dark:text-muted-dark">Loading subscription...</Text>
         </View>
       </>
     );
@@ -186,11 +186,11 @@ export default function AddSubscription() {
       />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        className="flex-1 bg-white dark:bg-zinc-900"
+        className="flex-1 bg-canvas dark:bg-canvas-dark"
         keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
       >
         <ScrollView
-          className="flex-1 bg-white dark:bg-zinc-900"
+          className="flex-1 bg-canvas dark:bg-canvas-dark"
           contentContainerClassName="px-4 pb-8 pt-6"
           keyboardShouldPersistTaps="handled"
           contentInsetAdjustmentBehavior="automatic"
@@ -202,24 +202,26 @@ export default function AddSubscription() {
               render={({ field: { onChange, onBlur, value } }) => (
                 <View className="flex items-center">
                   <View className="flex-row items-baseline">
-                    <Text className="text-4xl font-light leading-tight text-zinc-400 dark:text-zinc-500">
+                    <Text className="text-4xl font-light leading-tight text-subtle dark:text-subtle-dark">
                       CHF
                     </Text>
                     <TextInput
                       placeholder="0.00"
-                      placeholderTextColor="#d4d4d8"
+                      placeholderTextColor="#9aa4b2"
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
                       keyboardType="decimal-pad"
-                      className="ml-2 min-w-[120px] text-5xl font-semibold leading-tight text-zinc-900 dark:text-white"
+                      className="ml-2 min-w-[120px] text-5xl font-semibold leading-tight text-ink dark:text-ink-dark"
                       textAlign="left"
                       textAlignVertical="center"
                     />
                   </View>
-                  <Text className="mt-1 text-sm leading-5 text-zinc-400">{billingCycleLabel}</Text>
+                  <Text className="mt-1 text-sm leading-5 text-muted dark:text-muted-dark">
+                    {billingCycleLabel}
+                  </Text>
                   {errors.price && (
-                    <Text className="mt-2 text-xs leading-4 text-red-500">
+                    <Text className="mt-2 text-xs leading-4 text-danger dark:text-danger-dark">
                       {errors.price.message}
                     </Text>
                   )}
@@ -244,7 +246,9 @@ export default function AddSubscription() {
               )}
             />
             {errors.name && (
-              <Text className="mt-1 text-xs leading-4 text-red-500">{errors.name.message}</Text>
+              <Text className="mt-1 text-xs leading-4 text-danger dark:text-danger-dark">
+                {errors.name.message}
+              </Text>
             )}
           </View>
 
@@ -254,17 +258,19 @@ export default function AddSubscription() {
               control={control}
               name="billingCycleIndex"
               render={({ field: { onChange, value } }) => (
-                <Host matchContents>
-                  <Picker
-                    selection={value}
-                    onSelectionChange={(selection) => onChange(selection as number)}
-                    modifiers={[pickerStyle('segmented')]}
-                  >
-                    <SwiftText modifiers={[tag(0)]}>Weekly</SwiftText>
-                    <SwiftText modifiers={[tag(1)]}>Monthly</SwiftText>
-                    <SwiftText modifiers={[tag(2)]}>Yearly</SwiftText>
-                  </Picker>
-                </Host>
+                <View className="overflow-hidden rounded-2xl border border-border bg-surface p-2 dark:border-border-dark dark:bg-surface-dark">
+                  <Host matchContents>
+                    <Picker
+                      selection={value}
+                      onSelectionChange={(selection) => onChange(selection as number)}
+                      modifiers={[pickerStyle('segmented')]}
+                    >
+                      <SwiftText modifiers={[tag(0)]}>Weekly</SwiftText>
+                      <SwiftText modifiers={[tag(1)]}>Monthly</SwiftText>
+                      <SwiftText modifiers={[tag(2)]}>Yearly</SwiftText>
+                    </Picker>
+                  </Host>
+                </View>
               )}
             />
           </View>
@@ -275,15 +281,17 @@ export default function AddSubscription() {
               control={control}
               name="subscribedAt"
               render={({ field: { onChange, value } }) => (
-                <Host matchContents>
-                  <DatePicker
-                    onDateChange={(date: Date) => {
-                      onChange(date);
-                    }}
-                    displayedComponents={['date']}
-                    selection={value}
-                  />
-                </Host>
+                <View className="overflow-hidden rounded-2xl border border-border bg-surface p-2 dark:border-border-dark dark:bg-surface-dark">
+                  <Host matchContents>
+                    <DatePicker
+                      onDateChange={(date: Date) => {
+                        onChange(date);
+                      }}
+                      displayedComponents={['date']}
+                      selection={value}
+                    />
+                  </Host>
+                </View>
               )}
             />
           </View>
@@ -306,7 +314,9 @@ export default function AddSubscription() {
               )}
             />
             {errors.domain && (
-              <Text className="mt-1 text-xs leading-4 text-red-500">{errors.domain.message}</Text>
+              <Text className="mt-1 text-xs leading-4 text-danger dark:text-danger-dark">
+                {errors.domain.message}
+              </Text>
             )}
           </View>
         </ScrollView>
