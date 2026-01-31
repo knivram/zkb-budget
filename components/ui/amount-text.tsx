@@ -1,5 +1,6 @@
-import { cn } from '@/lib/utils';
 import { Text } from 'react-native';
+
+import { cn } from '@/lib/utils';
 
 type AmountTextProps = {
   amountCents: number;
@@ -35,8 +36,8 @@ export default function AmountText({
       className={cn(
         'text-base font-semibold',
         amountCents >= 0
-          ? 'text-emerald-700 dark:text-emerald-200'
-          : 'text-rose-800 dark:text-rose-200',
+          ? 'text-emerald-600 dark:text-emerald-300'
+          : 'text-rose-600 dark:text-rose-300',
         className
       )}
     >

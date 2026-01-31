@@ -1,7 +1,7 @@
+import { Text, View } from 'react-native';
+
 import { Category } from '@/db/schema';
 import { CATEGORIES } from '@/lib/categories';
-import { Host, Image as SwiftImage } from '@expo/ui/swift-ui';
-import { Text, View } from 'react-native';
 import AmountText from './ui/amount-text';
 
 export type CategoryItem = {
@@ -21,28 +21,29 @@ export default function SpendingByCategory({ categories, monthExpenses }: Spendi
     const percentage = monthExpenses > 0 ? Math.round((item.total / monthExpenses) * 100) : 0;
     const relativeWidth = maxTotal > 0 ? Math.round((item.total / maxTotal) * 90) : 0;
     const categoryConfig = CATEGORIES[item.category];
+    const Icon = categoryConfig.icon;
 
     return (
       <View key={item.category} className={index < categories.length - 1 ? 'mb-4' : ''}>
-        <View className="mb-1.5 flex-row items-center justify-between">
+        <View className="mb-2 flex-row items-center justify-between">
           <View className="flex-row items-center">
             <View
-              className="mr-2 h-8 w-8 items-center justify-center rounded"
+              className="mr-2 h-9 w-9 items-center justify-center rounded-xl"
               style={{ backgroundColor: categoryConfig.color }}
             >
-              <Host matchContents>
-                <SwiftImage systemName={categoryConfig.icon} size={14} color={'#ffffff'} />
-              </Host>
+              <Icon size={16} color="#ffffff" />
             </View>
-            <Text className="text-sm text-zinc-700 dark:text-zinc-300">{categoryConfig.label}</Text>
+            <Text className="text-sm font-medium text-slate-700 dark:text-slate-200">
+              {categoryConfig.label}
+            </Text>
           </View>
           <AmountText
             amountCents={item.total}
             roundToDollars={true}
-            className="text-sm font-medium text-zinc-900 dark:text-white"
+            className="text-sm font-semibold text-slate-900 dark:text-white"
           />
         </View>
-        <View className="h-2 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700">
+        <View className="h-2.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
           <View
             className="h-full rounded-full"
             style={{
@@ -51,7 +52,7 @@ export default function SpendingByCategory({ categories, monthExpenses }: Spendi
             }}
           />
         </View>
-        <Text className="mt-1 text-xs text-zinc-500">{percentage}%</Text>
+        <Text className="mt-1 text-xs text-slate-500">{percentage}%</Text>
       </View>
     );
   });
