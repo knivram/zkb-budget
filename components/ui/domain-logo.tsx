@@ -61,7 +61,7 @@ export default function DomainLogo({
     if (Icon) {
       return <Icon size={size / 2} color="#64748b" />;
     }
-    const fallbackLetter = name?.trim().charAt(0).toUpperCase() || '?';
+    const fallbackLetter = name.trim().charAt(0).toUpperCase() || '?';
     return <Text className="text-lg text-slate-400 dark:text-slate-500">{fallbackLetter}</Text>;
   };
 
