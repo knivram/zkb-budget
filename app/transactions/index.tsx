@@ -1,5 +1,6 @@
 import ItemActionMenu from '@/components/ItemActionMenu';
 import AmountText from '@/components/ui/amount-text';
+import { Badge, EmptyState, ListRow, ListSectionHeader } from '@/components/ui';
 import DomainLogo from '@/components/ui/domain-logo';
 import { db } from '@/db/client';
 import { transactions, type Transaction } from '@/db/schema';
@@ -10,7 +11,7 @@ import { desc, eq } from 'drizzle-orm';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { router, Stack } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Alert, Pressable, Text, View } from 'react-native';
+import { Alert, Text, View } from 'react-native';
 import ImportTransactions from './import-transactions';
 
 type SectionHeader = {
@@ -42,6 +43,14 @@ const formatMonthHeader = (dateStr: string): { month: string; year: number } => 
   const month = date.toLocaleDateString('de-CH', { month: 'long' });
   const year = date.getFullYear();
   return { month, year };
+};
+
+const formatCurrency = (amountCents: number): string => {
+  const formatted = (amountCents / 100).toLocaleString('de-CH', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+  return `CHF ${formatted}`;
 };
 
 const getMonthKey = (dateStr: string): string => {
@@ -127,26 +136,29 @@ export default function Transactions() {
         }}
       />
       <FlashList
-        className="flex-1 bg-white dark:bg-zinc-900"
+        className="flex-1 bg-slate-50 dark:bg-slate-950"
         contentInsetAdjustmentBehavior="automatic"
         data={items}
         keyExtractor={(item) => (item.type === 'header' ? item.key : item.data.id)}
         getItemType={(item) => item.type}
-        renderItem={({ item }) => {
+        renderItem={({ item, index }) => {
           if (item.type === 'header') {
             return (
-              <View className="flex-row justify-between border-b border-zinc-200 bg-zinc-50 px-4 py-2 dark:border-zinc-700 dark:bg-zinc-800">
-                <Text className="text-sm font-semibold text-zinc-600 dark:text-zinc-300">
-                  {item.month} {item.year}
-                </Text>
-                <AmountText amountCents={item.sum} className="text-sm" />
-              </View>
+              <ListSectionHeader
+                title={`${item.month} ${item.year}`}
+                value={
+                  <Text className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                    {formatCurrency(item.sum)}
+                  </Text>
+                }
+              />
             );
           }
 
           const transaction = item.data;
           const name = transaction.displayName ?? transaction.transactionAdditionalDetails;
           const categoryConfig = CATEGORIES[transaction.category];
+          const isLast = index === items.length - 1 || items[index + 1]?.type === 'header';
 
           return (
             <ItemActionMenu
@@ -158,66 +170,59 @@ export default function Transactions() {
               }
               onDelete={() => handleDelete(transaction)}
             >
-              <Pressable
+              <ListRow
                 onPress={() =>
                   router.push({
                     pathname: '/transactions/[id]',
                     params: { id: transaction.id },
                   })
                 }
+                className={isLast ? 'mb-4' : 'mb-2'}
               >
-                <View className="flex-row border-b border-zinc-100 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
-                  <DomainLogo
-                    domain={transaction.domain}
-                    fallbackIcon={categoryConfig.icon}
-                    size={40}
-                    className="mr-3"
-                  />
+                <DomainLogo
+                  domain={transaction.domain}
+                  fallbackIcon={categoryConfig.icon}
+                  size={44}
+                />
 
-                  <View className="flex-1">
-                    <Text
-                      className="text-base font-medium text-zinc-900 dark:text-white"
-                      numberOfLines={1}
-                    >
-                      {name}
-                    </Text>
-                    <Text className="text-sm text-zinc-500">{formatDate(transaction.date)}</Text>
+                <View className="flex-1">
+                  <Text
+                    className="text-base font-semibold text-slate-900 dark:text-white"
+                    numberOfLines={1}
+                  >
+                    {name}
+                  </Text>
+                  <Text className="text-sm text-slate-500 dark:text-slate-400">
+                    {formatDate(transaction.date)}
+                  </Text>
 
-                    <View className="mt-1 flex-row flex-wrap gap-1">
-                      <View className="flex-row items-center rounded-md bg-zinc-100 px-2 py-0.5 dark:bg-zinc-800">
+                  <View className="mt-2 flex-row flex-wrap gap-2">
+                    <Badge
+                      label={categoryConfig.label}
+                      icon={
                         <Host matchContents>
                           <SwiftImage systemName={categoryConfig.icon} size={12} />
                         </Host>
-                        <Text className="ml-1 text-xs text-zinc-600 dark:text-zinc-400">
-                          {categoryConfig.label}
-                        </Text>
-                      </View>
+                      }
+                    />
 
-                      {transaction.subscriptionId && (
-                        <View className="flex-row items-center rounded-md bg-blue-50 px-2 py-0.5 dark:bg-blue-900/30">
-                          <Text className="text-xs text-blue-600 dark:text-blue-400">
-                            Subscription
-                          </Text>
-                        </View>
-                      )}
-                    </View>
-                  </View>
-
-                  <View className="items-end justify-center">
-                    <AmountText amountCents={transaction.signedAmount} />
+                    {transaction.subscriptionId && <Badge label="Subscription" variant="accent" />}
                   </View>
                 </View>
-              </Pressable>
+
+                <View className="items-end justify-center">
+                  <AmountText amountCents={transaction.signedAmount} />
+                </View>
+              </ListRow>
             </ItemActionMenu>
           );
         }}
         ListEmptyComponent={
-          <View className="flex-1 items-center justify-center py-20">
-            <Text className="text-zinc-500">No transactions imported yet</Text>
-            <Text className="mt-2 text-sm text-zinc-400">
-              Tap Import to add transactions from XML
-            </Text>
-          </View>
+          <EmptyState
+            title="No transactions yet"
+            description="Tap Import to add transactions from your XML export."
+            className="py-20"
+          />
         }
       />
       <ImportTransactions isOpen={isImportOpen} onOpenChange={setIsImportOpen} />

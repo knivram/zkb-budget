@@ -1,4 +1,5 @@
 import AmountText from '@/components/ui/amount-text';
+import { Badge, SectionTitle, Surface } from '@/components/ui';
 import DomainLogo from '@/components/ui/domain-logo';
 import { db } from '@/db/client';
 import { subscriptions, transactions } from '@/db/schema';
@@ -38,9 +39,9 @@ type DetailRowProps = {
 
 function DetailRow({ label, value }: DetailRowProps) {
   return (
-    <View className="flex-row items-center justify-between border-b border-zinc-100 py-3 dark:border-zinc-800">
-      <Text className="text-sm text-zinc-500 dark:text-zinc-400">{label}</Text>
-      <Text className="text-sm font-medium text-zinc-900 dark:text-white">{value}</Text>
+    <View className="flex-row items-center justify-between border-b border-slate-200 py-3 dark:border-slate-800">
+      <Text className="text-sm text-slate-500 dark:text-slate-400">{label}</Text>
+      <Text className="text-sm font-medium text-slate-900 dark:text-white">{value}</Text>
     </View>
   );
 }
@@ -65,8 +66,8 @@ export default function TransactionDetail() {
     return (
       <>
         <Stack.Screen options={{ title: 'Transaction' }} />
-        <View className="flex-1 items-center justify-center bg-white dark:bg-zinc-900">
-          <Text className="text-zinc-500">Transaction not found</Text>
+        <View className="flex-1 items-center justify-center bg-slate-50 dark:bg-slate-950">
+          <Text className="text-slate-500">Transaction not found</Text>
         </View>
       </>
     );
@@ -118,58 +119,56 @@ export default function TransactionDetail() {
         </Stack.Toolbar.Menu>
       </Stack.Toolbar>
       <ScrollView
-        className="flex-1 bg-white dark:bg-zinc-900"
+        className="flex-1 bg-slate-50 dark:bg-slate-950"
         contentInsetAdjustmentBehavior="automatic"
+        contentContainerClassName="pb-8"
       >
         {/* Header Section */}
-        <View className="items-center border-b border-zinc-100 px-4 py-6 dark:border-zinc-800">
+        <Surface className="mx-4 mt-4 items-center">
           <DomainLogo
             domain={transaction.domain}
             fallbackIcon={categoryConfig.icon}
-            size={80}
-            className="mb-3"
+            size={84}
+            className="mb-4"
           />
           <Text
-            className="text-center text-xl font-semibold text-zinc-900 dark:text-white"
+            className="text-center text-xl font-semibold text-slate-900 dark:text-white"
             numberOfLines={2}
           >
             {displayName}
           </Text>
-          <AmountText amountCents={transaction.signedAmount} className="mt-2 text-3xl font-bold" />
-          <Text className="mt-1 text-sm text-zinc-500">{formatDate(transaction.date)}</Text>
+          <AmountText amountCents={transaction.signedAmount} className="mt-3 text-3xl font-bold" />
+          <Text className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+            {formatDate(transaction.date)}
+          </Text>
 
-          {/* Category Badge */}
-          <View
-            className="mt-4 flex-row items-center rounded-full px-4 py-2"
-            style={{ backgroundColor: `${categoryConfig.color}20` }}
-          >
-            <Host matchContents>
-              <SwiftImage systemName={categoryConfig.icon} size={16} color={categoryConfig.color} />
-            </Host>
-            <Text className="ml-2 text-sm font-medium" style={{ color: categoryConfig.color }}>
-              {categoryConfig.label}
-            </Text>
-          </View>
-
-          {/* Subscription Badge */}
-          {subscriptionData.length > 0 && (
-            <View className="mt-2 flex-row items-center rounded-full bg-blue-100 px-4 py-2 dark:bg-blue-900/30">
+          <View className="mt-4 flex-row flex-wrap items-center justify-center gap-2">
+            <View
+              className="flex-row items-center rounded-full px-3 py-1.5"
+              style={{ backgroundColor: `${categoryConfig.color}20` }}
+            >
               <Host matchContents>
-                <SwiftImage systemName="repeat" size={14} />
+                <SwiftImage
+                  systemName={categoryConfig.icon}
+                  size={14}
+                  color={categoryConfig.color}
+                />
               </Host>
-              <Text className="ml-2 text-sm font-medium text-blue-600 dark:text-blue-400">
-                {subscriptionData[0].name}
+              <Text className="ml-2 text-sm font-medium" style={{ color: categoryConfig.color }}>
+                {categoryConfig.label}
               </Text>
             </View>
-          )}
-        </View>
+
+            {subscriptionData.length > 0 && (
+              <Badge label={subscriptionData[0].name} variant="accent" />
+            )}
+          </View>
+        </Surface>
 
         {/* Transaction Details */}
-        <View className="px-4 py-4">
-          <Text className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
-            Transaction Details
-          </Text>
-          <View className="rounded-xl bg-zinc-50 px-4 dark:bg-zinc-800/50">
+        <View className="px-4 pt-6">
+          <SectionTitle title="Transaction Details" />
+          <Surface className="px-4">
             <DetailRow
               label="Type"
               value={transaction.creditDebitIndicator === 'credit' ? 'Income' : 'Expense'}
@@ -180,32 +179,32 @@ export default function TransactionDetail() {
             />
             <DetailRow label="Currency" value={transaction.currency} />
             {transaction.domain && <DetailRow label="Domain" value={transaction.domain} />}
-          </View>
+          </Surface>
         </View>
 
         {/* Bank Native Data */}
-        <View className="px-4 pb-4">
-          <Text className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
-            Bank Data
-          </Text>
-          <View className="rounded-xl bg-zinc-50 px-4 dark:bg-zinc-800/50">
+        <View className="px-4 pt-6">
+          <SectionTitle title="Bank Data" />
+          <Surface className="px-4">
             <DetailRow label="Account" value={transaction.accountIBAN} />
             <DetailRow label="Statement Type" value={transaction.statementType} />
-            <View className="border-b border-zinc-100 py-3 dark:border-zinc-800">
-              <Text className="mb-1 text-sm text-zinc-500 dark:text-zinc-400">
+            <View className="border-b border-slate-200 py-3 dark:border-slate-800">
+              <Text className="mb-1 text-sm text-slate-500 dark:text-slate-400">
                 Original Description
               </Text>
-              <Text className="text-sm font-medium text-zinc-900 dark:text-white">
+              <Text className="text-sm font-medium text-slate-900 dark:text-white">
                 {transaction.transactionAdditionalDetails}
               </Text>
             </View>
             <View className="py-3">
-              <Text className="mb-1 text-sm text-zinc-500 dark:text-zinc-400">Transaction ID</Text>
-              <Text className="font-mono text-xs text-zinc-600 dark:text-zinc-400">
+              <Text className="mb-1 text-sm text-slate-500 dark:text-slate-400">
+                Transaction ID
+              </Text>
+              <Text className="font-mono text-xs text-slate-600 dark:text-slate-400">
                 {transaction.id}
               </Text>
             </View>
-          </View>
+          </Surface>
         </View>
       </ScrollView>
     </>

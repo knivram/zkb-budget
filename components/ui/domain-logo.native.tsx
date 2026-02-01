@@ -1,8 +1,11 @@
-import { getLogoUri } from '@/lib/logo-cache';
-import { cn } from '@/lib/utils';
-import { Host, Image as SwiftImage } from '@expo/ui/swift-ui';
 import { useEffect, useState } from 'react';
 import { Image, Text, View } from 'react-native';
+
+import { Host, Image as SwiftImage } from '@expo/ui/swift-ui';
+
+import { getLogoUri } from '@/lib/logo-cache';
+import { cn } from '@/lib/utils';
+
 import { DomainLogoProps } from './domain-logo';
 
 export default function DomainLogo({
@@ -45,14 +48,16 @@ export default function DomainLogo({
       );
     }
     const fallbackLetter = name.trim().charAt(0).toUpperCase() || '?';
-    return <Text className="text-lg text-zinc-400 dark:text-zinc-500">{fallbackLetter}</Text>;
+    return <Text className="text-lg text-slate-400 dark:text-slate-500">{fallbackLetter}</Text>;
   };
 
   return (
     <View
       className={cn(
-        'items-center justify-center overflow-hidden rounded-xl ',
-        !logoUri ? 'bg-zinc-100 dark:bg-zinc-800' : 'bg-white',
+        'items-center justify-center overflow-hidden rounded-2xl border border-transparent',
+        !logoUri
+          ? 'border-slate-200 bg-slate-100 dark:border-slate-800 dark:bg-slate-800'
+          : 'border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900',
         className
       )}
       style={dimensionStyle}

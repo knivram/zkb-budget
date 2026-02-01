@@ -1,4 +1,5 @@
 import AmountText from '@/components/ui/amount-text';
+import { EmptyState, ListRow, SectionTitle, Surface } from '@/components/ui';
 import DomainLogo from '@/components/ui/domain-logo';
 import { db } from '@/db/client';
 import { subscriptions, transactions } from '@/db/schema';
@@ -29,8 +30,8 @@ export default function SubscriptionDetail() {
 
   if (subscription.length === 0) {
     return (
-      <View className="flex-1 items-center justify-center bg-white dark:bg-zinc-900">
-        <Text className="text-zinc-500">Subscription not found</Text>
+      <View className="flex-1 items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <Text className="text-slate-500">Subscription not found</Text>
       </View>
     );
   }
@@ -38,57 +39,59 @@ export default function SubscriptionDetail() {
   const sub = subscription[0];
   return (
     <FlatList
-      className="flex-1 bg-white dark:bg-zinc-900"
+      className="flex-1 bg-slate-50 dark:bg-slate-950"
       contentInsetAdjustmentBehavior="automatic"
       data={relatedTransactions}
       keyExtractor={(item) => item.id}
       ListHeaderComponent={
-        <View>
-          <View className="items-center border-b border-zinc-100 px-4 py-6 dark:border-zinc-800">
-            <DomainLogo domain={sub.domain} name={sub.name} size={80} />
-            <Text className="text-2xl font-semibold text-zinc-900 dark:text-white">{sub.name}</Text>
-            <View className="mt-1 flex-row items-center">
-              <Text className="text-lg text-zinc-500">
+        <View className="pb-6">
+          <Surface className="mx-4 mt-4 items-center">
+            <DomainLogo domain={sub.domain} name={sub.name} size={84} />
+            <Text className="mt-4 text-2xl font-semibold text-slate-900 dark:text-white">
+              {sub.name}
+            </Text>
+            <View className="mt-2 flex-row items-center">
+              <Text className="text-base text-slate-500 dark:text-slate-400">
                 <Text className="capitalize">{sub.billingCycle}</Text>
                 {' \u2022 '}
-                <AmountText
-                  amountCents={sub.price}
-                  className="text-lg font-semibold text-zinc-500 dark:text-zinc-500"
-                />
               </Text>
+              <AmountText
+                amountCents={sub.price}
+                tone="neutral"
+                className="text-base font-semibold text-slate-700 dark:text-slate-300"
+              />
             </View>
-            <Text className="mt-2 text-sm text-zinc-400">Since {formatDate(sub.subscribedAt)}</Text>
-            {sub.domain && <Text className="mt-1 text-sm text-blue-500">{sub.domain}</Text>}
-          </View>
-
-          <View className="border-b border-zinc-100 bg-zinc-50 px-4 py-2 dark:border-zinc-800 dark:bg-zinc-800/50">
-            <Text className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
-              Transactions ({relatedTransactions.length})
+            <Text className="mt-2 text-sm text-slate-400">
+              Since {formatDate(sub.subscribedAt)}
             </Text>
-          </View>
+            {sub.domain && (
+              <Text className="mt-2 text-sm font-medium text-indigo-500">{sub.domain}</Text>
+            )}
+          </Surface>
+
+          <SectionTitle
+            title={`Transactions (${relatedTransactions.length})`}
+            className="mt-8 px-4"
+          />
         </View>
       }
       renderItem={({ item }) => (
-        <View className="flex-row items-center justify-between border-b border-zinc-100 px-4 py-3 dark:border-zinc-800">
+        <ListRow inset={false} className="mx-4 mb-2">
           <View className="flex-1">
-            <Text className="text-base text-zinc-900 dark:text-white">
+            <Text className="text-base font-semibold text-slate-900 dark:text-white">
               {item.displayName ?? item.transactionAdditionalDetails}
             </Text>
-            <Text className="text-sm text-zinc-500">{item.date}</Text>
+            <Text className="text-sm text-slate-500 dark:text-slate-400">{item.date}</Text>
           </View>
-          <AmountText
-            amountCents={item.signedAmount}
-            className="text-base font-medium text-zinc-900 dark:text-zinc-100"
-          />
-        </View>
+          <AmountText amountCents={item.signedAmount} className="text-base font-semibold" />
+        </ListRow>
       )}
       ListEmptyComponent={
-        <View className="items-center py-12">
-          <Text className="text-zinc-500">No transactions linked</Text>
-          <Text className="mt-1 text-sm text-zinc-400">
-            Transactions will appear here when matched
-          </Text>
-        </View>
+        <EmptyState
+          title="No transactions linked"
+          description="Transactions will appear here when matched."
+          className="px-4"
+        />
       }
     />
   );

@@ -1,4 +1,5 @@
 import AmountText from '@/components/ui/amount-text';
+import { EmptyState, ListRow, SectionTitle, Surface } from '@/components/ui';
 import DomainLogo from '@/components/ui/domain-logo';
 import { db } from '@/db/client';
 import { BillingCycle, Subscription, subscriptions } from '@/db/schema';
@@ -7,7 +8,7 @@ import { eq } from 'drizzle-orm';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { router, Stack } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
+import { Alert, ScrollView, Text, View } from 'react-native';
 import DetectSubscriptions from './detect-subscriptions';
 
 const toMonthlyCents = (price: number, billingCycle: BillingCycle): number => {
@@ -74,76 +75,94 @@ export default function Subscriptions() {
         }}
       />
       <ScrollView
-        className="flex-1 flex-grow bg-white dark:bg-zinc-900"
+        className="flex-1 flex-grow bg-slate-50 dark:bg-slate-950"
         contentInsetAdjustmentBehavior="automatic"
       >
-        <View className="min-h-full bg-white dark:bg-zinc-900">
-          <View className="items-center py-8">
-            <Text className="text-lg text-zinc-400 dark:text-zinc-500">CHF</Text>
-            <AmountText
-              amountCents={monthlyTotal}
-              showCurrency={false}
-              className="text-5xl font-semibold text-zinc-900 dark:text-white"
-            />
-            <Text className="mt-1 text-sm text-zinc-400">per month</Text>
+        <View className="min-h-full bg-slate-50 pb-6 dark:bg-slate-950">
+          <Surface className="mx-4 mt-4 items-center">
+            <Text className="text-sm font-semibold uppercase tracking-wider text-slate-400">
+              Monthly spend
+            </Text>
+            <View className="mt-3 flex-row items-baseline">
+              <Text className="text-lg text-slate-400 dark:text-slate-500">CHF</Text>
+              <AmountText
+                amountCents={monthlyTotal}
+                showCurrency={false}
+                tone="neutral"
+                className="ml-2 text-4xl font-semibold text-slate-900 dark:text-white"
+              />
+            </View>
+            <Text className="mt-2 text-sm text-slate-400">Subscriptions per month</Text>
+          </Surface>
+
+          <View className="mt-8">
+            <SectionTitle title="Subscriptions" className="px-4" />
+            {data.length === 0 ? (
+              <EmptyState
+                title="No subscriptions yet"
+                description="Run detection or add a subscription to get started."
+                className="mt-6"
+              />
+            ) : (
+              <View className="gap-2">
+                {data.map((subscription: Subscription) => {
+                  return (
+                    <Host key={subscription.id}>
+                      <ContextMenu>
+                        <ContextMenu.Items>
+                          <Button
+                            systemImage="pencil"
+                            label="Edit"
+                            onPress={() =>
+                              router.push({
+                                pathname: '/subscriptions/add-subscription',
+                                params: { id: subscription.id },
+                              })
+                            }
+                          />
+                          <Button
+                            systemImage="trash"
+                            label="Delete"
+                            onPress={() => handleDelete(subscription)}
+                            role="destructive"
+                          />
+                        </ContextMenu.Items>
+                        <ContextMenu.Trigger>
+                          <ListRow
+                            onPress={() =>
+                              router.push({
+                                pathname: '/subscriptions/[id]',
+                                params: { id: subscription.id },
+                              })
+                            }
+                          >
+                            <DomainLogo
+                              domain={subscription.domain}
+                              name={subscription.name}
+                              size={48}
+                            />
+                            <View className="flex-1">
+                              <Text className="text-base font-semibold text-slate-900 dark:text-white">
+                                {subscription.name}
+                              </Text>
+                              <Text className="text-sm capitalize text-slate-500 dark:text-slate-400">
+                                {subscription.billingCycle}
+                              </Text>
+                            </View>
+                            <AmountText
+                              amountCents={subscription.price}
+                              tone="neutral"
+                              className="text-slate-900 dark:text-white"
+                            />
+                          </ListRow>
+                        </ContextMenu.Trigger>
+                      </ContextMenu>
+                    </Host>
+                  );
+                })}
+              </View>
+            )}
           </View>
-          {data.map((subscription: Subscription) => {
-            return (
-              <Host key={subscription.id}>
-                <ContextMenu>
-                  <ContextMenu.Items>
-                    <Button
-                      systemImage="pencil"
-                      label="Edit"
-                      onPress={() =>
-                        router.push({
-                          pathname: '/subscriptions/add-subscription',
-                          params: { id: subscription.id },
-                        })
-                      }
-                    />
-                    <Button
-                      systemImage="trash"
-                      label="Delete"
-                      onPress={() => handleDelete(subscription)}
-                      role="destructive"
-                    />
-                  </ContextMenu.Items>
-                  <ContextMenu.Trigger>
-                    <Pressable
-                      onPress={() =>
-                        router.push({
-                          pathname: '/subscriptions/[id]',
-                          params: { id: subscription.id },
-                        })
-                      }
-                    >
-                      <View className="flex-row items-center border-b border-zinc-100 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
-                        <DomainLogo
-                          domain={subscription.domain}
-                          name={subscription.name}
-                          size={48}
-                          className="mr-3"
-                        />
-                        <View className="flex-1">
-                          <Text className="text-base font-medium text-zinc-900 dark:text-white">
-                            {subscription.name}
-                          </Text>
-                          <Text className="text-sm capitalize text-zinc-500">
-                            {subscription.billingCycle}
-                          </Text>
-                        </View>
-                        <AmountText
-                          amountCents={subscription.price}
-                          className="text-zinc-900 dark:text-white"
-                        />
-                      </View>
-                    </Pressable>
-                  </ContextMenu.Trigger>
-                </ContextMenu>
-              </Host>
-            );
-          })}
         </View>
       </ScrollView>
       <DetectSubscriptions isOpen={isDetectOpen} onOpenChange={setIsDetectOpen} />
