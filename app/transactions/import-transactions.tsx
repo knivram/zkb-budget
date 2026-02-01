@@ -1,34 +1,15 @@
+import { BottomSheetModal } from '@/components/ui/bottom-sheet-modal';
+import { Button } from '@/components/ui/button';
 import { db } from '@/db/client';
 import { subscriptions, transactions } from '@/db/schema';
 import { EnrichedTransaction } from '@/lib/api/ai-schemas';
 import { API_URL } from '@/lib/config';
 import { parseXMLTransactions } from '@/lib/xml-parser';
-import {
-  BottomSheet,
-  Button,
-  Group,
-  Host,
-  HStack,
-  Spacer,
-  Text as SwiftText,
-  VStack,
-} from '@expo/ui/swift-ui';
-import {
-  buttonStyle,
-  controlSize,
-  disabled as disabledModifier,
-  font,
-  foregroundStyle,
-  frame,
-  interactiveDismissDisabled,
-  padding,
-  presentationDetents,
-} from '@expo/ui/swift-ui/modifiers';
 import { eq } from 'drizzle-orm';
 import * as DocumentPicker from 'expo-document-picker';
 import { File } from 'expo-file-system';
 import { useState } from 'react';
-import { Alert } from 'react-native';
+import { Alert, Text, View } from 'react-native';
 
 interface ImportTransactionsProps {
   isOpen: boolean;
@@ -143,41 +124,25 @@ export default function ImportTransactions({ isOpen, onOpenChange }: ImportTrans
   };
 
   return (
-    <Host>
-      <BottomSheet isPresented={isOpen} onIsPresentedChange={onOpenChange}>
-        <Group
-          modifiers={[
-            presentationDetents([{ fraction: 0.2 }]),
-            interactiveDismissDisabled(isImporting),
-          ]}
-        >
-          <HStack>
-            <VStack alignment="leading" modifiers={[padding({ all: 24 })]}>
-              <SwiftText modifiers={[font({ weight: 'semibold', size: 20 })]}>
-                Import Transactions
-              </SwiftText>
-              <SwiftText modifiers={[font({ size: 14 }), foregroundStyle('#71717a')]}>
-                Select an XML file exported from your bank
-              </SwiftText>
-              <Spacer minLength={20} />
-              <Button
-                onPress={handleImport}
-                modifiers={[
-                  buttonStyle('borderedProminent'),
-                  controlSize('large'),
-                  disabledModifier(isImporting),
-                  frame({ maxWidth: Infinity }),
-                ]}
-              >
-                <SwiftText modifiers={[frame({ maxWidth: Infinity })]}>
-                  {isImporting ? loadingMessage : 'Choose File'}
-                </SwiftText>
-              </Button>
-            </VStack>
-            <Spacer />
-          </HStack>
-        </Group>
-      </BottomSheet>
-    </Host>
+    <BottomSheetModal
+      visible={isOpen}
+      onClose={() => onOpenChange(false)}
+      dismissable={!isImporting}
+    >
+      <Text className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
+        Import Transactions
+      </Text>
+      <Text className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+        Select an XML file exported from your bank
+      </Text>
+      <View className="mt-6">
+        <Button
+          label={isImporting ? loadingMessage : 'Choose File'}
+          onPress={handleImport}
+          loading={isImporting}
+          fullWidth
+        />
+      </View>
+    </BottomSheetModal>
   );
 }

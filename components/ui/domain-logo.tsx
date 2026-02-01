@@ -1,4 +1,4 @@
-import { Image as SwiftImage } from '@expo/ui/swift-ui';
+import type { LucideIcon } from 'lucide-react-native';
 
 type BaseProps = {
   domain?: string | null;
@@ -9,8 +9,8 @@ type BaseProps = {
 export type DomainLogoProps = BaseProps &
   (
     | {
-        /** SF Symbol to show when no domain logo is available */
-        fallbackIcon: Parameters<typeof SwiftImage>[0]['systemName'];
+        /** Lucide icon to show when no domain logo is available */
+        fallbackIcon: LucideIcon;
         name?: never;
       }
     | {

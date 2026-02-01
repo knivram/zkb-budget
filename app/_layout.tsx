@@ -14,7 +14,7 @@ export default function RootLayout() {
 
   if (error) {
     return (
-      <View className="flex-1 items-center justify-center bg-white dark:bg-zinc-900">
+      <View className="flex-1 items-center justify-center bg-white dark:bg-zinc-950">
         <Text className="text-red-500">Migration error: {error.message}</Text>
       </View>
     );
@@ -22,8 +22,8 @@ export default function RootLayout() {
 
   if (!success) {
     return (
-      <View className="flex-1 items-center justify-center bg-white dark:bg-zinc-900">
-        <Text className="text-zinc-900 dark:text-white">Loading...</Text>
+      <View className="flex-1 items-center justify-center bg-white dark:bg-zinc-950">
+        <Text className="text-zinc-900 dark:text-zinc-50">Loading...</Text>
       </View>
     );
   }

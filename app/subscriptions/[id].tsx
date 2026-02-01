@@ -29,7 +29,7 @@ export default function SubscriptionDetail() {
 
   if (subscription.length === 0) {
     return (
-      <View className="flex-1 items-center justify-center bg-white dark:bg-zinc-900">
+      <View className="flex-1 items-center justify-center bg-white dark:bg-zinc-950">
         <Text className="text-zinc-500">Subscription not found</Text>
       </View>
     );
@@ -38,7 +38,7 @@ export default function SubscriptionDetail() {
   const sub = subscription[0];
   return (
     <FlatList
-      className="flex-1 bg-white dark:bg-zinc-900"
+      className="flex-1 bg-white dark:bg-zinc-950"
       contentInsetAdjustmentBehavior="automatic"
       data={relatedTransactions}
       keyExtractor={(item) => item.id}
@@ -46,14 +46,16 @@ export default function SubscriptionDetail() {
         <View>
           <View className="items-center border-b border-zinc-100 px-4 py-6 dark:border-zinc-800">
             <DomainLogo domain={sub.domain} name={sub.name} size={80} />
-            <Text className="text-2xl font-semibold text-zinc-900 dark:text-white">{sub.name}</Text>
+            <Text className="mt-3 text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
+              {sub.name}
+            </Text>
             <View className="mt-1 flex-row items-center">
-              <Text className="text-lg text-zinc-500">
+              <Text className="text-lg text-zinc-500 dark:text-zinc-400">
                 <Text className="capitalize">{sub.billingCycle}</Text>
                 {' \u2022 '}
                 <AmountText
                   amountCents={sub.price}
-                  className="text-lg font-semibold text-zinc-500 dark:text-zinc-500"
+                  className="text-lg font-semibold text-zinc-500 dark:text-zinc-400"
                 />
               </Text>
             </View>
@@ -61,7 +63,7 @@ export default function SubscriptionDetail() {
             {sub.domain && <Text className="mt-1 text-sm text-blue-500">{sub.domain}</Text>}
           </View>
 
-          <View className="border-b border-zinc-100 bg-zinc-50 px-4 py-2 dark:border-zinc-800 dark:bg-zinc-800/50">
+          <View className="border-b border-zinc-100 bg-zinc-50 px-4 py-2 dark:border-zinc-800 dark:bg-zinc-900">
             <Text className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
               Transactions ({relatedTransactions.length})
             </Text>
@@ -71,10 +73,10 @@ export default function SubscriptionDetail() {
       renderItem={({ item }) => (
         <View className="flex-row items-center justify-between border-b border-zinc-100 px-4 py-3 dark:border-zinc-800">
           <View className="flex-1">
-            <Text className="text-base text-zinc-900 dark:text-white">
+            <Text className="text-base text-zinc-900 dark:text-zinc-50">
               {item.displayName ?? item.transactionAdditionalDetails}
             </Text>
-            <Text className="text-sm text-zinc-500">{item.date}</Text>
+            <Text className="text-sm text-zinc-500 dark:text-zinc-400">{item.date}</Text>
           </View>
           <AmountText
             amountCents={item.signedAmount}

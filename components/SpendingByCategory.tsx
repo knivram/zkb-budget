@@ -1,6 +1,5 @@
-import { Category } from '@/db/schema';
+import type { Category } from '@/db/schema';
 import { CATEGORIES } from '@/lib/categories';
-import { Host, Image as SwiftImage } from '@expo/ui/swift-ui';
 import { Text, View } from 'react-native';
 import AmountText from './ui/amount-text';
 
@@ -21,18 +20,17 @@ export default function SpendingByCategory({ categories, monthExpenses }: Spendi
     const percentage = monthExpenses > 0 ? Math.round((item.total / monthExpenses) * 100) : 0;
     const relativeWidth = maxTotal > 0 ? Math.round((item.total / maxTotal) * 90) : 0;
     const categoryConfig = CATEGORIES[item.category];
+    const Icon = categoryConfig.icon;
 
     return (
       <View key={item.category} className={index < categories.length - 1 ? 'mb-4' : ''}>
         <View className="mb-1.5 flex-row items-center justify-between">
           <View className="flex-row items-center">
             <View
-              className="mr-2 h-8 w-8 items-center justify-center rounded"
+              className="mr-2 h-8 w-8 items-center justify-center rounded-lg"
               style={{ backgroundColor: categoryConfig.color }}
             >
-              <Host matchContents>
-                <SwiftImage systemName={categoryConfig.icon} size={14} color={'#ffffff'} />
-              </Host>
+              <Icon size={14} color="#ffffff" strokeWidth={2.2} />
             </View>
             <Text className="text-sm text-zinc-700 dark:text-zinc-300">{categoryConfig.label}</Text>
           </View>

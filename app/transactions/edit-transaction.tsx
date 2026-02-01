@@ -2,13 +2,22 @@ import { Input, Label } from '@/components/ui';
 import { db } from '@/db/client';
 import { CATEGORIES as CATEGORY_ENUM, transactions } from '@/db/schema';
 import { CATEGORIES } from '@/lib/categories';
-import { Button, Host, Menu, Image as SwiftImage } from '@expo/ui/swift-ui';
+import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { eq } from 'drizzle-orm';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { ChevronDown } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from 'react-native';
 import { z } from 'zod';
 
 const transactionEditSchema = z.object({
@@ -35,6 +44,7 @@ export default function EditTransaction() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [isLoading, setIsLoading] = useState(true);
   const [originalDescription, setOriginalDescription] = useState('');
+  const [categoryPickerVisible, setCategoryPickerVisible] = useState(false);
 
   const {
     control,
@@ -96,7 +106,7 @@ export default function EditTransaction() {
     return (
       <>
         <Stack.Screen options={{ title: 'Edit Transaction' }} />
-        <View className="flex-1 items-center justify-center bg-white dark:bg-zinc-900">
+        <View className="flex-1 items-center justify-center bg-white dark:bg-zinc-950">
           <Text className="text-zinc-500">Loading transaction...</Text>
         </View>
       </>
@@ -123,18 +133,18 @@ export default function EditTransaction() {
       </Stack.Toolbar>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        className="flex-1 bg-white dark:bg-zinc-900"
+        className="flex-1 bg-white dark:bg-zinc-950"
         keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
       >
         <ScrollView
-          className="flex-1 bg-white dark:bg-zinc-900"
+          className="flex-1 bg-white dark:bg-zinc-950"
           contentContainerClassName="px-4 pb-8 pt-6"
           keyboardShouldPersistTaps="handled"
           contentInsetAdjustmentBehavior="automatic"
         >
           {/* Original Description (read-only reference) */}
           {originalDescription && (
-            <View className="mb-6 rounded-xl bg-zinc-50 p-4 dark:bg-zinc-800/50">
+            <View className="mb-6 rounded-2xl bg-zinc-50 p-4 dark:bg-zinc-900">
               <Text className="mb-1 text-xs font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
                 Original Description
               </Text>
@@ -174,48 +184,88 @@ export default function EditTransaction() {
               render={({ field: { onChange, value } }) => {
                 const selectedCategory = CATEGORY_ENUM[value];
                 const config = CATEGORIES[selectedCategory];
+                const Icon = config.icon;
 
                 return (
-                  <Host>
-                    <Menu
-                      label={
-                        <Pressable>
-                          <View className="mt-1 flex-row items-center rounded-xl bg-zinc-100 px-4 py-3 dark:bg-zinc-800">
-                            <View className="mr-3">
-                              <Host matchContents>
-                                <SwiftImage
-                                  systemName={config.icon}
-                                  size={20}
-                                  color={config.color}
-                                />
-                              </Host>
-                            </View>
-                            <Text
-                              className="flex-1 text-base font-medium text-zinc-900 dark:text-zinc-100"
-                              numberOfLines={1}
-                            >
-                              {config.label}
-                            </Text>
-                            <Host matchContents>
-                              <SwiftImage systemName="chevron.up.chevron.down" size={14} />
-                            </Host>
-                          </View>
-                        </Pressable>
-                      }
+                  <>
+                    <Pressable onPress={() => setCategoryPickerVisible(true)}>
+                      <View className="mt-1 flex-row items-center rounded-xl bg-zinc-100 px-4 py-3 dark:bg-zinc-800">
+                        <View className="mr-3">
+                          <Icon size={20} color={config.color} strokeWidth={2} />
+                        </View>
+                        <Text
+                          className="flex-1 text-base font-medium text-zinc-900 dark:text-zinc-100"
+                          numberOfLines={1}
+                        >
+                          {config.label}
+                        </Text>
+                        <ChevronDown size={16} color="#a1a1aa" strokeWidth={2} />
+                      </View>
+                    </Pressable>
+                    <Modal
+                      visible={categoryPickerVisible}
+                      transparent
+                      animationType="slide"
+                      onRequestClose={() => setCategoryPickerVisible(false)}
                     >
-                      {CATEGORY_ENUM.map((cat, index) => {
-                        const catConfig = CATEGORIES[cat];
-                        return (
-                          <Button
-                            key={cat}
-                            systemImage={catConfig.icon}
-                            label={catConfig.label}
-                            onPress={() => onChange(index)}
-                          />
-                        );
-                      })}
-                    </Menu>
-                  </Host>
+                      <View className="flex-1 justify-end">
+                        <Pressable
+                          className="absolute inset-0 bg-black/40"
+                          onPress={() => setCategoryPickerVisible(false)}
+                        />
+                        <View className="max-h-[70%] rounded-t-3xl bg-white pb-10 dark:bg-zinc-900">
+                          <View className="items-center border-b border-zinc-100 py-4 dark:border-zinc-800">
+                            <View className="mb-3 h-1 w-10 rounded-full bg-zinc-300 dark:bg-zinc-600" />
+                            <Text className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+                              Select Category
+                            </Text>
+                          </View>
+                          <ScrollView>
+                            {CATEGORY_ENUM.map((cat, index) => {
+                              const catConfig = CATEGORIES[cat];
+                              const CatIcon = catConfig.icon;
+                              const isSelected = index === value;
+                              return (
+                                <Pressable
+                                  key={cat}
+                                  onPress={() => {
+                                    onChange(index);
+                                    setCategoryPickerVisible(false);
+                                  }}
+                                  className={cn(
+                                    'flex-row items-center border-b border-zinc-100 px-5 py-3.5 dark:border-zinc-800',
+                                    isSelected && 'bg-blue-50 dark:bg-blue-900/20'
+                                  )}
+                                >
+                                  <View
+                                    className="mr-3 h-8 w-8 items-center justify-center rounded-lg"
+                                    style={{ backgroundColor: catConfig.color }}
+                                  >
+                                    <CatIcon size={16} color="#ffffff" strokeWidth={2} />
+                                  </View>
+                                  <Text
+                                    className={cn(
+                                      'flex-1 text-base text-zinc-900 dark:text-zinc-100',
+                                      isSelected && 'font-semibold'
+                                    )}
+                                  >
+                                    {catConfig.label}
+                                  </Text>
+                                  {isSelected && (
+                                    <View className="h-5 w-5 items-center justify-center rounded-full bg-blue-600">
+                                      <Text className="text-xs font-bold text-white">
+                                        {'\u2713'}
+                                      </Text>
+                                    </View>
+                                  )}
+                                </Pressable>
+                              );
+                            })}
+                          </ScrollView>
+                        </View>
+                      </View>
+                    </Modal>
+                  </>
                 );
               }}
             />

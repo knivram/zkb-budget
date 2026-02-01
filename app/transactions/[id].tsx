@@ -3,10 +3,10 @@ import DomainLogo from '@/components/ui/domain-logo';
 import { db } from '@/db/client';
 import { subscriptions, transactions } from '@/db/schema';
 import { CATEGORIES } from '@/lib/categories';
-import { Host, Image as SwiftImage } from '@expo/ui/swift-ui';
 import { eq } from 'drizzle-orm';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { Repeat } from 'lucide-react-native';
 import React from 'react';
 import { Alert, ScrollView, Text, View } from 'react-native';
 
@@ -40,7 +40,7 @@ function DetailRow({ label, value }: DetailRowProps) {
   return (
     <View className="flex-row items-center justify-between border-b border-zinc-100 py-3 dark:border-zinc-800">
       <Text className="text-sm text-zinc-500 dark:text-zinc-400">{label}</Text>
-      <Text className="text-sm font-medium text-zinc-900 dark:text-white">{value}</Text>
+      <Text className="text-sm font-medium text-zinc-900 dark:text-zinc-50">{value}</Text>
     </View>
   );
 }
@@ -65,7 +65,7 @@ export default function TransactionDetail() {
     return (
       <>
         <Stack.Screen options={{ title: 'Transaction' }} />
-        <View className="flex-1 items-center justify-center bg-white dark:bg-zinc-900">
+        <View className="flex-1 items-center justify-center bg-white dark:bg-zinc-950">
           <Text className="text-zinc-500">Transaction not found</Text>
         </View>
       </>
@@ -95,6 +95,7 @@ export default function TransactionDetail() {
 
   const displayName = transaction.displayName ?? transaction.transactionAdditionalDetails;
   const categoryConfig = CATEGORIES[transaction.category];
+  const CategoryIcon = categoryConfig.icon;
 
   return (
     <>
@@ -118,7 +119,7 @@ export default function TransactionDetail() {
         </Stack.Toolbar.Menu>
       </Stack.Toolbar>
       <ScrollView
-        className="flex-1 bg-white dark:bg-zinc-900"
+        className="flex-1 bg-white dark:bg-zinc-950"
         contentInsetAdjustmentBehavior="automatic"
       >
         {/* Header Section */}
@@ -130,7 +131,7 @@ export default function TransactionDetail() {
             className="mb-3"
           />
           <Text
-            className="text-center text-xl font-semibold text-zinc-900 dark:text-white"
+            className="text-center text-xl font-semibold text-zinc-900 dark:text-zinc-50"
             numberOfLines={2}
           >
             {displayName}
@@ -143,9 +144,7 @@ export default function TransactionDetail() {
             className="mt-4 flex-row items-center rounded-full px-4 py-2"
             style={{ backgroundColor: `${categoryConfig.color}20` }}
           >
-            <Host matchContents>
-              <SwiftImage systemName={categoryConfig.icon} size={16} color={categoryConfig.color} />
-            </Host>
+            <CategoryIcon size={16} color={categoryConfig.color} strokeWidth={2} />
             <Text className="ml-2 text-sm font-medium" style={{ color: categoryConfig.color }}>
               {categoryConfig.label}
             </Text>
@@ -153,10 +152,8 @@ export default function TransactionDetail() {
 
           {/* Subscription Badge */}
           {subscriptionData.length > 0 && (
-            <View className="mt-2 flex-row items-center rounded-full bg-blue-100 px-4 py-2 dark:bg-blue-900/30">
-              <Host matchContents>
-                <SwiftImage systemName="repeat" size={14} />
-              </Host>
+            <View className="mt-2 flex-row items-center rounded-full bg-blue-50 px-4 py-2 dark:bg-blue-900/30">
+              <Repeat size={14} color="#3b82f6" strokeWidth={2} />
               <Text className="ml-2 text-sm font-medium text-blue-600 dark:text-blue-400">
                 {subscriptionData[0].name}
               </Text>
@@ -169,7 +166,7 @@ export default function TransactionDetail() {
           <Text className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
             Transaction Details
           </Text>
-          <View className="rounded-xl bg-zinc-50 px-4 dark:bg-zinc-800/50">
+          <View className="rounded-2xl bg-zinc-50 px-4 dark:bg-zinc-900">
             <DetailRow
               label="Type"
               value={transaction.creditDebitIndicator === 'credit' ? 'Income' : 'Expense'}
@@ -188,14 +185,14 @@ export default function TransactionDetail() {
           <Text className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
             Bank Data
           </Text>
-          <View className="rounded-xl bg-zinc-50 px-4 dark:bg-zinc-800/50">
+          <View className="rounded-2xl bg-zinc-50 px-4 dark:bg-zinc-900">
             <DetailRow label="Account" value={transaction.accountIBAN} />
             <DetailRow label="Statement Type" value={transaction.statementType} />
             <View className="border-b border-zinc-100 py-3 dark:border-zinc-800">
               <Text className="mb-1 text-sm text-zinc-500 dark:text-zinc-400">
                 Original Description
               </Text>
-              <Text className="text-sm font-medium text-zinc-900 dark:text-white">
+              <Text className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
                 {transaction.transactionAdditionalDetails}
               </Text>
             </View>

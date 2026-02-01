@@ -6,6 +6,7 @@ import { DetectedSubscription } from '@/lib/api/ai-schemas';
 import { cn } from '@/lib/utils';
 import { inArray } from 'drizzle-orm';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { Check } from 'lucide-react-native';
 import { useState } from 'react';
 import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
@@ -121,7 +122,7 @@ export default function ReviewDetectedSubscriptions() {
         }}
       />
       <ScrollView
-        className="flex-1 bg-white dark:bg-zinc-900"
+        className="flex-1 bg-white dark:bg-zinc-950"
         contentInsetAdjustmentBehavior="automatic"
       >
         <View className="p-4">
@@ -133,22 +134,26 @@ export default function ReviewDetectedSubscriptions() {
               <TouchableOpacity
                 key={index}
                 onPress={() => toggleSelection(index)}
-                className={`rounded-xl border-2 p-4 ${
+                className={cn(
+                  'rounded-2xl border-2 p-4',
                   selectedIds.has(index)
                     ? 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-950'
-                    : 'border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-800'
-                }`}
+                    : 'border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900'
+                )}
               >
                 <View className="flex-row items-start justify-between">
                   <View className="flex-1 flex-row">
                     <DomainLogo domain={sub.domain} name={sub.name} size={40} className="mr-3" />
                     <View className="flex-1">
                       <View className="mb-2 flex-row items-center gap-2">
-                        <Text className="text-lg font-semibold text-zinc-900 dark:text-white">
+                        <Text className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
                           {sub.name}
                         </Text>
                         <View
-                          className={`rounded-full px-2 py-0.5 ${getConfidenceColor(sub.confidence)}`}
+                          className={cn(
+                            'rounded-full px-2 py-0.5',
+                            getConfidenceColor(sub.confidence)
+                          )}
                         >
                           <Text className="text-xs font-medium text-white">
                             {getConfidenceBadgeText(sub.confidence)} (
@@ -186,9 +191,7 @@ export default function ReviewDetectedSubscriptions() {
                         : 'border-zinc-300 bg-white dark:border-zinc-600 dark:bg-zinc-700'
                     )}
                   >
-                    {selectedIds.has(index) && (
-                      <Text className="text-sm font-bold text-white">✓</Text>
-                    )}
+                    {selectedIds.has(index) && <Check size={14} color="#ffffff" strokeWidth={3} />}
                   </View>
                 </View>
               </TouchableOpacity>
