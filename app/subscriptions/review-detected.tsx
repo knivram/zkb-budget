@@ -1,13 +1,14 @@
+import { useState } from 'react';
+import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { inArray } from 'drizzle-orm';
+
 import AmountText from '@/components/ui/amount-text';
 import DomainLogo from '@/components/ui/domain-logo';
 import { db } from '@/db/client';
 import { subscriptions, transactions } from '@/db/schema';
-import { DetectedSubscription } from '@/lib/api/ai-schemas';
+import type { DetectedSubscription } from '@/lib/api/ai-schemas';
 import { cn } from '@/lib/utils';
-import { inArray } from 'drizzle-orm';
-import { router, Stack, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
-import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 const HIGH_CONFIDENCE_THRESHOLD = 0.8;
 const MEDIUM_CONFIDENCE_THRESHOLD = 0.6;
@@ -121,22 +122,22 @@ export default function ReviewDetectedSubscriptions() {
         }}
       />
       <ScrollView
-        className="flex-1 bg-white dark:bg-zinc-900"
+        className="flex-1 bg-slate-50 dark:bg-slate-950"
         contentInsetAdjustmentBehavior="automatic"
       >
         <View className="p-4">
-          <Text className="mb-2 text-sm text-zinc-600 dark:text-zinc-400">
+          <Text className="mb-2 text-sm text-slate-600 dark:text-slate-400">
             Review these detected subscriptions and select which ones to add to your account.
           </Text>
           <View className="mt-4 flex-col gap-2">
             {detectedSubscriptions.map((sub, index) => (
-              <TouchableOpacity
+              <Pressable
                 key={index}
                 onPress={() => toggleSelection(index)}
-                className={`rounded-xl border-2 p-4 ${
+                className={`rounded-2xl border-2 p-4 ${
                   selectedIds.has(index)
-                    ? 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-950'
-                    : 'border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-800'
+                    ? 'border-indigo-500 bg-indigo-50 dark:border-indigo-400 dark:bg-indigo-950'
+                    : 'border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900'
                 }`}
               >
                 <View className="flex-row items-start justify-between">
@@ -144,7 +145,7 @@ export default function ReviewDetectedSubscriptions() {
                     <DomainLogo domain={sub.domain} name={sub.name} size={40} className="mr-3" />
                     <View className="flex-1">
                       <View className="mb-2 flex-row items-center gap-2">
-                        <Text className="text-lg font-semibold text-zinc-900 dark:text-white">
+                        <Text className="text-lg font-semibold text-slate-900 dark:text-white">
                           {sub.name}
                         </Text>
                         <View
@@ -159,20 +160,20 @@ export default function ReviewDetectedSubscriptions() {
                       <View className="mb-1 flex-row flex-wrap items-center">
                         <AmountText
                           amountCents={sub.price}
-                          className="text-base font-medium text-zinc-700 dark:text-zinc-300"
+                          className="text-base font-medium text-slate-700 dark:text-slate-300"
                         />
-                        <Text className="text-base font-medium text-zinc-700 dark:text-zinc-300">
+                        <Text className="text-base font-medium text-slate-700 dark:text-slate-300">
                           {' \u2022 '}
                           <Text className="capitalize">{sub.billingCycle}</Text>
                         </Text>
                       </View>
                       {sub.domain && (
-                        <Text className="mb-2 text-sm text-zinc-500 dark:text-zinc-400">
+                        <Text className="mb-2 text-sm text-slate-500 dark:text-slate-400">
                           {sub.domain}
                         </Text>
                       )}
                       {sub.reasoning && (
-                        <Text className="text-sm italic text-zinc-600 dark:text-zinc-400">
+                        <Text className="text-sm italic text-slate-600 dark:text-slate-400">
                           &quot;{sub.reasoning}&quot;
                         </Text>
                       )}
@@ -182,8 +183,8 @@ export default function ReviewDetectedSubscriptions() {
                     className={cn(
                       'ml-3 h-6 w-6 items-center justify-center rounded-full border-2',
                       selectedIds.has(index)
-                        ? 'border-blue-500 bg-blue-500'
-                        : 'border-zinc-300 bg-white dark:border-zinc-600 dark:bg-zinc-700'
+                        ? 'border-indigo-500 bg-indigo-500'
+                        : 'border-slate-300 bg-white dark:border-slate-600 dark:bg-slate-700'
                     )}
                   >
                     {selectedIds.has(index) && (
@@ -191,7 +192,7 @@ export default function ReviewDetectedSubscriptions() {
                     )}
                   </View>
                 </View>
-              </TouchableOpacity>
+              </Pressable>
             ))}
           </View>
         </View>

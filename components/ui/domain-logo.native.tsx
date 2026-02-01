@@ -1,8 +1,9 @@
-import { getLogoUri } from '@/lib/logo-cache';
-import { cn } from '@/lib/utils';
-import { Host, Image as SwiftImage } from '@expo/ui/swift-ui';
 import { useEffect, useState } from 'react';
 import { Image, Text, View } from 'react-native';
+import type { LucideIcon } from 'lucide-react-native';
+
+import { getLogoUri } from '@/lib/logo-cache';
+import { cn } from '@/lib/utils';
 import { DomainLogoProps } from './domain-logo';
 
 export default function DomainLogo({
@@ -35,24 +36,20 @@ export default function DomainLogo({
   }, [domain]);
 
   const dimensionStyle = { width: size, height: size };
+  const Icon = fallbackIcon as LucideIcon | undefined;
 
   const renderFallback = () => {
-    if (fallbackIcon) {
-      return (
-        <Host matchContents>
-          <SwiftImage systemName={fallbackIcon} size={size / 2} />
-        </Host>
-      );
+    if (Icon) {
+      return <Icon size={size / 2} color="#64748b" />;
     }
-    const fallbackLetter = name.trim().charAt(0).toUpperCase() || '?';
-    return <Text className="text-lg text-zinc-400 dark:text-zinc-500">{fallbackLetter}</Text>;
+    const fallbackLetter = name?.trim().charAt(0).toUpperCase() || '?';
+    return <Text className="text-lg text-slate-400 dark:text-slate-500">{fallbackLetter}</Text>;
   };
 
   return (
     <View
       className={cn(
-        'items-center justify-center overflow-hidden rounded-xl ',
-        !logoUri ? 'bg-zinc-100 dark:bg-zinc-800' : 'bg-white',
+        'items-center justify-center overflow-hidden rounded-2xl border border-slate-200/70 bg-white dark:border-slate-800 dark:bg-slate-900',
         className
       )}
       style={dimensionStyle}
