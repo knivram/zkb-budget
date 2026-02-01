@@ -1,4 +1,4 @@
-import { Input, Label } from '@/components/ui';
+import { Card, Input, Label } from '@/components/ui';
 import { db } from '@/db/client';
 import { CATEGORIES as CATEGORY_ENUM, transactions } from '@/db/schema';
 import { CATEGORIES } from '@/lib/categories';
@@ -96,8 +96,8 @@ export default function EditTransaction() {
     return (
       <>
         <Stack.Screen options={{ title: 'Edit Transaction' }} />
-        <View className="flex-1 items-center justify-center bg-white dark:bg-zinc-900">
-          <Text className="text-zinc-500">Loading transaction...</Text>
+        <View className="flex-1 items-center justify-center bg-surface dark:bg-surface-dark">
+          <Text className="text-gray-500">Loading transaction...</Text>
         </View>
       </>
     );
@@ -123,29 +123,29 @@ export default function EditTransaction() {
       </Stack.Toolbar>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        className="flex-1 bg-white dark:bg-zinc-900"
+        className="flex-1 bg-surface dark:bg-surface-dark"
         keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
       >
         <ScrollView
-          className="flex-1 bg-white dark:bg-zinc-900"
+          className="flex-1"
           contentContainerClassName="px-4 pb-8 pt-6"
           keyboardShouldPersistTaps="handled"
           contentInsetAdjustmentBehavior="automatic"
         >
           {/* Original Description (read-only reference) */}
           {originalDescription && (
-            <View className="mb-6 rounded-xl bg-zinc-50 p-4 dark:bg-zinc-800/50">
-              <Text className="mb-1 text-xs font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+            <Card className="mb-6 p-4">
+              <Text className="mb-1 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
                 Original Description
               </Text>
-              <Text className="text-sm text-zinc-700 dark:text-zinc-300">
+              <Text className="text-sm text-gray-700 dark:text-gray-300">
                 {originalDescription}
               </Text>
-            </View>
+            </Card>
           )}
 
           {/* Display Name */}
-          <View className="mb-4">
+          <View className="mb-5">
             <Label>Display Name</Label>
             <Controller
               control={control}
@@ -160,13 +160,13 @@ export default function EditTransaction() {
                 />
               )}
             />
-            <Text className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
+            <Text className="mt-1.5 text-xs text-gray-400 dark:text-gray-500">
               Leave empty to use the original bank description
             </Text>
           </View>
 
           {/* Category */}
-          <View className="mb-4">
+          <View className="mb-5">
             <Label>Category</Label>
             <Controller
               control={control}
@@ -180,7 +180,7 @@ export default function EditTransaction() {
                     <Menu
                       label={
                         <Pressable>
-                          <View className="mt-1 flex-row items-center rounded-xl bg-zinc-100 px-4 py-3 dark:bg-zinc-800">
+                          <View className="flex-row items-center rounded-xl border border-separator bg-card px-4 py-3 dark:border-separator-dark dark:bg-card-dark">
                             <View className="mr-3">
                               <Host matchContents>
                                 <SwiftImage
@@ -191,7 +191,7 @@ export default function EditTransaction() {
                               </Host>
                             </View>
                             <Text
-                              className="flex-1 text-base font-medium text-zinc-900 dark:text-zinc-100"
+                              className="flex-1 text-base font-medium text-gray-900 dark:text-gray-100"
                               numberOfLines={1}
                             >
                               {config.label}
@@ -222,7 +222,7 @@ export default function EditTransaction() {
           </View>
 
           {/* Domain */}
-          <View className="mb-4">
+          <View className="mb-5">
             <Label>Merchant Domain (optional)</Label>
             <Controller
               control={control}
@@ -240,9 +240,9 @@ export default function EditTransaction() {
               )}
             />
             {errors.domain && (
-              <Text className="mt-1 text-xs text-red-500">{errors.domain.message}</Text>
+              <Text className="mt-1.5 text-xs text-red-500">{errors.domain.message}</Text>
             )}
-            <Text className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
+            <Text className="mt-1.5 text-xs text-gray-400 dark:text-gray-500">
               Used to display the merchant logo
             </Text>
           </View>

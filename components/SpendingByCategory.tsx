@@ -27,22 +27,22 @@ export default function SpendingByCategory({ categories, monthExpenses }: Spendi
         <View className="mb-1.5 flex-row items-center justify-between">
           <View className="flex-row items-center">
             <View
-              className="mr-2 h-8 w-8 items-center justify-center rounded"
+              className="mr-2.5 h-8 w-8 items-center justify-center rounded-lg"
               style={{ backgroundColor: categoryConfig.color }}
             >
               <Host matchContents>
                 <SwiftImage systemName={categoryConfig.icon} size={14} color={'#ffffff'} />
               </Host>
             </View>
-            <Text className="text-sm text-zinc-700 dark:text-zinc-300">{categoryConfig.label}</Text>
+            <Text className="text-sm text-gray-700 dark:text-gray-300">{categoryConfig.label}</Text>
           </View>
           <AmountText
             amountCents={item.total}
             roundToDollars={true}
-            className="text-sm font-medium text-zinc-900 dark:text-white"
+            className="text-sm font-medium text-gray-900 dark:text-gray-100"
           />
         </View>
-        <View className="h-2 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700">
+        <View className="h-2 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
           <View
             className="h-full rounded-full"
             style={{
@@ -51,7 +51,7 @@ export default function SpendingByCategory({ categories, monthExpenses }: Spendi
             }}
           />
         </View>
-        <Text className="mt-1 text-xs text-zinc-500">{percentage}%</Text>
+        <Text className="mt-1 text-xs text-gray-500 dark:text-gray-400">{percentage}%</Text>
       </View>
     );
   });

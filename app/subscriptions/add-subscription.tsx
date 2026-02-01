@@ -146,8 +146,8 @@ export default function AddSubscription() {
     return (
       <>
         <Stack.Screen options={{ title: 'Edit Subscription' }} />
-        <View className="flex-1 items-center justify-center bg-white dark:bg-zinc-900">
-          <Text className="text-zinc-500">Loading subscription...</Text>
+        <View className="flex-1 items-center justify-center bg-surface dark:bg-surface-dark">
+          <Text className="text-gray-500">Loading subscription...</Text>
         </View>
       </>
     );
@@ -186,15 +186,16 @@ export default function AddSubscription() {
       />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        className="flex-1 bg-white dark:bg-zinc-900"
+        className="flex-1 bg-surface dark:bg-surface-dark"
         keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
       >
         <ScrollView
-          className="flex-1 bg-white dark:bg-zinc-900"
+          className="flex-1"
           contentContainerClassName="px-4 pb-8 pt-6"
           keyboardShouldPersistTaps="handled"
           contentInsetAdjustmentBehavior="automatic"
         >
+          {/* Price Hero */}
           <View className="mb-8 items-center">
             <Controller
               control={control}
@@ -202,22 +203,24 @@ export default function AddSubscription() {
               render={({ field: { onChange, onBlur, value } }) => (
                 <View className="flex items-center">
                   <View className="flex-row items-baseline">
-                    <Text className="text-4xl font-light leading-tight text-zinc-400 dark:text-zinc-500">
+                    <Text className="text-4xl font-light leading-tight text-gray-400 dark:text-gray-500">
                       CHF
                     </Text>
                     <TextInput
                       placeholder="0.00"
-                      placeholderTextColor="#d4d4d8"
+                      placeholderTextColor="#c7c7cc"
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
                       keyboardType="decimal-pad"
-                      className="ml-2 min-w-[120px] text-5xl font-semibold leading-tight text-zinc-900 dark:text-white"
+                      className="ml-2 min-w-[120px] text-5xl font-semibold leading-tight text-gray-900 dark:text-gray-100"
                       textAlign="left"
                       textAlignVertical="center"
                     />
                   </View>
-                  <Text className="mt-1 text-sm leading-5 text-zinc-400">{billingCycleLabel}</Text>
+                  <Text className="mt-1 text-sm leading-5 text-gray-400 dark:text-gray-500">
+                    {billingCycleLabel}
+                  </Text>
                   {errors.price && (
                     <Text className="mt-2 text-xs leading-4 text-red-500">
                       {errors.price.message}
@@ -228,7 +231,7 @@ export default function AddSubscription() {
             />
           </View>
 
-          <View className="mb-4">
+          <View className="mb-5">
             <Label>Name</Label>
             <Controller
               control={control}
@@ -244,11 +247,11 @@ export default function AddSubscription() {
               )}
             />
             {errors.name && (
-              <Text className="mt-1 text-xs leading-4 text-red-500">{errors.name.message}</Text>
+              <Text className="mt-1.5 text-xs leading-4 text-red-500">{errors.name.message}</Text>
             )}
           </View>
 
-          <View className="mb-4">
+          <View className="mb-5">
             <Label>Billing Cycle</Label>
             <Controller
               control={control}
@@ -269,7 +272,7 @@ export default function AddSubscription() {
             />
           </View>
 
-          <View className="mb-4">
+          <View className="mb-5">
             <Label>Subscribed Since</Label>
             <Controller
               control={control}
@@ -288,7 +291,7 @@ export default function AddSubscription() {
             />
           </View>
 
-          <View className="mb-4">
+          <View className="mb-5">
             <Label>Provider Domain (optional)</Label>
             <Controller
               control={control}
@@ -306,7 +309,7 @@ export default function AddSubscription() {
               )}
             />
             {errors.domain && (
-              <Text className="mt-1 text-xs leading-4 text-red-500">{errors.domain.message}</Text>
+              <Text className="mt-1.5 text-xs leading-4 text-red-500">{errors.domain.message}</Text>
             )}
           </View>
         </ScrollView>

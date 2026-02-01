@@ -1,6 +1,7 @@
 import ItemActionMenu from '@/components/ItemActionMenu';
 import AmountText from '@/components/ui/amount-text';
 import DomainLogo from '@/components/ui/domain-logo';
+import EmptyState from '@/components/ui/empty-state';
 import { db } from '@/db/client';
 import { transactions, type Transaction } from '@/db/schema';
 import { CATEGORIES } from '@/lib/categories';
@@ -127,7 +128,7 @@ export default function Transactions() {
         }}
       />
       <FlashList
-        className="flex-1 bg-white dark:bg-zinc-900"
+        className="flex-1 bg-surface dark:bg-surface-dark"
         contentInsetAdjustmentBehavior="automatic"
         data={items}
         keyExtractor={(item) => (item.type === 'header' ? item.key : item.data.id)}
@@ -135,8 +136,8 @@ export default function Transactions() {
         renderItem={({ item }) => {
           if (item.type === 'header') {
             return (
-              <View className="flex-row justify-between border-b border-zinc-200 bg-zinc-50 px-4 py-2 dark:border-zinc-700 dark:bg-zinc-800">
-                <Text className="text-sm font-semibold text-zinc-600 dark:text-zinc-300">
+              <View className="flex-row justify-between bg-surface px-4 py-2.5 dark:bg-surface-dark">
+                <Text className="text-sm font-semibold text-gray-500 dark:text-gray-400">
                   {item.month} {item.year}
                 </Text>
                 <AmountText amountCents={item.sum} className="text-sm" />
@@ -166,45 +167,48 @@ export default function Transactions() {
                   })
                 }
               >
-                <View className="flex-row border-b border-zinc-100 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
+                <View className="flex-row border-b border-separator bg-card px-4 py-3 dark:border-separator-dark dark:bg-card-dark">
                   <DomainLogo
                     domain={transaction.domain}
                     fallbackIcon={categoryConfig.icon}
-                    size={40}
+                    size={44}
                     className="mr-3"
                   />
 
-                  <View className="flex-1">
+                  <View className="flex-1 justify-center">
                     <Text
-                      className="text-base font-medium text-zinc-900 dark:text-white"
+                      className="text-base font-medium text-gray-900 dark:text-gray-100"
                       numberOfLines={1}
                     >
                       {name}
                     </Text>
-                    <Text className="text-sm text-zinc-500">{formatDate(transaction.date)}</Text>
-
-                    <View className="mt-1 flex-row flex-wrap gap-1">
-                      <View className="flex-row items-center rounded-md bg-zinc-100 px-2 py-0.5 dark:bg-zinc-800">
-                        <Host matchContents>
-                          <SwiftImage systemName={categoryConfig.icon} size={12} />
-                        </Host>
-                        <Text className="ml-1 text-xs text-zinc-600 dark:text-zinc-400">
-                          {categoryConfig.label}
-                        </Text>
-                      </View>
-
-                      {transaction.subscriptionId && (
-                        <View className="flex-row items-center rounded-md bg-blue-50 px-2 py-0.5 dark:bg-blue-900/30">
-                          <Text className="text-xs text-blue-600 dark:text-blue-400">
-                            Subscription
-                          </Text>
-                        </View>
-                      )}
+                    <View className="mt-0.5 flex-row items-center">
+                      <Text className="text-sm text-gray-500 dark:text-gray-400">
+                        {formatDate(transaction.date)}
+                      </Text>
+                      <Text className="mx-1.5 text-gray-300 dark:text-gray-600">{'\u00B7'}</Text>
+                      <Host matchContents>
+                        <SwiftImage
+                          systemName={categoryConfig.icon}
+                          size={11}
+                          color={categoryConfig.color}
+                        />
+                      </Host>
+                      <Text className="ml-1 text-xs text-gray-500 dark:text-gray-400">
+                        {categoryConfig.label}
+                      </Text>
                     </View>
                   </View>
 
                   <View className="items-end justify-center">
                     <AmountText amountCents={transaction.signedAmount} />
+                    {transaction.subscriptionId && (
+                      <View className="mt-0.5 rounded-full bg-accent/10 px-2 py-0.5 dark:bg-accent-dark/15">
+                        <Text className="text-xs font-medium text-accent dark:text-accent-dark">
+                          Recurring
+                        </Text>
+                      </View>
+                    )}
                   </View>
                 </View>
               </Pressable>
@@ -212,12 +216,10 @@ export default function Transactions() {
           );
         }}
         ListEmptyComponent={
-          <View className="flex-1 items-center justify-center py-20">
-            <Text className="text-zinc-500">No transactions imported yet</Text>
-            <Text className="mt-2 text-sm text-zinc-400">
-              Tap Import to add transactions from XML
-            </Text>
-          </View>
+          <EmptyState
+            title="No transactions imported yet"
+            subtitle="Tap Import to add transactions from XML"
+          />
         }
       />
       <ImportTransactions isOpen={isImportOpen} onOpenChange={setIsImportOpen} />

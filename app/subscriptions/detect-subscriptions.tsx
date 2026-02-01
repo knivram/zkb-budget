@@ -1,28 +1,9 @@
+import ActionButton from '@/components/ui/action-button';
+import BottomSheetModal from '@/components/ui/bottom-sheet-modal';
 import { db } from '@/db/client';
 import { transactions } from '@/db/schema';
 import { SubscriptionDetectionResponse } from '@/lib/api/ai-schemas';
 import { API_URL } from '@/lib/config';
-import {
-  BottomSheet,
-  Button,
-  Group,
-  Host,
-  HStack,
-  Spacer,
-  Text as SwiftText,
-  VStack,
-} from '@expo/ui/swift-ui';
-import {
-  buttonStyle,
-  controlSize,
-  disabled as disabledModifier,
-  font,
-  foregroundStyle,
-  frame,
-  interactiveDismissDisabled,
-  padding,
-  presentationDetents,
-} from '@expo/ui/swift-ui/modifiers';
 import { isNull } from 'drizzle-orm';
 import { router } from 'expo-router';
 import { useState } from 'react';
@@ -103,41 +84,19 @@ export default function DetectSubscriptions({ isOpen, onOpenChange }: DetectSubs
   };
 
   return (
-    <Host>
-      <BottomSheet isPresented={isOpen} onIsPresentedChange={onOpenChange}>
-        <Group
-          modifiers={[
-            presentationDetents([{ fraction: 0.23 }]),
-            interactiveDismissDisabled(isDetecting),
-          ]}
-        >
-          <HStack>
-            <VStack alignment="leading" modifiers={[padding({ all: 24 })]}>
-              <SwiftText modifiers={[font({ weight: 'semibold', size: 20 })]}>
-                Detect Subscriptions
-              </SwiftText>
-              <SwiftText modifiers={[font({ size: 14 }), foregroundStyle('#71717a')]}>
-                Use AI to analyze your transactions and find recurring subscriptions
-              </SwiftText>
-              <Spacer minLength={20} />
-              <Button
-                onPress={handleDetect}
-                modifiers={[
-                  buttonStyle('borderedProminent'),
-                  controlSize('large'),
-                  disabledModifier(isDetecting),
-                  frame({ maxWidth: Infinity }),
-                ]}
-              >
-                <SwiftText modifiers={[frame({ maxWidth: Infinity })]}>
-                  {isDetecting ? loadingMessage : 'Start Detection'}
-                </SwiftText>
-              </Button>
-            </VStack>
-            <Spacer />
-          </HStack>
-        </Group>
-      </BottomSheet>
-    </Host>
+    <BottomSheetModal
+      visible={isOpen}
+      onClose={() => onOpenChange(false)}
+      title="Detect Subscriptions"
+      subtitle="Use AI to analyze your transactions and find recurring subscriptions"
+      dismissible={!isDetecting}
+    >
+      <ActionButton
+        label={isDetecting ? loadingMessage : 'Start Detection'}
+        onPress={handleDetect}
+        disabled={isDetecting}
+        loading={isDetecting}
+      />
+    </BottomSheetModal>
   );
 }
