@@ -1,10 +1,10 @@
 import SpendingByCategory from '@/components/SpendingByCategory';
 import AmountText from '@/components/ui/amount-text';
+import { ListRow, SectionTitle, Surface } from '@/components/ui';
 import DomainLogo from '@/components/ui/domain-logo';
 import { db } from '@/db/client';
 import { transactions } from '@/db/schema';
 import { formatYearMonth } from '@/lib/date';
-import { cn } from '@/lib/utils';
 import { Button, Host } from '@expo/ui/swift-ui';
 import { buttonStyle, controlSize, disabled, labelStyle } from '@expo/ui/swift-ui/modifiers';
 import { and, count, desc, eq, isNotNull, notInArray, sql, sum } from 'drizzle-orm';
@@ -133,10 +133,10 @@ export default function Analytics() {
 
   return (
     <ScrollView
-      className="flex-1 bg-white dark:bg-zinc-900"
+      className="flex-1 bg-slate-50 dark:bg-slate-950"
       contentInsetAdjustmentBehavior="automatic"
     >
-      <View className="p-4">
+      <View className="p-4 pb-8">
         <View className="mb-6 flex-row items-center justify-between">
           <Host matchContents>
             <Button
@@ -146,7 +146,7 @@ export default function Analytics() {
               modifiers={[buttonStyle('glass'), controlSize('regular'), labelStyle('iconOnly')]}
             />
           </Host>
-          <Text className="text-lg font-semibold text-zinc-900 dark:text-white">
+          <Text className="text-lg font-semibold text-slate-900 dark:text-white">
             {formatMonthFull(selectedMonth)}
           </Text>
           <Host matchContents>
@@ -164,27 +164,31 @@ export default function Analytics() {
           </Host>
         </View>
 
-        <View className="mb-4 flex-row justify-between">
-          <View className="mr-2 flex-1 rounded-xl bg-emerald-50 p-4 dark:bg-emerald-900/30">
-            <Text className="text-sm text-emerald-600 dark:text-emerald-400">Income</Text>
+        <View className="mb-4 flex-row justify-between gap-3">
+          <Surface className="flex-1 border-emerald-200 bg-emerald-50/60 dark:border-emerald-800 dark:bg-emerald-500/10">
+            <Text className="text-sm font-semibold text-emerald-600 dark:text-emerald-300">
+              Income
+            </Text>
             <AmountText
               amountCents={monthIncome}
               roundToDollars={true}
-              className="text-xl font-bold text-emerald-700 dark:text-emerald-200"
+              tone="neutral"
+              className="mt-2 text-xl font-bold text-emerald-700 dark:text-emerald-200"
             />
-          </View>
-          <View className="ml-2 flex-1 rounded-xl bg-rose-50 p-4 dark:bg-rose-900/30">
-            <Text className="text-sm text-rose-600 dark:text-rose-400">Expenses</Text>
+          </Surface>
+          <Surface className="flex-1 border-rose-200 bg-rose-50/60 dark:border-rose-800 dark:bg-rose-500/10">
+            <Text className="text-sm font-semibold text-rose-600 dark:text-rose-300">Expenses</Text>
             <AmountText
               amountCents={monthExpenses}
               roundToDollars={true}
-              className="text-xl font-bold text-rose-700 dark:text-rose-200"
+              tone="neutral"
+              className="mt-2 text-xl font-bold text-rose-700 dark:text-rose-200"
             />
-          </View>
+          </Surface>
         </View>
 
         {expenseChange !== null && (
-          <View className="mb-6 flex-row items-center justify-center rounded-xl bg-zinc-50 p-3 dark:bg-zinc-800">
+          <Surface className="mb-6 flex-row items-center justify-center border-slate-200 bg-slate-100/60 dark:border-slate-800 dark:bg-slate-900/60">
             {expenseChange > 0 ? (
               <TrendingUp size={18} color="#f43f5e" />
             ) : expenseChange < 0 ? (
@@ -196,55 +200,44 @@ export default function Analytics() {
                   ? 'text-rose-600 dark:text-rose-400'
                   : expenseChange < 0
                     ? 'text-emerald-600 dark:text-emerald-400'
-                    : 'text-zinc-600 dark:text-zinc-400'
+                    : 'text-slate-600 dark:text-slate-400'
               }`}
             >
               {expenseChange === 0
                 ? 'Same as last month'
                 : `${Math.abs(expenseChange)}% ${expenseChange > 0 ? 'more' : 'less'} than last month`}
             </Text>
-          </View>
+          </Surface>
         )}
 
         {categoryData.length > 0 && (
           <View className="mb-6">
-            <Text className="mb-4 text-lg font-semibold text-zinc-900 dark:text-white">
-              Spending by Category
-            </Text>
-            <View className="rounded-xl bg-zinc-50 p-4 dark:bg-zinc-800">
+            <SectionTitle title="Spending by Category" />
+            <Surface>
               <SpendingByCategory categories={categoryData} monthExpenses={monthExpenses} />
-            </View>
+            </Surface>
           </View>
         )}
 
         {merchantData.length > 0 && (
           <View className="mb-6">
-            <Text className="mb-4 text-lg font-semibold text-zinc-900 dark:text-white">
-              Top Merchants
-            </Text>
-            <View className="rounded-xl bg-zinc-50 p-4 dark:bg-zinc-800">
+            <SectionTitle title="Top Merchants" />
+            <View className="gap-2">
               {merchantData.map((merchant, index) => (
-                <View
-                  key={merchant.displayName ?? index}
-                  className={cn(
-                    'flex-row items-center',
-                    index < merchantData.length - 1 &&
-                      'mb-3 border-b border-zinc-200 pb-3 dark:border-zinc-700'
-                  )}
-                >
+                <ListRow key={merchant.displayName ?? index}>
                   <DomainLogo
                     domain={merchant.domain ?? undefined}
                     name={merchant.displayName ?? ''}
-                    size={40}
+                    size={44}
                   />
-                  <View className="ml-3 flex-1">
+                  <View className="flex-1">
                     <Text
-                      className="text-sm font-medium text-zinc-900 dark:text-white"
+                      className="text-sm font-semibold text-slate-900 dark:text-white"
                       numberOfLines={1}
                     >
                       {merchant.displayName}
                     </Text>
-                    <Text className="text-xs text-zinc-500">
+                    <Text className="text-xs text-slate-500 dark:text-slate-400">
                       {merchant.count} transaction
                       {merchant.count !== 1 ? 's' : ''}
                     </Text>
@@ -252,21 +245,22 @@ export default function Analytics() {
                   <AmountText
                     amountCents={merchant.total}
                     roundToDollars={true}
-                    className="text-sm font-semibold text-zinc-900 dark:text-white"
+                    tone="neutral"
+                    className="text-sm font-semibold text-slate-900 dark:text-white"
                   />
-                </View>
+                </ListRow>
               ))}
             </View>
           </View>
         )}
 
         {categoryData.length === 0 && merchantData.length === 0 ? (
-          <View className="items-center justify-center py-20">
-            <Text className="text-zinc-500">No transaction data available</Text>
-            <Text className="mt-2 text-sm text-zinc-400">
+          <Surface className="items-center justify-center py-12">
+            <Text className="text-slate-500">No transaction data available</Text>
+            <Text className="mt-2 text-sm text-slate-400">
               Import transactions to see your spending analytics
             </Text>
-          </View>
+          </Surface>
         ) : null}
       </View>
     </ScrollView>

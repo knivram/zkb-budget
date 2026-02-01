@@ -1,4 +1,4 @@
-import { Input, Label } from '@/components/ui';
+import { Input, Label, SectionTitle, Surface } from '@/components/ui';
 import { db } from '@/db/client';
 import { CATEGORIES as CATEGORY_ENUM, transactions } from '@/db/schema';
 import { CATEGORIES } from '@/lib/categories';
@@ -96,8 +96,8 @@ export default function EditTransaction() {
     return (
       <>
         <Stack.Screen options={{ title: 'Edit Transaction' }} />
-        <View className="flex-1 items-center justify-center bg-white dark:bg-zinc-900">
-          <Text className="text-zinc-500">Loading transaction...</Text>
+        <View className="flex-1 items-center justify-center bg-slate-50 dark:bg-slate-950">
+          <Text className="text-slate-500">Loading transaction...</Text>
         </View>
       </>
     );
@@ -123,129 +123,130 @@ export default function EditTransaction() {
       </Stack.Toolbar>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        className="flex-1 bg-white dark:bg-zinc-900"
+        className="flex-1 bg-slate-50 dark:bg-slate-950"
         keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
       >
         <ScrollView
-          className="flex-1 bg-white dark:bg-zinc-900"
+          className="flex-1 bg-slate-50 dark:bg-slate-950"
           contentContainerClassName="px-4 pb-8 pt-6"
           keyboardShouldPersistTaps="handled"
           contentInsetAdjustmentBehavior="automatic"
         >
           {/* Original Description (read-only reference) */}
           {originalDescription && (
-            <View className="mb-6 rounded-xl bg-zinc-50 p-4 dark:bg-zinc-800/50">
-              <Text className="mb-1 text-xs font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
-                Original Description
-              </Text>
-              <Text className="text-sm text-zinc-700 dark:text-zinc-300">
+            <Surface className="mb-6">
+              <SectionTitle title="Original Description" className="mb-2" />
+              <Text className="text-sm text-slate-700 dark:text-slate-300">
                 {originalDescription}
               </Text>
-            </View>
+            </Surface>
           )}
 
           {/* Display Name */}
-          <View className="mb-4">
-            <Label>Display Name</Label>
-            <Controller
-              control={control}
-              name="displayName"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <Input
-                  placeholder="e.g. Groceries at Migros"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  autoCapitalize="sentences"
-                />
-              )}
-            />
-            <Text className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
-              Leave empty to use the original bank description
-            </Text>
-          </View>
+          <SectionTitle title="Transaction details" />
+          <Surface className="gap-4">
+            <View>
+              <Label>Display Name</Label>
+              <Controller
+                control={control}
+                name="displayName"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <Input
+                    placeholder="e.g. Groceries at Migros"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    autoCapitalize="sentences"
+                  />
+                )}
+              />
+              <Text className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+                Leave empty to use the original bank description
+              </Text>
+            </View>
 
-          {/* Category */}
-          <View className="mb-4">
-            <Label>Category</Label>
-            <Controller
-              control={control}
-              name="categoryIndex"
-              render={({ field: { onChange, value } }) => {
-                const selectedCategory = CATEGORY_ENUM[value];
-                const config = CATEGORIES[selectedCategory];
+            {/* Category */}
+            <View>
+              <Label>Category</Label>
+              <Controller
+                control={control}
+                name="categoryIndex"
+                render={({ field: { onChange, value } }) => {
+                  const selectedCategory = CATEGORY_ENUM[value];
+                  const config = CATEGORIES[selectedCategory];
 
-                return (
-                  <Host>
-                    <Menu
-                      label={
-                        <Pressable>
-                          <View className="mt-1 flex-row items-center rounded-xl bg-zinc-100 px-4 py-3 dark:bg-zinc-800">
-                            <View className="mr-3">
+                  return (
+                    <Host>
+                      <Menu
+                        label={
+                          <Pressable>
+                            <View className="mt-1 flex-row items-center rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                              <View className="mr-3">
+                                <Host matchContents>
+                                  <SwiftImage
+                                    systemName={config.icon}
+                                    size={20}
+                                    color={config.color}
+                                  />
+                                </Host>
+                              </View>
+                              <Text
+                                className="flex-1 text-base font-medium text-slate-900 dark:text-white"
+                                numberOfLines={1}
+                              >
+                                {config.label}
+                              </Text>
                               <Host matchContents>
-                                <SwiftImage
-                                  systemName={config.icon}
-                                  size={20}
-                                  color={config.color}
-                                />
+                                <SwiftImage systemName="chevron.up.chevron.down" size={14} />
                               </Host>
                             </View>
-                            <Text
-                              className="flex-1 text-base font-medium text-zinc-900 dark:text-zinc-100"
-                              numberOfLines={1}
-                            >
-                              {config.label}
-                            </Text>
-                            <Host matchContents>
-                              <SwiftImage systemName="chevron.up.chevron.down" size={14} />
-                            </Host>
-                          </View>
-                        </Pressable>
-                      }
-                    >
-                      {CATEGORY_ENUM.map((cat, index) => {
-                        const catConfig = CATEGORIES[cat];
-                        return (
-                          <Button
-                            key={cat}
-                            systemImage={catConfig.icon}
-                            label={catConfig.label}
-                            onPress={() => onChange(index)}
-                          />
-                        );
-                      })}
-                    </Menu>
-                  </Host>
-                );
-              }}
-            />
-          </View>
+                          </Pressable>
+                        }
+                      >
+                        {CATEGORY_ENUM.map((cat, index) => {
+                          const catConfig = CATEGORIES[cat];
+                          return (
+                            <Button
+                              key={cat}
+                              systemImage={catConfig.icon}
+                              label={catConfig.label}
+                              onPress={() => onChange(index)}
+                            />
+                          );
+                        })}
+                      </Menu>
+                    </Host>
+                  );
+                }}
+              />
+            </View>
 
-          {/* Domain */}
-          <View className="mb-4">
-            <Label>Merchant Domain (optional)</Label>
-            <Controller
-              control={control}
-              name="domain"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <Input
-                  placeholder="e.g. migros.ch"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  keyboardType="url"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                />
+            {/* Domain */}
+            <View>
+              <Label>Merchant Domain (optional)</Label>
+              <Controller
+                control={control}
+                name="domain"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <Input
+                    placeholder="e.g. migros.ch"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    keyboardType="url"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                  />
+                )}
+              />
+              {errors.domain && (
+                <Text className="mt-1 text-xs text-red-500">{errors.domain.message}</Text>
               )}
-            />
-            {errors.domain && (
-              <Text className="mt-1 text-xs text-red-500">{errors.domain.message}</Text>
-            )}
-            <Text className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
-              Used to display the merchant logo
-            </Text>
-          </View>
+              <Text className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+                Used to display the merchant logo
+              </Text>
+            </View>
+          </Surface>
         </ScrollView>
       </KeyboardAvoidingView>
     </>

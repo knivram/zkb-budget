@@ -1,4 +1,4 @@
-import { Input, Label } from '@/components/ui';
+import { Input, Label, SectionTitle, Surface } from '@/components/ui';
 import { db } from '@/db/client';
 import { BILLING_CYCLES, BillingCycle, subscriptions } from '@/db/schema';
 import { parsePriceToCents } from '@/lib/price';
@@ -146,8 +146,8 @@ export default function AddSubscription() {
     return (
       <>
         <Stack.Screen options={{ title: 'Edit Subscription' }} />
-        <View className="flex-1 items-center justify-center bg-white dark:bg-zinc-900">
-          <Text className="text-zinc-500">Loading subscription...</Text>
+        <View className="flex-1 items-center justify-center bg-slate-50 dark:bg-slate-950">
+          <Text className="text-slate-500">Loading subscription...</Text>
         </View>
       </>
     );
@@ -186,38 +186,38 @@ export default function AddSubscription() {
       />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        className="flex-1 bg-white dark:bg-zinc-900"
+        className="flex-1 bg-slate-50 dark:bg-slate-950"
         keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
       >
         <ScrollView
-          className="flex-1 bg-white dark:bg-zinc-900"
+          className="flex-1 bg-slate-50 dark:bg-slate-950"
           contentContainerClassName="px-4 pb-8 pt-6"
           keyboardShouldPersistTaps="handled"
           contentInsetAdjustmentBehavior="automatic"
         >
-          <View className="mb-8 items-center">
+          <Surface className="mb-8 items-center">
             <Controller
               control={control}
               name="price"
               render={({ field: { onChange, onBlur, value } }) => (
                 <View className="flex items-center">
                   <View className="flex-row items-baseline">
-                    <Text className="text-4xl font-light leading-tight text-zinc-400 dark:text-zinc-500">
+                    <Text className="text-3xl font-medium leading-tight text-slate-400 dark:text-slate-500">
                       CHF
                     </Text>
                     <TextInput
                       placeholder="0.00"
-                      placeholderTextColor="#d4d4d8"
+                      placeholderTextColor="#94a3b8"
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
                       keyboardType="decimal-pad"
-                      className="ml-2 min-w-[120px] text-5xl font-semibold leading-tight text-zinc-900 dark:text-white"
+                      className="ml-2 min-w-[120px] text-5xl font-semibold leading-tight text-slate-900 dark:text-white"
                       textAlign="left"
                       textAlignVertical="center"
                     />
                   </View>
-                  <Text className="mt-1 text-sm leading-5 text-zinc-400">{billingCycleLabel}</Text>
+                  <Text className="mt-2 text-sm leading-5 text-slate-400">{billingCycleLabel}</Text>
                   {errors.price && (
                     <Text className="mt-2 text-xs leading-4 text-red-500">
                       {errors.price.message}
@@ -226,89 +226,92 @@ export default function AddSubscription() {
                 </View>
               )}
             />
-          </View>
+          </Surface>
 
-          <View className="mb-4">
-            <Label>Name</Label>
-            <Controller
-              control={control}
-              name="name"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <Input
-                  placeholder="e.g. Netflix"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  autoCapitalize="words"
-                />
-              )}
-            />
-            {errors.name && (
-              <Text className="mt-1 text-xs leading-4 text-red-500">{errors.name.message}</Text>
-            )}
-          </View>
-
-          <View className="mb-4">
-            <Label>Billing Cycle</Label>
-            <Controller
-              control={control}
-              name="billingCycleIndex"
-              render={({ field: { onChange, value } }) => (
-                <Host matchContents>
-                  <Picker
-                    selection={value}
-                    onSelectionChange={(selection) => onChange(selection as number)}
-                    modifiers={[pickerStyle('segmented')]}
-                  >
-                    <SwiftText modifiers={[tag(0)]}>Weekly</SwiftText>
-                    <SwiftText modifiers={[tag(1)]}>Monthly</SwiftText>
-                    <SwiftText modifiers={[tag(2)]}>Yearly</SwiftText>
-                  </Picker>
-                </Host>
-              )}
-            />
-          </View>
-
-          <View className="mb-4">
-            <Label>Subscribed Since</Label>
-            <Controller
-              control={control}
-              name="subscribedAt"
-              render={({ field: { onChange, value } }) => (
-                <Host matchContents>
-                  <DatePicker
-                    onDateChange={(date: Date) => {
-                      onChange(date);
-                    }}
-                    displayedComponents={['date']}
-                    selection={value}
+          <SectionTitle title="Subscription details" />
+          <Surface className="gap-4">
+            <View>
+              <Label>Name</Label>
+              <Controller
+                control={control}
+                name="name"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <Input
+                    placeholder="e.g. Netflix"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    autoCapitalize="words"
                   />
-                </Host>
+                )}
+              />
+              {errors.name && (
+                <Text className="mt-1 text-xs leading-4 text-red-500">{errors.name.message}</Text>
               )}
-            />
-          </View>
+            </View>
 
-          <View className="mb-4">
-            <Label>Provider Domain (optional)</Label>
-            <Controller
-              control={control}
-              name="domain"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <Input
-                  placeholder="e.g. netflix.com"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  keyboardType="url"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                />
+            <View>
+              <Label>Billing Cycle</Label>
+              <Controller
+                control={control}
+                name="billingCycleIndex"
+                render={({ field: { onChange, value } }) => (
+                  <Host matchContents>
+                    <Picker
+                      selection={value}
+                      onSelectionChange={(selection) => onChange(selection as number)}
+                      modifiers={[pickerStyle('segmented')]}
+                    >
+                      <SwiftText modifiers={[tag(0)]}>Weekly</SwiftText>
+                      <SwiftText modifiers={[tag(1)]}>Monthly</SwiftText>
+                      <SwiftText modifiers={[tag(2)]}>Yearly</SwiftText>
+                    </Picker>
+                  </Host>
+                )}
+              />
+            </View>
+
+            <View>
+              <Label>Subscribed Since</Label>
+              <Controller
+                control={control}
+                name="subscribedAt"
+                render={({ field: { onChange, value } }) => (
+                  <Host matchContents>
+                    <DatePicker
+                      onDateChange={(date: Date) => {
+                        onChange(date);
+                      }}
+                      displayedComponents={['date']}
+                      selection={value}
+                    />
+                  </Host>
+                )}
+              />
+            </View>
+
+            <View>
+              <Label>Provider Domain (optional)</Label>
+              <Controller
+                control={control}
+                name="domain"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <Input
+                    placeholder="e.g. netflix.com"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    keyboardType="url"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                  />
+                )}
+              />
+              {errors.domain && (
+                <Text className="mt-1 text-xs leading-4 text-red-500">{errors.domain.message}</Text>
               )}
-            />
-            {errors.domain && (
-              <Text className="mt-1 text-xs leading-4 text-red-500">{errors.domain.message}</Text>
-            )}
-          </View>
+            </View>
+          </Surface>
         </ScrollView>
       </KeyboardAvoidingView>
     </>
