@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, Text, View, type PressableStateCallbackType } from 'react-native';
 
 import { cn } from '@/lib/utils';
 
@@ -49,16 +49,16 @@ export function Button({
     <Pressable
       onPress={onPress}
       disabled={disabled}
-      className={({ pressed }) =>
-        cn(
-          'flex-row items-center justify-center rounded-2xl border border-transparent',
-          variant === 'secondary' && 'border-slate-200 dark:border-slate-700',
-          variantClasses[variant],
-          sizeClasses[size],
-          pressed && !disabled && 'opacity-90',
-          disabled && 'opacity-50',
-          className
-        )
+      className={cn(
+        'flex-row items-center justify-center rounded-2xl border border-transparent',
+        variant === 'secondary' && 'border-slate-200 dark:border-slate-700',
+        variantClasses[variant],
+        sizeClasses[size],
+        disabled && 'opacity-50',
+        className
+      )}
+      style={({ pressed }: PressableStateCallbackType) =>
+        pressed && !disabled ? { opacity: 0.9 } : undefined
       }
     >
       {label ? (

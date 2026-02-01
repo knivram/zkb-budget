@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
-import { Alert, Pressable } from 'react-native';
+import type { ComponentType, ReactNode } from 'react';
+import { Alert, Pressable, type PressableProps } from 'react-native';
 
 type ItemActionMenuProps = {
   children: ReactNode;
@@ -16,6 +16,9 @@ export default function ItemActionMenu({
   editLabel = 'Edit',
   deleteLabel = 'Delete',
 }: ItemActionMenuProps) {
+  // react-native-web supports onContextMenu, but react-native types don't include it.
+  const WebPressable = Pressable as ComponentType<PressableProps & { onContextMenu?: () => void }>;
+
   const showMenu = () => {
     if (!onEdit && !onDelete) return;
     const buttons = [];
@@ -31,8 +34,8 @@ export default function ItemActionMenu({
   };
 
   return (
-    <Pressable onLongPress={showMenu} onContextMenu={showMenu} delayLongPress={250}>
+    <WebPressable onLongPress={showMenu} onContextMenu={showMenu} delayLongPress={250}>
       {children}
-    </Pressable>
+    </WebPressable>
   );
 }

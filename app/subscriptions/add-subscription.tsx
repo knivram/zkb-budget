@@ -242,9 +242,7 @@ export default function AddSubscription() {
                       textAlignVertical="center"
                     />
                   </View>
-                  <Text className="mt-1 text-sm leading-5 text-slate-400">
-                    {billingCycleLabel}
-                  </Text>
+                  <Text className="mt-1 text-sm leading-5 text-slate-400">{billingCycleLabel}</Text>
                   {errors.price && (
                     <Text className="mt-2 text-xs leading-4 text-red-500">
                       {errors.price.message}

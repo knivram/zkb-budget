@@ -198,7 +198,9 @@ export default function TransactionDetail() {
               </Text>
             </View>
             <View className="py-3">
-              <Text className="mb-1 text-sm text-slate-500 dark:text-slate-400">Transaction ID</Text>
+              <Text className="mb-1 text-sm text-slate-500 dark:text-slate-400">
+                Transaction ID
+              </Text>
               <Text className="font-mono text-xs text-slate-600 dark:text-slate-400">
                 {transaction.id}
               </Text>

@@ -41,9 +41,7 @@ export function SegmentedControl<T extends string | number>({
             <Text
               className={cn(
                 'text-sm font-semibold',
-                isSelected
-                  ? 'text-slate-900 dark:text-white'
-                  : 'text-slate-500 dark:text-slate-400'
+                isSelected ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400'
               )}
             >
               {option.label}

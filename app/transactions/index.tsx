@@ -166,7 +166,7 @@ export default function Transactions() {
                     params: { id: transaction.id },
                   })
                 }
-                >
+              >
                 <View className="flex-row border-b border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900">
                   <DomainLogo
                     domain={transaction.domain}
