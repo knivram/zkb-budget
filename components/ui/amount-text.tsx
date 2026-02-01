@@ -35,8 +35,8 @@ export default function AmountText({
       className={cn(
         'text-base font-semibold',
         amountCents >= 0
-          ? 'text-emerald-700 dark:text-emerald-200'
-          : 'text-rose-800 dark:text-rose-200',
+          ? 'text-accent-700 dark:text-accent-300'
+          : 'text-rose-600 dark:text-rose-300',
         className
       )}
     >

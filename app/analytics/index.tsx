@@ -1,10 +1,12 @@
 import SpendingByCategory from '@/components/SpendingByCategory';
 import AmountText from '@/components/ui/amount-text';
 import DomainLogo from '@/components/ui/domain-logo';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ListItem } from '@/components/ui/list-item';
+import { SectionGroup } from '@/components/ui/section-group';
 import { db } from '@/db/client';
 import { transactions } from '@/db/schema';
 import { formatYearMonth } from '@/lib/date';
-import { cn } from '@/lib/utils';
 import { Button, Host } from '@expo/ui/swift-ui';
 import { buttonStyle, controlSize, disabled, labelStyle } from '@expo/ui/swift-ui/modifiers';
 import { and, count, desc, eq, isNotNull, notInArray, sql, sum } from 'drizzle-orm';
@@ -133,10 +135,11 @@ export default function Analytics() {
 
   return (
     <ScrollView
-      className="flex-1 bg-white dark:bg-zinc-900"
+      className="flex-1 bg-stone-50 dark:bg-stone-950"
       contentInsetAdjustmentBehavior="automatic"
     >
       <View className="p-4">
+        {/* Month navigation */}
         <View className="mb-6 flex-row items-center justify-between">
           <Host matchContents>
             <Button
@@ -146,7 +149,7 @@ export default function Analytics() {
               modifiers={[buttonStyle('glass'), controlSize('regular'), labelStyle('iconOnly')]}
             />
           </Host>
-          <Text className="text-lg font-semibold text-zinc-900 dark:text-white">
+          <Text className="text-lg font-semibold text-stone-900 dark:text-stone-50">
             {formatMonthFull(selectedMonth)}
           </Text>
           <Host matchContents>
@@ -164,17 +167,18 @@ export default function Analytics() {
           </Host>
         </View>
 
-        <View className="mb-4 flex-row justify-between">
-          <View className="mr-2 flex-1 rounded-xl bg-emerald-50 p-4 dark:bg-emerald-900/30">
-            <Text className="text-sm text-emerald-600 dark:text-emerald-400">Income</Text>
+        {/* Income / Expense summary cards */}
+        <View className="mb-4 flex-row justify-between gap-3">
+          <View className="flex-1 rounded-2xl bg-accent-50 p-4 dark:bg-accent-950/50">
+            <Text className="text-sm text-accent-700 dark:text-accent-300">Income</Text>
             <AmountText
               amountCents={monthIncome}
               roundToDollars={true}
-              className="text-xl font-bold text-emerald-700 dark:text-emerald-200"
+              className="text-xl font-bold text-accent-800 dark:text-accent-200"
             />
           </View>
-          <View className="ml-2 flex-1 rounded-xl bg-rose-50 p-4 dark:bg-rose-900/30">
-            <Text className="text-sm text-rose-600 dark:text-rose-400">Expenses</Text>
+          <View className="flex-1 rounded-2xl bg-rose-50 p-4 dark:bg-rose-950/50">
+            <Text className="text-sm text-rose-600 dark:text-rose-300">Expenses</Text>
             <AmountText
               amountCents={monthExpenses}
               roundToDollars={true}
@@ -183,20 +187,21 @@ export default function Analytics() {
           </View>
         </View>
 
+        {/* Expense trend */}
         {expenseChange !== null && (
-          <View className="mb-6 flex-row items-center justify-center rounded-xl bg-zinc-50 p-3 dark:bg-zinc-800">
+          <View className="mb-6 flex-row items-center justify-center rounded-2xl bg-white p-3 dark:bg-stone-900">
             {expenseChange > 0 ? (
-              <TrendingUp size={18} color="#f43f5e" />
+              <TrendingUp size={18} color="#e11d48" />
             ) : expenseChange < 0 ? (
-              <TrendingDown size={18} color="#10b981" />
+              <TrendingDown size={18} color="#0d9488" />
             ) : null}
             <Text
               className={`ml-2 text-sm font-medium ${
                 expenseChange > 0
-                  ? 'text-rose-600 dark:text-rose-400'
+                  ? 'text-rose-600 dark:text-rose-300'
                   : expenseChange < 0
-                    ? 'text-emerald-600 dark:text-emerald-400'
-                    : 'text-zinc-600 dark:text-zinc-400'
+                    ? 'text-accent-700 dark:text-accent-300'
+                    : 'text-stone-600 dark:text-stone-400'
               }`}
             >
               {expenseChange === 0
@@ -206,67 +211,55 @@ export default function Analytics() {
           </View>
         )}
 
+        {/* Spending by category */}
         {categoryData.length > 0 && (
-          <View className="mb-6">
-            <Text className="mb-4 text-lg font-semibold text-zinc-900 dark:text-white">
-              Spending by Category
-            </Text>
-            <View className="rounded-xl bg-zinc-50 p-4 dark:bg-zinc-800">
-              <SpendingByCategory categories={categoryData} monthExpenses={monthExpenses} />
-            </View>
-          </View>
+          <SectionGroup header="Spending by Category" className="p-4">
+            <SpendingByCategory categories={categoryData} monthExpenses={monthExpenses} />
+          </SectionGroup>
         )}
 
+        {/* Top merchants — using unified ListItem */}
         {merchantData.length > 0 && (
-          <View className="mb-6">
-            <Text className="mb-4 text-lg font-semibold text-zinc-900 dark:text-white">
-              Top Merchants
-            </Text>
-            <View className="rounded-xl bg-zinc-50 p-4 dark:bg-zinc-800">
-              {merchantData.map((merchant, index) => (
-                <View
-                  key={merchant.displayName ?? index}
-                  className={cn(
-                    'flex-row items-center',
-                    index < merchantData.length - 1 &&
-                      'mb-3 border-b border-zinc-200 pb-3 dark:border-zinc-700'
-                  )}
-                >
+          <SectionGroup header="Top Merchants">
+            {merchantData.map((merchant, index) => (
+              <ListItem
+                key={merchant.displayName ?? index}
+                leading={
                   <DomainLogo
                     domain={merchant.domain ?? undefined}
                     name={merchant.displayName ?? ''}
                     size={40}
                   />
-                  <View className="ml-3 flex-1">
-                    <Text
-                      className="text-sm font-medium text-zinc-900 dark:text-white"
-                      numberOfLines={1}
-                    >
-                      {merchant.displayName}
-                    </Text>
-                    <Text className="text-xs text-zinc-500">
-                      {merchant.count} transaction
-                      {merchant.count !== 1 ? 's' : ''}
-                    </Text>
-                  </View>
+                }
+                trailing={
                   <AmountText
                     amountCents={merchant.total}
                     roundToDollars={true}
-                    className="text-sm font-semibold text-zinc-900 dark:text-white"
+                    className="text-sm font-semibold"
                   />
-                </View>
-              ))}
-            </View>
-          </View>
+                }
+                showDivider={index < merchantData.length - 1}
+              >
+                <Text
+                  className="text-sm font-medium text-stone-900 dark:text-stone-50"
+                  numberOfLines={1}
+                >
+                  {merchant.displayName}
+                </Text>
+                <Text className="text-xs text-stone-500 dark:text-stone-400">
+                  {merchant.count} transaction
+                  {merchant.count !== 1 ? 's' : ''}
+                </Text>
+              </ListItem>
+            ))}
+          </SectionGroup>
         )}
 
         {categoryData.length === 0 && merchantData.length === 0 ? (
-          <View className="items-center justify-center py-20">
-            <Text className="text-zinc-500">No transaction data available</Text>
-            <Text className="mt-2 text-sm text-zinc-400">
-              Import transactions to see your spending analytics
-            </Text>
-          </View>
+          <EmptyState
+            title="No transaction data available"
+            subtitle="Import transactions to see your spending analytics"
+          />
         ) : null}
       </View>
     </ScrollView>

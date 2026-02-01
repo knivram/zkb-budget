@@ -96,8 +96,8 @@ export default function EditTransaction() {
     return (
       <>
         <Stack.Screen options={{ title: 'Edit Transaction' }} />
-        <View className="flex-1 items-center justify-center bg-white dark:bg-zinc-900">
-          <Text className="text-zinc-500">Loading transaction...</Text>
+        <View className="flex-1 items-center justify-center bg-stone-50 dark:bg-stone-950">
+          <Text className="text-stone-500">Loading transaction...</Text>
         </View>
       </>
     );
@@ -123,22 +123,22 @@ export default function EditTransaction() {
       </Stack.Toolbar>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        className="flex-1 bg-white dark:bg-zinc-900"
+        className="flex-1 bg-stone-50 dark:bg-stone-950"
         keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
       >
         <ScrollView
-          className="flex-1 bg-white dark:bg-zinc-900"
+          className="flex-1"
           contentContainerClassName="px-4 pb-8 pt-6"
           keyboardShouldPersistTaps="handled"
           contentInsetAdjustmentBehavior="automatic"
         >
           {/* Original Description (read-only reference) */}
           {originalDescription && (
-            <View className="mb-6 rounded-xl bg-zinc-50 p-4 dark:bg-zinc-800/50">
-              <Text className="mb-1 text-xs font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+            <View className="mb-6 rounded-2xl bg-white p-4 dark:bg-stone-900">
+              <Text className="mb-1 text-xs font-semibold uppercase tracking-wide text-stone-400 dark:text-stone-500">
                 Original Description
               </Text>
-              <Text className="text-sm text-zinc-700 dark:text-zinc-300">
+              <Text className="text-sm text-stone-700 dark:text-stone-300">
                 {originalDescription}
               </Text>
             </View>
@@ -160,7 +160,7 @@ export default function EditTransaction() {
                 />
               )}
             />
-            <Text className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
+            <Text className="mt-1 text-xs text-stone-400 dark:text-stone-500">
               Leave empty to use the original bank description
             </Text>
           </View>
@@ -180,7 +180,7 @@ export default function EditTransaction() {
                     <Menu
                       label={
                         <Pressable>
-                          <View className="mt-1 flex-row items-center rounded-xl bg-zinc-100 px-4 py-3 dark:bg-zinc-800">
+                          <View className="mt-1 flex-row items-center rounded-xl bg-stone-100 px-4 py-3 dark:bg-stone-800">
                             <View className="mr-3">
                               <Host matchContents>
                                 <SwiftImage
@@ -191,7 +191,7 @@ export default function EditTransaction() {
                               </Host>
                             </View>
                             <Text
-                              className="flex-1 text-base font-medium text-zinc-900 dark:text-zinc-100"
+                              className="flex-1 text-base font-medium text-stone-900 dark:text-stone-100"
                               numberOfLines={1}
                             >
                               {config.label}
@@ -240,9 +240,9 @@ export default function EditTransaction() {
               )}
             />
             {errors.domain && (
-              <Text className="mt-1 text-xs text-red-500">{errors.domain.message}</Text>
+              <Text className="mt-1 text-xs text-rose-500">{errors.domain.message}</Text>
             )}
-            <Text className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
+            <Text className="mt-1 text-xs text-stone-400 dark:text-stone-500">
               Used to display the merchant logo
             </Text>
           </View>

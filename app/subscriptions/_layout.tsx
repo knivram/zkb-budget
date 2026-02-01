@@ -5,8 +5,8 @@ export default function SubscriptionLayout() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
 
-  const headerTintColor = isDark ? '#ffffff' : '#000000';
-  const headerLargeTitleStyle = { color: isDark ? '#ffffff' : '#000000' };
+  const headerTintColor = isDark ? '#fafaf9' : '#0c0a09';
+  const headerLargeTitleStyle = { color: isDark ? '#fafaf9' : '#0c0a09' };
 
   return (
     <Stack

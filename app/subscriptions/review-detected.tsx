@@ -12,6 +12,18 @@ import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 const HIGH_CONFIDENCE_THRESHOLD = 0.8;
 const MEDIUM_CONFIDENCE_THRESHOLD = 0.6;
 
+const getConfidenceColor = (confidence: number): string => {
+  if (confidence >= HIGH_CONFIDENCE_THRESHOLD) return '#059669'; // emerald-600
+  if (confidence >= MEDIUM_CONFIDENCE_THRESHOLD) return '#d97706'; // amber-600
+  return '#ea580c'; // orange-600
+};
+
+const getConfidenceBadgeText = (confidence: number): string => {
+  if (confidence >= HIGH_CONFIDENCE_THRESHOLD) return 'High';
+  if (confidence >= MEDIUM_CONFIDENCE_THRESHOLD) return 'Medium';
+  return 'Low';
+};
+
 export default function ReviewDetectedSubscriptions() {
   const params = useLocalSearchParams();
   const detectedSubscriptions: DetectedSubscription[] = JSON.parse(
@@ -78,18 +90,6 @@ export default function ReviewDetectedSubscriptions() {
     }
   };
 
-  const getConfidenceColor = (confidence: number): string => {
-    if (confidence >= HIGH_CONFIDENCE_THRESHOLD) return 'bg-green-500';
-    if (confidence >= MEDIUM_CONFIDENCE_THRESHOLD) return 'bg-yellow-500';
-    return 'bg-orange-500';
-  };
-
-  const getConfidenceBadgeText = (confidence: number): string => {
-    if (confidence >= HIGH_CONFIDENCE_THRESHOLD) return 'High';
-    if (confidence >= MEDIUM_CONFIDENCE_THRESHOLD) return 'Medium';
-    return 'Low';
-  };
-
   return (
     <>
       <Stack.Screen
@@ -121,78 +121,89 @@ export default function ReviewDetectedSubscriptions() {
         }}
       />
       <ScrollView
-        className="flex-1 bg-white dark:bg-zinc-900"
+        className="flex-1 bg-stone-50 dark:bg-stone-950"
         contentInsetAdjustmentBehavior="automatic"
       >
         <View className="p-4">
-          <Text className="mb-2 text-sm text-zinc-600 dark:text-zinc-400">
+          <Text className="mb-4 text-sm text-stone-600 dark:text-stone-400">
             Review these detected subscriptions and select which ones to add to your account.
           </Text>
-          <View className="mt-4 flex-col gap-2">
-            {detectedSubscriptions.map((sub, index) => (
-              <TouchableOpacity
-                key={index}
-                onPress={() => toggleSelection(index)}
-                className={`rounded-xl border-2 p-4 ${
-                  selectedIds.has(index)
-                    ? 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-950'
-                    : 'border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-800'
-                }`}
-              >
-                <View className="flex-row items-start justify-between">
-                  <View className="flex-1 flex-row">
-                    <DomainLogo domain={sub.domain} name={sub.name} size={40} className="mr-3" />
-                    <View className="flex-1">
-                      <View className="mb-2 flex-row items-center gap-2">
-                        <Text className="text-lg font-semibold text-zinc-900 dark:text-white">
-                          {sub.name}
-                        </Text>
-                        <View
-                          className={`rounded-full px-2 py-0.5 ${getConfidenceColor(sub.confidence)}`}
-                        >
-                          <Text className="text-xs font-medium text-white">
-                            {getConfidenceBadgeText(sub.confidence)} (
-                            {Math.round(sub.confidence * 100)}%)
+          <View className="flex-col gap-3">
+            {detectedSubscriptions.map((sub, index) => {
+              const isSelected = selectedIds.has(index);
+              const confidenceColor = getConfidenceColor(sub.confidence);
+
+              return (
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => toggleSelection(index)}
+                  activeOpacity={0.7}
+                  className={cn(
+                    'overflow-hidden rounded-2xl border-2 p-4',
+                    isSelected
+                      ? 'border-accent-500 bg-white dark:border-accent-400 dark:bg-stone-900'
+                      : 'border-stone-200 bg-white dark:border-stone-700 dark:bg-stone-900'
+                  )}
+                >
+                  <View className="flex-row items-start justify-between">
+                    <View className="flex-1 flex-row">
+                      <DomainLogo domain={sub.domain} name={sub.name} size={40} className="mr-3" />
+                      <View className="flex-1">
+                        <View className="mb-2 flex-row items-center gap-2">
+                          <Text className="text-base font-semibold text-stone-900 dark:text-stone-50">
+                            {sub.name}
+                          </Text>
+                          <View
+                            className="rounded-lg px-2 py-0.5"
+                            style={{ backgroundColor: `${confidenceColor}18` }}
+                          >
+                            <Text
+                              className="text-xs font-medium"
+                              style={{ color: confidenceColor }}
+                            >
+                              {getConfidenceBadgeText(sub.confidence)}{' '}
+                              {Math.round(sub.confidence * 100)}%
+                            </Text>
+                          </View>
+                        </View>
+                        <View className="mb-1 flex-row flex-wrap items-center">
+                          <AmountText
+                            amountCents={sub.price}
+                            className="text-sm font-medium text-stone-600 dark:text-stone-300"
+                          />
+                          <Text className="text-sm font-medium text-stone-600 dark:text-stone-300">
+                            {' \u2022 '}
+                            <Text className="capitalize">{sub.billingCycle}</Text>
                           </Text>
                         </View>
+                        {sub.domain && (
+                          <Text className="mb-1 text-sm text-stone-400 dark:text-stone-500">
+                            {sub.domain}
+                          </Text>
+                        )}
+                        {sub.reasoning && (
+                          <Text className="text-xs italic text-stone-500 dark:text-stone-400">
+                            &quot;{sub.reasoning}&quot;
+                          </Text>
+                        )}
                       </View>
-                      <View className="mb-1 flex-row flex-wrap items-center">
-                        <AmountText
-                          amountCents={sub.price}
-                          className="text-base font-medium text-zinc-700 dark:text-zinc-300"
-                        />
-                        <Text className="text-base font-medium text-zinc-700 dark:text-zinc-300">
-                          {' \u2022 '}
-                          <Text className="capitalize">{sub.billingCycle}</Text>
-                        </Text>
-                      </View>
-                      {sub.domain && (
-                        <Text className="mb-2 text-sm text-zinc-500 dark:text-zinc-400">
-                          {sub.domain}
-                        </Text>
+                    </View>
+
+                    {/* Selection indicator */}
+                    <View
+                      className={cn(
+                        'ml-3 h-6 w-6 items-center justify-center rounded-full border-2',
+                        isSelected
+                          ? 'border-accent-600 bg-accent-600'
+                          : 'border-stone-300 bg-white dark:border-stone-600 dark:bg-stone-800'
                       )}
-                      {sub.reasoning && (
-                        <Text className="text-sm italic text-zinc-600 dark:text-zinc-400">
-                          &quot;{sub.reasoning}&quot;
-                        </Text>
-                      )}
+                    >
+                      {isSelected && <Text className="text-xs font-bold text-white">✓</Text>}
                     </View>
                   </View>
-                  <View
-                    className={cn(
-                      'ml-3 h-6 w-6 items-center justify-center rounded-full border-2',
-                      selectedIds.has(index)
-                        ? 'border-blue-500 bg-blue-500'
-                        : 'border-zinc-300 bg-white dark:border-zinc-600 dark:bg-zinc-700'
-                    )}
-                  >
-                    {selectedIds.has(index) && (
-                      <Text className="text-sm font-bold text-white">✓</Text>
-                    )}
-                  </View>
-                </View>
-              </TouchableOpacity>
-            ))}
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </View>
       </ScrollView>

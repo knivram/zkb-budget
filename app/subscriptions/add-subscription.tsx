@@ -146,8 +146,8 @@ export default function AddSubscription() {
     return (
       <>
         <Stack.Screen options={{ title: 'Edit Subscription' }} />
-        <View className="flex-1 items-center justify-center bg-white dark:bg-zinc-900">
-          <Text className="text-zinc-500">Loading subscription...</Text>
+        <View className="flex-1 items-center justify-center bg-stone-50 dark:bg-stone-950">
+          <Text className="text-stone-500">Loading subscription...</Text>
         </View>
       </>
     );
@@ -186,15 +186,16 @@ export default function AddSubscription() {
       />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        className="flex-1 bg-white dark:bg-zinc-900"
+        className="flex-1 bg-stone-50 dark:bg-stone-950"
         keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
       >
         <ScrollView
-          className="flex-1 bg-white dark:bg-zinc-900"
+          className="flex-1"
           contentContainerClassName="px-4 pb-8 pt-6"
           keyboardShouldPersistTaps="handled"
           contentInsetAdjustmentBehavior="automatic"
         >
+          {/* Price input — prominent hero */}
           <View className="mb-8 items-center">
             <Controller
               control={control}
@@ -202,24 +203,26 @@ export default function AddSubscription() {
               render={({ field: { onChange, onBlur, value } }) => (
                 <View className="flex items-center">
                   <View className="flex-row items-baseline">
-                    <Text className="text-4xl font-light leading-tight text-zinc-400 dark:text-zinc-500">
+                    <Text className="text-4xl font-light leading-tight text-stone-400 dark:text-stone-500">
                       CHF
                     </Text>
                     <TextInput
                       placeholder="0.00"
-                      placeholderTextColor="#d4d4d8"
+                      placeholderTextColor="#a8a29e"
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
                       keyboardType="decimal-pad"
-                      className="ml-2 min-w-[120px] text-5xl font-semibold leading-tight text-zinc-900 dark:text-white"
+                      className="ml-2 min-w-[120px] text-5xl font-semibold leading-tight text-stone-900 dark:text-stone-50"
                       textAlign="left"
                       textAlignVertical="center"
                     />
                   </View>
-                  <Text className="mt-1 text-sm leading-5 text-zinc-400">{billingCycleLabel}</Text>
+                  <Text className="mt-1 text-sm leading-5 text-stone-400 dark:text-stone-500">
+                    {billingCycleLabel}
+                  </Text>
                   {errors.price && (
-                    <Text className="mt-2 text-xs leading-4 text-red-500">
+                    <Text className="mt-2 text-xs leading-4 text-rose-500">
                       {errors.price.message}
                     </Text>
                   )}
@@ -244,7 +247,7 @@ export default function AddSubscription() {
               )}
             />
             {errors.name && (
-              <Text className="mt-1 text-xs leading-4 text-red-500">{errors.name.message}</Text>
+              <Text className="mt-1 text-xs leading-4 text-rose-500">{errors.name.message}</Text>
             )}
           </View>
 
@@ -306,7 +309,7 @@ export default function AddSubscription() {
               )}
             />
             {errors.domain && (
-              <Text className="mt-1 text-xs leading-4 text-red-500">{errors.domain.message}</Text>
+              <Text className="mt-1 text-xs leading-4 text-rose-500">{errors.domain.message}</Text>
             )}
           </View>
         </ScrollView>

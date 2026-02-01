@@ -45,14 +45,14 @@ export default function DomainLogo({
       );
     }
     const fallbackLetter = name.trim().charAt(0).toUpperCase() || '?';
-    return <Text className="text-lg text-zinc-400 dark:text-zinc-500">{fallbackLetter}</Text>;
+    return <Text className="text-lg text-stone-400 dark:text-stone-500">{fallbackLetter}</Text>;
   };
 
   return (
     <View
       className={cn(
-        'items-center justify-center overflow-hidden rounded-xl ',
-        !logoUri ? 'bg-zinc-100 dark:bg-zinc-800' : 'bg-white',
+        'items-center justify-center overflow-hidden rounded-xl',
+        !logoUri ? 'bg-stone-100 dark:bg-stone-800' : 'bg-white',
         className
       )}
       style={dimensionStyle}
