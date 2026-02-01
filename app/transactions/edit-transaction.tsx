@@ -1,15 +1,15 @@
+import { useEffect, useState } from 'react';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { Button, Host, Menu, Image as SwiftImage } from '@expo/ui/swift-ui';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { eq } from 'drizzle-orm';
+import { Controller, useForm } from 'react-hook-form';
+import { z } from 'zod';
 import { Input, Label } from '@/components/ui';
 import { db } from '@/db/client';
 import { CATEGORIES as CATEGORY_ENUM, transactions } from '@/db/schema';
 import { CATEGORIES } from '@/lib/categories';
-import { Button, Host, Menu, Image as SwiftImage } from '@expo/ui/swift-ui';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { eq } from 'drizzle-orm';
-import { router, Stack, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
-import { z } from 'zod';
 
 const transactionEditSchema = z.object({
   displayName: z.string().optional(),
@@ -96,8 +96,8 @@ export default function EditTransaction() {
     return (
       <>
         <Stack.Screen options={{ title: 'Edit Transaction' }} />
-        <View className="flex-1 items-center justify-center bg-white dark:bg-zinc-900">
-          <Text className="text-zinc-500">Loading transaction...</Text>
+        <View className="flex-1 items-center justify-center bg-canvas dark:bg-canvas-dark">
+          <Text className="text-muted dark:text-muted-dark">Loading transaction...</Text>
         </View>
       </>
     );
@@ -123,24 +123,22 @@ export default function EditTransaction() {
       </Stack.Toolbar>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        className="flex-1 bg-white dark:bg-zinc-900"
+        className="flex-1 bg-canvas dark:bg-canvas-dark"
         keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
       >
         <ScrollView
-          className="flex-1 bg-white dark:bg-zinc-900"
+          className="flex-1 bg-canvas dark:bg-canvas-dark"
           contentContainerClassName="px-4 pb-8 pt-6"
           keyboardShouldPersistTaps="handled"
           contentInsetAdjustmentBehavior="automatic"
         >
           {/* Original Description (read-only reference) */}
           {originalDescription && (
-            <View className="mb-6 rounded-xl bg-zinc-50 p-4 dark:bg-zinc-800/50">
-              <Text className="mb-1 text-xs font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+            <View className="mb-6 rounded-2xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark">
+              <Text className="mb-1 text-xs font-semibold uppercase tracking-wide text-subtle dark:text-subtle-dark">
                 Original Description
               </Text>
-              <Text className="text-sm text-zinc-700 dark:text-zinc-300">
-                {originalDescription}
-              </Text>
+              <Text className="text-sm text-muted dark:text-muted-dark">{originalDescription}</Text>
             </View>
           )}
 
@@ -160,7 +158,7 @@ export default function EditTransaction() {
                 />
               )}
             />
-            <Text className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
+            <Text className="mt-1 text-xs text-subtle dark:text-subtle-dark">
               Leave empty to use the original bank description
             </Text>
           </View>
@@ -180,7 +178,7 @@ export default function EditTransaction() {
                     <Menu
                       label={
                         <Pressable>
-                          <View className="mt-1 flex-row items-center rounded-xl bg-zinc-100 px-4 py-3 dark:bg-zinc-800">
+                          <View className="mt-1 flex-row items-center rounded-2xl border border-border bg-surface px-4 py-3 dark:border-border-dark dark:bg-surface-dark">
                             <View className="mr-3">
                               <Host matchContents>
                                 <SwiftImage
@@ -191,7 +189,7 @@ export default function EditTransaction() {
                               </Host>
                             </View>
                             <Text
-                              className="flex-1 text-base font-medium text-zinc-900 dark:text-zinc-100"
+                              className="flex-1 text-base font-semibold text-ink dark:text-ink-dark"
                               numberOfLines={1}
                             >
                               {config.label}
@@ -240,9 +238,11 @@ export default function EditTransaction() {
               )}
             />
             {errors.domain && (
-              <Text className="mt-1 text-xs text-red-500">{errors.domain.message}</Text>
+              <Text className="mt-1 text-xs text-danger dark:text-danger-dark">
+                {errors.domain.message}
+              </Text>
             )}
-            <Text className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
+            <Text className="mt-1 text-xs text-subtle dark:text-subtle-dark">
               Used to display the merchant logo
             </Text>
           </View>

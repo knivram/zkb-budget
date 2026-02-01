@@ -5,7 +5,7 @@ export function Input({ className, ...props }: TextInputProps) {
   return (
     <TextInput
       className={cn(
-        'rounded-xl bg-zinc-100 px-4 text-base text-zinc-900 dark:bg-zinc-800 dark:text-white',
+        'rounded-2xl border border-border bg-surface px-4 text-base text-ink dark:border-border-dark dark:bg-surface-dark dark:text-ink-dark',
         className
       )}
       style={[
@@ -16,7 +16,7 @@ export function Input({ className, ...props }: TextInputProps) {
           paddingBottom: 4,
         },
       ]}
-      placeholderTextColor="#a1a1aa"
+      placeholderTextColor="#9aa4b2"
       multiline={false}
       {...props}
     />

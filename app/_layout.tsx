@@ -14,16 +14,16 @@ export default function RootLayout() {
 
   if (error) {
     return (
-      <View className="flex-1 items-center justify-center bg-white dark:bg-zinc-900">
-        <Text className="text-red-500">Migration error: {error.message}</Text>
+      <View className="flex-1 items-center justify-center bg-canvas dark:bg-canvas-dark">
+        <Text className="text-danger dark:text-danger-dark">Migration error: {error.message}</Text>
       </View>
     );
   }
 
   if (!success) {
     return (
-      <View className="flex-1 items-center justify-center bg-white dark:bg-zinc-900">
-        <Text className="text-zinc-900 dark:text-white">Loading...</Text>
+      <View className="flex-1 items-center justify-center bg-canvas dark:bg-canvas-dark">
+        <Text className="text-ink dark:text-ink-dark">Loading...</Text>
       </View>
     );
   }

@@ -1,3 +1,8 @@
+import { useMemo, useState } from 'react';
+import { Pressable, ScrollView, Text, View, useColorScheme } from 'react-native';
+import { and, count, desc, eq, isNotNull, notInArray, sql, sum } from 'drizzle-orm';
+import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
+import { ChevronLeft, ChevronRight, TrendingDown, TrendingUp } from 'lucide-react-native';
 import SpendingByCategory from '@/components/SpendingByCategory';
 import AmountText from '@/components/ui/amount-text';
 import DomainLogo from '@/components/ui/domain-logo';
@@ -5,13 +10,6 @@ import { db } from '@/db/client';
 import { transactions } from '@/db/schema';
 import { formatYearMonth } from '@/lib/date';
 import { cn } from '@/lib/utils';
-import { Button, Host } from '@expo/ui/swift-ui';
-import { buttonStyle, controlSize, disabled, labelStyle } from '@expo/ui/swift-ui/modifiers';
-import { and, count, desc, eq, isNotNull, notInArray, sql, sum } from 'drizzle-orm';
-import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
-import { TrendingDown, TrendingUp } from 'lucide-react-native';
-import { useMemo, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
 
 const formatMonthFull = (monthStr: string): string => {
   const [year, month] = monthStr.split('-');
@@ -22,6 +20,8 @@ const formatMonthFull = (monthStr: string): string => {
 const monthFilter = (month: string) => sql`strftime('%Y-%m', ${transactions.date}) = ${month}`;
 
 export default function Analytics() {
+  const colorScheme = useColorScheme();
+  const iconColor = colorScheme === 'dark' ? '#a7b3c8' : '#5b677d';
   const { currentMonth, defaultMonth } = useMemo(() => {
     const now = new Date();
     const lastMonth = new Date(now);
@@ -133,70 +133,69 @@ export default function Analytics() {
 
   return (
     <ScrollView
-      className="flex-1 bg-white dark:bg-zinc-900"
+      className="flex-1 bg-canvas dark:bg-canvas-dark"
       contentInsetAdjustmentBehavior="automatic"
     >
       <View className="p-4">
         <View className="mb-6 flex-row items-center justify-between">
-          <Host matchContents>
-            <Button
-              onPress={handlePreviousMonth}
-              label="Previous"
-              systemImage="chevron.left"
-              modifiers={[buttonStyle('glass'), controlSize('regular'), labelStyle('iconOnly')]}
-            />
-          </Host>
-          <Text className="text-lg font-semibold text-zinc-900 dark:text-white">
+          <Pressable
+            className="h-10 w-10 items-center justify-center rounded-full border border-border bg-surface dark:border-border-dark dark:bg-surface-dark"
+            onPress={handlePreviousMonth}
+          >
+            <ChevronLeft size={18} color={iconColor} />
+          </Pressable>
+          <Text className="text-lg font-semibold text-ink dark:text-ink-dark">
             {formatMonthFull(selectedMonth)}
           </Text>
-          <Host matchContents>
-            <Button
-              onPress={handleNextMonth}
-              label="Next"
-              systemImage="chevron.right"
-              modifiers={[
-                buttonStyle('glass'),
-                controlSize('regular'),
-                labelStyle('iconOnly'),
-                disabled(isCurrentMonth),
-              ]}
-            />
-          </Host>
+          <Pressable
+            className={cn(
+              'h-10 w-10 items-center justify-center rounded-full border border-border bg-surface dark:border-border-dark dark:bg-surface-dark',
+              isCurrentMonth && 'opacity-40'
+            )}
+            onPress={handleNextMonth}
+            disabled={isCurrentMonth}
+          >
+            <ChevronRight size={18} color={iconColor} />
+          </Pressable>
         </View>
 
         <View className="mb-4 flex-row justify-between">
-          <View className="mr-2 flex-1 rounded-xl bg-emerald-50 p-4 dark:bg-emerald-900/30">
-            <Text className="text-sm text-emerald-600 dark:text-emerald-400">Income</Text>
+          <View className="mr-2 flex-1 rounded-2xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark">
+            <Text className="text-xs font-semibold uppercase tracking-wide text-subtle dark:text-subtle-dark">
+              Income
+            </Text>
             <AmountText
               amountCents={monthIncome}
               roundToDollars={true}
-              className="text-xl font-bold text-emerald-700 dark:text-emerald-200"
+              className="text-xl font-bold"
             />
           </View>
-          <View className="ml-2 flex-1 rounded-xl bg-rose-50 p-4 dark:bg-rose-900/30">
-            <Text className="text-sm text-rose-600 dark:text-rose-400">Expenses</Text>
+          <View className="ml-2 flex-1 rounded-2xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark">
+            <Text className="text-xs font-semibold uppercase tracking-wide text-subtle dark:text-subtle-dark">
+              Expenses
+            </Text>
             <AmountText
               amountCents={monthExpenses}
               roundToDollars={true}
-              className="text-xl font-bold text-rose-700 dark:text-rose-200"
+              className="text-xl font-bold"
             />
           </View>
         </View>
 
         {expenseChange !== null && (
-          <View className="mb-6 flex-row items-center justify-center rounded-xl bg-zinc-50 p-3 dark:bg-zinc-800">
+          <View className="mb-6 flex-row items-center justify-center rounded-2xl border border-border bg-surface-muted p-3 dark:border-border-dark dark:bg-surface-muted-dark">
             {expenseChange > 0 ? (
-              <TrendingUp size={18} color="#f43f5e" />
+              <TrendingUp size={18} color="#e11d48" />
             ) : expenseChange < 0 ? (
-              <TrendingDown size={18} color="#10b981" />
+              <TrendingDown size={18} color="#16a34a" />
             ) : null}
             <Text
               className={`ml-2 text-sm font-medium ${
                 expenseChange > 0
-                  ? 'text-rose-600 dark:text-rose-400'
+                  ? 'text-danger dark:text-danger-dark'
                   : expenseChange < 0
-                    ? 'text-emerald-600 dark:text-emerald-400'
-                    : 'text-zinc-600 dark:text-zinc-400'
+                    ? 'text-success dark:text-success-dark'
+                    : 'text-muted dark:text-muted-dark'
               }`}
             >
               {expenseChange === 0
@@ -208,10 +207,10 @@ export default function Analytics() {
 
         {categoryData.length > 0 && (
           <View className="mb-6">
-            <Text className="mb-4 text-lg font-semibold text-zinc-900 dark:text-white">
+            <Text className="mb-4 text-lg font-semibold text-ink dark:text-ink-dark">
               Spending by Category
             </Text>
-            <View className="rounded-xl bg-zinc-50 p-4 dark:bg-zinc-800">
+            <View className="rounded-2xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark">
               <SpendingByCategory categories={categoryData} monthExpenses={monthExpenses} />
             </View>
           </View>
@@ -219,17 +218,17 @@ export default function Analytics() {
 
         {merchantData.length > 0 && (
           <View className="mb-6">
-            <Text className="mb-4 text-lg font-semibold text-zinc-900 dark:text-white">
+            <Text className="mb-4 text-lg font-semibold text-ink dark:text-ink-dark">
               Top Merchants
             </Text>
-            <View className="rounded-xl bg-zinc-50 p-4 dark:bg-zinc-800">
+            <View className="rounded-2xl border border-border bg-surface p-4 dark:border-border-dark dark:bg-surface-dark">
               {merchantData.map((merchant, index) => (
                 <View
                   key={merchant.displayName ?? index}
                   className={cn(
                     'flex-row items-center',
                     index < merchantData.length - 1 &&
-                      'mb-3 border-b border-zinc-200 pb-3 dark:border-zinc-700'
+                      'mb-3 border-b border-border pb-3 dark:border-border-dark'
                   )}
                 >
                   <DomainLogo
@@ -239,12 +238,12 @@ export default function Analytics() {
                   />
                   <View className="ml-3 flex-1">
                     <Text
-                      className="text-sm font-medium text-zinc-900 dark:text-white"
+                      className="text-sm font-semibold text-ink dark:text-ink-dark"
                       numberOfLines={1}
                     >
                       {merchant.displayName}
                     </Text>
-                    <Text className="text-xs text-zinc-500">
+                    <Text className="text-xs text-muted dark:text-muted-dark">
                       {merchant.count} transaction
                       {merchant.count !== 1 ? 's' : ''}
                     </Text>
@@ -252,7 +251,7 @@ export default function Analytics() {
                   <AmountText
                     amountCents={merchant.total}
                     roundToDollars={true}
-                    className="text-sm font-semibold text-zinc-900 dark:text-white"
+                    className="text-sm font-semibold text-ink dark:text-ink-dark"
                   />
                 </View>
               ))}
@@ -262,8 +261,8 @@ export default function Analytics() {
 
         {categoryData.length === 0 && merchantData.length === 0 ? (
           <View className="items-center justify-center py-20">
-            <Text className="text-zinc-500">No transaction data available</Text>
-            <Text className="mt-2 text-sm text-zinc-400">
+            <Text className="text-muted dark:text-muted-dark">No transaction data available</Text>
+            <Text className="mt-2 text-sm text-subtle dark:text-subtle-dark">
               Import transactions to see your spending analytics
             </Text>
           </View>
