@@ -27,6 +27,7 @@
     "@shopify/flash-list": "2.0.2",
     "@toon-format/toon": "^2.1.0",
     "ai": "^6.0.5",
+    "buffer": "^6.0.3",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.1",
     "drizzle-zod": "^0.8.3",
