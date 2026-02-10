@@ -1,16 +1,15 @@
-import { Input, Label } from '@/components/ui';
-import { db } from '@/db/client';
-import { BILLING_CYCLES, BillingCycle, subscriptions } from '@/db/schema';
-import { parsePriceToCents } from '@/lib/price';
-import { DatePicker, Host, Picker, Text as SwiftText } from '@expo/ui/swift-ui';
-import { pickerStyle, tag } from '@expo/ui/swift-ui/modifiers';
+import { useEffect, useState } from 'react';
+import { KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from 'react-native';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { eq } from 'drizzle-orm';
-import { router, Stack, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from 'react-native';
 import { z } from 'zod';
+
+import { Input, Label, SegmentedControl } from '@/components/ui';
+import { db } from '@/db/client';
+import { BILLING_CYCLES, subscriptions, type BillingCycle } from '@/db/schema';
+import { parsePriceToCents } from '@/lib/price';
 
 const subscriptionSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -51,11 +50,31 @@ const billingCycleLabels: Record<BillingCycle, string> = {
   yearly: 'per year',
 };
 
+const formatDateInput = (date: Date): string => {
+  if (!(date instanceof Date) || isNaN(date.getTime())) {
+    return '';
+  }
+  return date.toISOString().split('T')[0];
+};
+
+const parseDateInput = (value: string): Date | null => {
+  const [yearStr, monthStr, dayStr] = value.split('-');
+  const year = Number(yearStr);
+  const month = Number(monthStr);
+  const day = Number(dayStr);
+
+  if (!year || !month || !day) return null;
+  const date = new Date(year, month - 1, day);
+  if (isNaN(date.getTime())) return null;
+  return date;
+};
+
 export default function AddSubscription() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const isEditing = !!id;
   const subscriptionId = id ? parseInt(id, 10) : null;
   const [isLoading, setIsLoading] = useState(isEditing);
+  const [subscribedAtInput, setSubscribedAtInput] = useState(formatDateInput(new Date()));
 
   const {
     control,
@@ -109,8 +128,14 @@ export default function AddSubscription() {
     }
   }, [isEditing, subscriptionId, reset]);
 
-  const billingCycleText = BILLING_CYCLES[watch('billingCycleIndex')];
+  const billingCycleIndex = watch('billingCycleIndex');
+  const subscribedAt = watch('subscribedAt');
+  const billingCycleText = BILLING_CYCLES[billingCycleIndex];
   const billingCycleLabel = billingCycleLabels[billingCycleText];
+
+  useEffect(() => {
+    setSubscribedAtInput(formatDateInput(subscribedAt));
+  }, [subscribedAt]);
 
   const onSubmit = async (data: SubscriptionFormData) => {
     try {
@@ -146,8 +171,8 @@ export default function AddSubscription() {
     return (
       <>
         <Stack.Screen options={{ title: 'Edit Subscription' }} />
-        <View className="flex-1 items-center justify-center bg-white dark:bg-zinc-900">
-          <Text className="text-zinc-500">Loading subscription...</Text>
+        <View className="flex-1 items-center justify-center bg-slate-50 dark:bg-slate-950">
+          <Text className="text-slate-500">Loading subscription...</Text>
         </View>
       </>
     );
@@ -186,11 +211,11 @@ export default function AddSubscription() {
       />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        className="flex-1 bg-white dark:bg-zinc-900"
+        className="flex-1 bg-slate-50 dark:bg-slate-950"
         keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
       >
         <ScrollView
-          className="flex-1 bg-white dark:bg-zinc-900"
+          className="flex-1 bg-slate-50 dark:bg-slate-950"
           contentContainerClassName="px-4 pb-8 pt-6"
           keyboardShouldPersistTaps="handled"
           contentInsetAdjustmentBehavior="automatic"
@@ -202,22 +227,22 @@ export default function AddSubscription() {
               render={({ field: { onChange, onBlur, value } }) => (
                 <View className="flex items-center">
                   <View className="flex-row items-baseline">
-                    <Text className="text-4xl font-light leading-tight text-zinc-400 dark:text-zinc-500">
+                    <Text className="text-4xl font-light leading-tight text-slate-400 dark:text-slate-500">
                       CHF
                     </Text>
                     <TextInput
                       placeholder="0.00"
-                      placeholderTextColor="#d4d4d8"
+                      placeholderTextColor="#cbd5f5"
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
                       keyboardType="decimal-pad"
-                      className="ml-2 min-w-[120px] text-5xl font-semibold leading-tight text-zinc-900 dark:text-white"
+                      className="ml-2 min-w-[120px] text-5xl font-semibold leading-tight text-slate-900 dark:text-white"
                       textAlign="left"
                       textAlignVertical="center"
                     />
                   </View>
-                  <Text className="mt-1 text-sm leading-5 text-zinc-400">{billingCycleLabel}</Text>
+                  <Text className="mt-1 text-sm leading-5 text-slate-400">{billingCycleLabel}</Text>
                   {errors.price && (
                     <Text className="mt-2 text-xs leading-4 text-red-500">
                       {errors.price.message}
@@ -254,17 +279,15 @@ export default function AddSubscription() {
               control={control}
               name="billingCycleIndex"
               render={({ field: { onChange, value } }) => (
-                <Host matchContents>
-                  <Picker
-                    selection={value}
-                    onSelectionChange={(selection) => onChange(selection as number)}
-                    modifiers={[pickerStyle('segmented')]}
-                  >
-                    <SwiftText modifiers={[tag(0)]}>Weekly</SwiftText>
-                    <SwiftText modifiers={[tag(1)]}>Monthly</SwiftText>
-                    <SwiftText modifiers={[tag(2)]}>Yearly</SwiftText>
-                  </Picker>
-                </Host>
+                <SegmentedControl
+                  value={value}
+                  onChange={(nextValue) => onChange(nextValue)}
+                  options={[
+                    { label: 'Weekly', value: 0 },
+                    { label: 'Monthly', value: 1 },
+                    { label: 'Yearly', value: 2 },
+                  ]}
+                />
               )}
             />
           </View>
@@ -274,18 +297,24 @@ export default function AddSubscription() {
             <Controller
               control={control}
               name="subscribedAt"
-              render={({ field: { onChange, value } }) => (
-                <Host matchContents>
-                  <DatePicker
-                    onDateChange={(date: Date) => {
-                      onChange(date);
-                    }}
-                    displayedComponents={['date']}
-                    selection={value}
-                  />
-                </Host>
+              render={({ field: { onChange } }) => (
+                <Input
+                  placeholder="YYYY-MM-DD"
+                  value={subscribedAtInput}
+                  onChangeText={(text) => {
+                    setSubscribedAtInput(text);
+                    const nextDate = parseDateInput(text);
+                    if (nextDate) {
+                      onChange(nextDate);
+                    }
+                  }}
+                  keyboardType="numbers-and-punctuation"
+                />
               )}
             />
+            <Text className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+              Use the format YYYY-MM-DD.
+            </Text>
           </View>
 
           <View className="mb-4">

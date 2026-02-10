@@ -1,15 +1,17 @@
-import { Input, Label } from '@/components/ui';
+import { useEffect, useState } from 'react';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { eq } from 'drizzle-orm';
+import { Check, ChevronsUpDown } from 'lucide-react-native';
+import { Controller, useForm } from 'react-hook-form';
+import { z } from 'zod';
+
+import { BottomSheet, Input, Label } from '@/components/ui';
 import { db } from '@/db/client';
 import { CATEGORIES as CATEGORY_ENUM, transactions } from '@/db/schema';
 import { CATEGORIES } from '@/lib/categories';
-import { Button, Host, Menu, Image as SwiftImage } from '@expo/ui/swift-ui';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { eq } from 'drizzle-orm';
-import { router, Stack, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
-import { z } from 'zod';
+import { cn } from '@/lib/utils';
 
 const transactionEditSchema = z.object({
   displayName: z.string().optional(),
@@ -35,6 +37,7 @@ export default function EditTransaction() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [isLoading, setIsLoading] = useState(true);
   const [originalDescription, setOriginalDescription] = useState('');
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
 
   const {
     control,
@@ -96,8 +99,8 @@ export default function EditTransaction() {
     return (
       <>
         <Stack.Screen options={{ title: 'Edit Transaction' }} />
-        <View className="flex-1 items-center justify-center bg-white dark:bg-zinc-900">
-          <Text className="text-zinc-500">Loading transaction...</Text>
+        <View className="flex-1 items-center justify-center bg-slate-50 dark:bg-slate-950">
+          <Text className="text-slate-500">Loading transaction...</Text>
         </View>
       </>
     );
@@ -123,22 +126,22 @@ export default function EditTransaction() {
       </Stack.Toolbar>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        className="flex-1 bg-white dark:bg-zinc-900"
+        className="flex-1 bg-slate-50 dark:bg-slate-950"
         keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
       >
         <ScrollView
-          className="flex-1 bg-white dark:bg-zinc-900"
+          className="flex-1 bg-slate-50 dark:bg-slate-950"
           contentContainerClassName="px-4 pb-8 pt-6"
           keyboardShouldPersistTaps="handled"
           contentInsetAdjustmentBehavior="automatic"
         >
           {/* Original Description (read-only reference) */}
           {originalDescription && (
-            <View className="mb-6 rounded-xl bg-zinc-50 p-4 dark:bg-zinc-800/50">
-              <Text className="mb-1 text-xs font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+            <View className="mb-6 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+              <Text className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
                 Original Description
               </Text>
-              <Text className="text-sm text-zinc-700 dark:text-zinc-300">
+              <Text className="text-sm text-slate-700 dark:text-slate-300">
                 {originalDescription}
               </Text>
             </View>
@@ -160,7 +163,7 @@ export default function EditTransaction() {
                 />
               )}
             />
-            <Text className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
+            <Text className="mt-1 text-xs text-slate-400 dark:text-slate-500">
               Leave empty to use the original bank description
             </Text>
           </View>
@@ -174,48 +177,67 @@ export default function EditTransaction() {
               render={({ field: { onChange, value } }) => {
                 const selectedCategory = CATEGORY_ENUM[value];
                 const config = CATEGORIES[selectedCategory];
+                const CategoryIcon = config.icon;
 
                 return (
-                  <Host>
-                    <Menu
-                      label={
-                        <Pressable>
-                          <View className="mt-1 flex-row items-center rounded-xl bg-zinc-100 px-4 py-3 dark:bg-zinc-800">
-                            <View className="mr-3">
-                              <Host matchContents>
-                                <SwiftImage
-                                  systemName={config.icon}
-                                  size={20}
-                                  color={config.color}
-                                />
-                              </Host>
-                            </View>
-                            <Text
-                              className="flex-1 text-base font-medium text-zinc-900 dark:text-zinc-100"
-                              numberOfLines={1}
-                            >
-                              {config.label}
-                            </Text>
-                            <Host matchContents>
-                              <SwiftImage systemName="chevron.up.chevron.down" size={14} />
-                            </Host>
-                          </View>
-                        </Pressable>
-                      }
-                    >
-                      {CATEGORY_ENUM.map((cat, index) => {
-                        const catConfig = CATEGORIES[cat];
-                        return (
-                          <Button
-                            key={cat}
-                            systemImage={catConfig.icon}
-                            label={catConfig.label}
-                            onPress={() => onChange(index)}
-                          />
-                        );
-                      })}
-                    </Menu>
-                  </Host>
+                  <>
+                    <Pressable onPress={() => setIsCategoryOpen(true)}>
+                      <View className="mt-1 flex-row items-center rounded-2xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900">
+                        <View className="mr-3 h-8 w-8 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800">
+                          <CategoryIcon size={18} color={config.color} />
+                        </View>
+                        <Text
+                          className="flex-1 text-base font-medium text-slate-900 dark:text-slate-100"
+                          numberOfLines={1}
+                        >
+                          {config.label}
+                        </Text>
+                        <ChevronsUpDown size={16} color="#94a3b8" />
+                      </View>
+                    </Pressable>
+                    <BottomSheet isOpen={isCategoryOpen} onOpenChange={setIsCategoryOpen}>
+                      <View className="gap-3">
+                        <View>
+                          <Text className="text-lg font-semibold text-slate-900 dark:text-white">
+                            Choose a category
+                          </Text>
+                          <Text className="mt-1 text-sm text-slate-500">
+                            Pick the best match for this transaction.
+                          </Text>
+                        </View>
+                        <View className="gap-2">
+                          {CATEGORY_ENUM.map((cat, index) => {
+                            const catConfig = CATEGORIES[cat];
+                            const Icon = catConfig.icon;
+                            const isSelected = index === value;
+                            return (
+                              <Pressable
+                                key={cat}
+                                onPress={() => {
+                                  onChange(index);
+                                  setIsCategoryOpen(false);
+                                }}
+                                className={cn(
+                                  'flex-row items-center rounded-2xl border px-3 py-2.5',
+                                  isSelected
+                                    ? 'border-indigo-200 bg-indigo-50 dark:border-indigo-700 dark:bg-indigo-950'
+                                    : 'border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900'
+                                )}
+                              >
+                                <View className="mr-3 h-9 w-9 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800">
+                                  <Icon size={18} color={catConfig.color} />
+                                </View>
+                                <Text className="flex-1 text-sm font-semibold text-slate-800 dark:text-slate-100">
+                                  {catConfig.label}
+                                </Text>
+                                {isSelected && <Check size={16} color="#4f46e5" />}
+                              </Pressable>
+                            );
+                          })}
+                        </View>
+                      </View>
+                    </BottomSheet>
+                  </>
                 );
               }}
             />
@@ -242,7 +264,7 @@ export default function EditTransaction() {
             {errors.domain && (
               <Text className="mt-1 text-xs text-red-500">{errors.domain.message}</Text>
             )}
-            <Text className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
+            <Text className="mt-1 text-xs text-slate-400 dark:text-slate-500">
               Used to display the merchant logo
             </Text>
           </View>

@@ -1,17 +1,17 @@
+import { useMemo, useState } from 'react';
+import { ScrollView, Text, View } from 'react-native';
+import { and, count, desc, eq, isNotNull, notInArray, sql, sum } from 'drizzle-orm';
+import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
+import { ChevronLeft, ChevronRight, TrendingDown, TrendingUp } from 'lucide-react-native';
+
 import SpendingByCategory from '@/components/SpendingByCategory';
+import { Button } from '@/components/ui';
 import AmountText from '@/components/ui/amount-text';
 import DomainLogo from '@/components/ui/domain-logo';
 import { db } from '@/db/client';
 import { transactions } from '@/db/schema';
 import { formatYearMonth } from '@/lib/date';
 import { cn } from '@/lib/utils';
-import { Button, Host } from '@expo/ui/swift-ui';
-import { buttonStyle, controlSize, disabled, labelStyle } from '@expo/ui/swift-ui/modifiers';
-import { and, count, desc, eq, isNotNull, notInArray, sql, sum } from 'drizzle-orm';
-import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
-import { TrendingDown, TrendingUp } from 'lucide-react-native';
-import { useMemo, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
 
 const formatMonthFull = (monthStr: string): string => {
   const [year, month] = monthStr.split('-');
@@ -133,58 +133,58 @@ export default function Analytics() {
 
   return (
     <ScrollView
-      className="flex-1 bg-white dark:bg-zinc-900"
+      className="flex-1 bg-slate-50 dark:bg-slate-950"
       contentInsetAdjustmentBehavior="automatic"
     >
-      <View className="p-4">
+      <View className="p-4 pb-10">
         <View className="mb-6 flex-row items-center justify-between">
-          <Host matchContents>
-            <Button
-              onPress={handlePreviousMonth}
-              label="Previous"
-              systemImage="chevron.left"
-              modifiers={[buttonStyle('glass'), controlSize('regular'), labelStyle('iconOnly')]}
-            />
-          </Host>
-          <Text className="text-lg font-semibold text-zinc-900 dark:text-white">
+          <Button
+            onPress={handlePreviousMonth}
+            variant="ghost"
+            size="sm"
+            className="h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white/70 dark:border-slate-800 dark:bg-slate-900"
+          >
+            <ChevronLeft size={18} color="#64748b" />
+          </Button>
+          <Text className="text-lg font-semibold text-slate-900 dark:text-white">
             {formatMonthFull(selectedMonth)}
           </Text>
-          <Host matchContents>
-            <Button
-              onPress={handleNextMonth}
-              label="Next"
-              systemImage="chevron.right"
-              modifiers={[
-                buttonStyle('glass'),
-                controlSize('regular'),
-                labelStyle('iconOnly'),
-                disabled(isCurrentMonth),
-              ]}
-            />
-          </Host>
+          <Button
+            onPress={handleNextMonth}
+            variant="ghost"
+            size="sm"
+            disabled={isCurrentMonth}
+            className="h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white/70 dark:border-slate-800 dark:bg-slate-900"
+          >
+            <ChevronRight size={18} color={isCurrentMonth ? '#cbd5f5' : '#64748b'} />
+          </Button>
         </View>
 
-        <View className="mb-4 flex-row justify-between">
-          <View className="mr-2 flex-1 rounded-xl bg-emerald-50 p-4 dark:bg-emerald-900/30">
-            <Text className="text-sm text-emerald-600 dark:text-emerald-400">Income</Text>
+        <View className="mb-5 flex-row justify-between gap-3">
+          <View className="flex-1 rounded-2xl border border-emerald-100 bg-emerald-50 p-4 dark:border-emerald-900/60 dark:bg-emerald-950/40">
+            <Text className="text-xs font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
+              Income
+            </Text>
             <AmountText
               amountCents={monthIncome}
               roundToDollars={true}
-              className="text-xl font-bold text-emerald-700 dark:text-emerald-200"
+              className="text-2xl font-bold text-emerald-700 dark:text-emerald-200"
             />
           </View>
-          <View className="ml-2 flex-1 rounded-xl bg-rose-50 p-4 dark:bg-rose-900/30">
-            <Text className="text-sm text-rose-600 dark:text-rose-400">Expenses</Text>
+          <View className="flex-1 rounded-2xl border border-rose-100 bg-rose-50 p-4 dark:border-rose-900/60 dark:bg-rose-950/40">
+            <Text className="text-xs font-semibold uppercase tracking-wide text-rose-600 dark:text-rose-400">
+              Expenses
+            </Text>
             <AmountText
               amountCents={monthExpenses}
               roundToDollars={true}
-              className="text-xl font-bold text-rose-700 dark:text-rose-200"
+              className="text-2xl font-bold text-rose-700 dark:text-rose-200"
             />
           </View>
         </View>
 
         {expenseChange !== null && (
-          <View className="mb-6 flex-row items-center justify-center rounded-xl bg-zinc-50 p-3 dark:bg-zinc-800">
+          <View className="mb-6 flex-row items-center justify-center rounded-2xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
             {expenseChange > 0 ? (
               <TrendingUp size={18} color="#f43f5e" />
             ) : expenseChange < 0 ? (
@@ -193,10 +193,10 @@ export default function Analytics() {
             <Text
               className={`ml-2 text-sm font-medium ${
                 expenseChange > 0
-                  ? 'text-rose-600 dark:text-rose-400'
+                  ? 'text-rose-600 dark:text-rose-300'
                   : expenseChange < 0
-                    ? 'text-emerald-600 dark:text-emerald-400'
-                    : 'text-zinc-600 dark:text-zinc-400'
+                    ? 'text-emerald-600 dark:text-emerald-300'
+                    : 'text-slate-600 dark:text-slate-400'
               }`}
             >
               {expenseChange === 0
@@ -208,10 +208,10 @@ export default function Analytics() {
 
         {categoryData.length > 0 && (
           <View className="mb-6">
-            <Text className="mb-4 text-lg font-semibold text-zinc-900 dark:text-white">
+            <Text className="mb-3 text-lg font-semibold text-slate-900 dark:text-white">
               Spending by Category
             </Text>
-            <View className="rounded-xl bg-zinc-50 p-4 dark:bg-zinc-800">
+            <View className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
               <SpendingByCategory categories={categoryData} monthExpenses={monthExpenses} />
             </View>
           </View>
@@ -219,17 +219,17 @@ export default function Analytics() {
 
         {merchantData.length > 0 && (
           <View className="mb-6">
-            <Text className="mb-4 text-lg font-semibold text-zinc-900 dark:text-white">
+            <Text className="mb-3 text-lg font-semibold text-slate-900 dark:text-white">
               Top Merchants
             </Text>
-            <View className="rounded-xl bg-zinc-50 p-4 dark:bg-zinc-800">
+            <View className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
               {merchantData.map((merchant, index) => (
                 <View
                   key={merchant.displayName ?? index}
                   className={cn(
                     'flex-row items-center',
                     index < merchantData.length - 1 &&
-                      'mb-3 border-b border-zinc-200 pb-3 dark:border-zinc-700'
+                      'mb-3 border-b border-slate-200 pb-3 dark:border-slate-800'
                   )}
                 >
                   <DomainLogo
@@ -239,12 +239,12 @@ export default function Analytics() {
                   />
                   <View className="ml-3 flex-1">
                     <Text
-                      className="text-sm font-medium text-zinc-900 dark:text-white"
+                      className="text-sm font-medium text-slate-900 dark:text-white"
                       numberOfLines={1}
                     >
                       {merchant.displayName}
                     </Text>
-                    <Text className="text-xs text-zinc-500">
+                    <Text className="text-xs text-slate-500">
                       {merchant.count} transaction
                       {merchant.count !== 1 ? 's' : ''}
                     </Text>
@@ -252,7 +252,7 @@ export default function Analytics() {
                   <AmountText
                     amountCents={merchant.total}
                     roundToDollars={true}
-                    className="text-sm font-semibold text-zinc-900 dark:text-white"
+                    className="text-sm font-semibold text-slate-900 dark:text-white"
                   />
                 </View>
               ))}
@@ -262,8 +262,8 @@ export default function Analytics() {
 
         {categoryData.length === 0 && merchantData.length === 0 ? (
           <View className="items-center justify-center py-20">
-            <Text className="text-zinc-500">No transaction data available</Text>
-            <Text className="mt-2 text-sm text-zinc-400">
+            <Text className="text-slate-500">No transaction data available</Text>
+            <Text className="mt-2 text-sm text-slate-400">
               Import transactions to see your spending analytics
             </Text>
           </View>

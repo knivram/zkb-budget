@@ -1,5 +1,5 @@
-import { Button, ContextMenu, Host } from '@expo/ui/swift-ui';
 import type { ReactNode } from 'react';
+import { Alert, Pressable } from 'react-native';
 
 type ItemActionMenuProps = {
   children: ReactNode;
@@ -16,17 +16,23 @@ export default function ItemActionMenu({
   editLabel = 'Edit',
   deleteLabel = 'Delete',
 }: ItemActionMenuProps) {
+  const showMenu = () => {
+    if (!onEdit && !onDelete) return;
+    const buttons = [];
+    if (onEdit) {
+      buttons.push({ text: editLabel, onPress: onEdit });
+    }
+    if (onDelete) {
+      buttons.push({ text: deleteLabel, onPress: onDelete, style: 'destructive' as const });
+    }
+    buttons.push({ text: 'Cancel', style: 'cancel' as const });
+
+    Alert.alert('Actions', undefined, buttons);
+  };
+
   return (
-    <Host>
-      <ContextMenu>
-        <ContextMenu.Items>
-          {onEdit && <Button systemImage="pencil" label={editLabel} onPress={onEdit} />}
-          {onDelete && (
-            <Button systemImage="trash" label={deleteLabel} onPress={onDelete} role="destructive" />
-          )}
-        </ContextMenu.Items>
-        <ContextMenu.Trigger>{children}</ContextMenu.Trigger>
-      </ContextMenu>
-    </Host>
+    <Pressable onLongPress={showMenu} delayLongPress={250}>
+      {children}
+    </Pressable>
   );
 }
