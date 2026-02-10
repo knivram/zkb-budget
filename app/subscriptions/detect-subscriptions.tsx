@@ -116,7 +116,7 @@ export default function DetectSubscriptions({ isOpen, onOpenChange }: DetectSubs
               <SwiftText modifiers={[font({ weight: 'semibold', size: 20 })]}>
                 Detect Subscriptions
               </SwiftText>
-              <SwiftText modifiers={[font({ size: 14 }), foregroundStyle('#71717a')]}>
+              <SwiftText modifiers={[font({ size: 14 }), foregroundStyle('#64748b')]}>
                 Use AI to analyze your transactions and find recurring subscriptions
               </SwiftText>
               <Spacer minLength={20} />
