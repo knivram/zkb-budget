@@ -10,6 +10,7 @@
     "lint": "expo lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "check": "bun run lint && bun run typecheck && bun run format:check",
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:studio": "drizzle-kit studio",
