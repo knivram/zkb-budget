@@ -42,6 +42,10 @@ export default function RootLayout() {
         <NativeTabs.Trigger.Icon sf="chart.bar.fill" />
         <NativeTabs.Trigger.Label>Analytics</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="search" role="search">
+        <Icon sf="magnifyingglass" />
+        <Label>Search</Label>
+      </NativeTabs.Trigger>
     </NativeTabs>
   );
 }

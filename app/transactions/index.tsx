@@ -1,6 +1,7 @@
 import ItemActionMenu from '@/components/ItemActionMenu';
 import AmountText from '@/components/ui/amount-text';
 import DomainLogo from '@/components/ui/domain-logo';
+import { Input } from '@/components/ui/input';
 import { db } from '@/db/client';
 import { transactions, type Transaction } from '@/db/schema';
 import { CATEGORIES } from '@/lib/categories';
@@ -49,6 +50,22 @@ const getMonthKey = (dateStr: string): string => {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 };
 
+const filterTransactionsBySearch = (
+  transactionsList: Transaction[],
+  searchQuery: string
+): Transaction[] => {
+  if (!searchQuery.trim()) {
+    return transactionsList;
+  }
+
+  const query = searchQuery.toLowerCase().trim();
+  return transactionsList.filter((transaction) => {
+    const displayName = transaction.displayName?.toLowerCase() ?? '';
+    const bankDetails = transaction.transactionAdditionalDetails.toLowerCase();
+    return displayName.includes(query) || bankDetails.includes(query);
+  });
+};
+
 const groupTransactionsByMonth = (transactionsList: Transaction[]): { items: ListItem[] } => {
   const items: ListItem[] = [];
   let currentMonthKey = '';
@@ -85,10 +102,19 @@ const groupTransactionsByMonth = (transactionsList: Transaction[]): { items: Lis
 
 export default function Transactions() {
   const [isImportOpen, setIsImportOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const { data } = useLiveQuery(db.select().from(transactions).orderBy(desc(transactions.date)));
 
-  const { items } = useMemo(() => groupTransactionsByMonth(data), [data]);
+  const filteredTransactions = useMemo(
+    () => filterTransactionsBySearch(data, searchQuery),
+    [data, searchQuery]
+  );
+
+  const { items } = useMemo(
+    () => groupTransactionsByMonth(filteredTransactions),
+    [filteredTransactions]
+  );
 
   const handleDelete = (transaction: Transaction) => {
     const name = transaction.displayName ?? transaction.transactionAdditionalDetails;
@@ -132,6 +158,27 @@ export default function Transactions() {
         data={items}
         keyExtractor={(item) => (item.type === 'header' ? item.key : item.data.id)}
         getItemType={(item) => item.type}
+        ListHeaderComponent={
+          <View className="bg-white px-4 py-3 dark:bg-zinc-900">
+            <View className="relative">
+              <Input
+                placeholder="Search transactions..."
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                autoCapitalize="none"
+                autoCorrect={false}
+                returnKeyType="search"
+                clearButtonMode="while-editing"
+              />
+            </View>
+            {searchQuery.length > 0 && (
+              <Text className="mt-2 text-sm text-zinc-500">
+                {filteredTransactions.length} result{filteredTransactions.length !== 1 ? 's' : ''}{' '}
+                for &ldquo;{searchQuery}&rdquo;
+              </Text>
+            )}
+          </View>
+        }
         renderItem={({ item }) => {
           if (item.type === 'header') {
             return (
@@ -213,10 +260,19 @@ export default function Transactions() {
         }}
         ListEmptyComponent={
           <View className="flex-1 items-center justify-center py-20">
-            <Text className="text-zinc-500">No transactions imported yet</Text>
-            <Text className="mt-2 text-sm text-zinc-400">
-              Tap Import to add transactions from XML
-            </Text>
+            {searchQuery.length > 0 ? (
+              <>
+                <Text className="text-zinc-500">No transactions found</Text>
+                <Text className="mt-2 text-sm text-zinc-400">Try a different search term</Text>
+              </>
+            ) : (
+              <>
+                <Text className="text-zinc-500">No transactions imported yet</Text>
+                <Text className="mt-2 text-sm text-zinc-400">
+                  Tap Import to add transactions from XML
+                </Text>
+              </>
+            )}
           </View>
         }
       />
