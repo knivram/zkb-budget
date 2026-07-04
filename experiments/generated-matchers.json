@@ -1,0 +1,206 @@
+[
+  {
+    "pattern": "^Credit salary: (\\w+)",
+    "displayName": "$1",
+    "category": "income",
+    "priority": 1
+  },
+  {
+    "pattern": "ERGON INFORMATIK AG",
+    "displayName": "Ergon Informatik AG",
+    "category": "income",
+    "priority": 2
+  },
+  {
+    "pattern": "Debit TWINT: SBB (?:EASYRIDE|MOBILE)",
+    "displayName": "SBB",
+    "category": "transport",
+    "domain": "sbb.ch",
+    "priority": 5
+  },
+  {
+    "pattern": "ZURCHER VERKEHRSVERBUND",
+    "displayName": "ZVV",
+    "category": "transport",
+    "domain": "zvv.ch",
+    "priority": 5
+  },
+  {
+    "pattern": "JustEat",
+    "displayName": "Just Eat",
+    "category": "dining",
+    "domain": "just-eat.ch",
+    "priority": 5
+  },
+  {
+    "pattern": "Fielmann",
+    "displayName": "Fielmann",
+    "category": "healthcare",
+    "domain": "fielmann.ch",
+    "priority": 5
+  },
+  {
+    "pattern": "Apotheke",
+    "displayName": "Pharmacy",
+    "category": "healthcare",
+    "priority": 5
+  },
+  {
+    "pattern": "(?:CURSOR|OPENROUTER|CLAUDE\\.AI)",
+    "displayName": "AI Subscription",
+    "category": "entertainment",
+    "priority": 5
+  },
+  {
+    "pattern": "Apple\\.com|Apple Store",
+    "displayName": "Apple",
+    "category": "shopping",
+    "domain": "apple.com",
+    "priority": 5
+  },
+  {
+    "pattern": "Galaxus|Digitec",
+    "displayName": "Galaxus/Digitec",
+    "category": "shopping",
+    "domain": "galaxus.ch",
+    "priority": 5
+  },
+  {
+    "pattern": "Media Markt",
+    "displayName": "Media Markt",
+    "category": "shopping",
+    "domain": "mediamarkt.ch",
+    "priority": 5
+  },
+  {
+    "pattern": "Strava",
+    "displayName": "Strava",
+    "category": "personal_care",
+    "domain": "strava.com",
+    "priority": 5
+  },
+  {
+    "pattern": "Cut \\+ Color",
+    "displayName": "Hairsalon",
+    "category": "personal_care",
+    "priority": 5
+  },
+  {
+    "pattern": "Mobility CarSharing",
+    "displayName": "Mobility",
+    "category": "transport",
+    "domain": "mobility.ch",
+    "priority": 5
+  },
+  {
+    "pattern": "Revolut",
+    "displayName": "Revolut Transfer",
+    "category": "transfer",
+    "domain": "revolut.com",
+    "priority": 5
+  },
+  {
+    "pattern": "Schone Bescherung AG",
+    "displayName": "Retail Refund",
+    "category": "income",
+    "priority": 5
+  },
+  {
+    "pattern": "(?:Coop|MIGROS|VOI|SPAR).*(?:MMM|MM|M |Take Away|Gourm|to go)",
+    "displayName": "Supermarket",
+    "category": "food",
+    "priority": 10
+  },
+  {
+    "pattern": "Veloplus|Ochsner Sport|Achermann Sport",
+    "displayName": "Sporting Goods",
+    "category": "personal_care",
+    "priority": 10
+  },
+  {
+    "pattern": "k kiosk",
+    "displayName": "K Kiosk",
+    "category": "food",
+    "priority": 10
+  },
+  {
+    "pattern": "FCZ|FUSSBALL CLUB",
+    "displayName": "Sports/Hobbies",
+    "category": "entertainment",
+    "priority": 10
+  },
+  {
+    "pattern": "Coop-\\d+",
+    "displayName": "Coop",
+    "category": "food",
+    "domain": "coop.ch",
+    "priority": 11
+  },
+  {
+    "pattern": "MIGROS (?:MMM|MM|M |HAUPTBAHNHOF|KREUZPLATZ|LIMMATPLATZ)",
+    "displayName": "Migros",
+    "category": "food",
+    "domain": "migros.ch",
+    "priority": 11
+  },
+  {
+    "pattern": "(?:Ristorante|Rest\\.|Pizzeria|Bistro|Burger|Darbar|Negishi|Manta Bar|Borsalino|Tenz Momo|Tiffins|Bibim Shack|Al Mouchtar|Tacos & Chile|Izla Gastro|Gyros|Piu|Chois|Rucola|ACG PIZZA)",
+    "displayName": "Restaurant/Dining",
+    "category": "dining",
+    "priority": 15
+  },
+  {
+    "pattern": "(?:Bakery|Gelateria|Brezelkonig|Espresso House|Cafebar|Zopf & Zopfli)",
+    "displayName": "Cafe & Bakery",
+    "category": "dining",
+    "priority": 15
+  },
+  {
+    "pattern": "SHOPIFY\\*",
+    "displayName": "Online Store (Shopify)",
+    "category": "shopping",
+    "priority": 20
+  },
+  {
+    "pattern": "EINFACH\\.SIEBDRUCK|EINZELSTUECK|DillySocks|Kathe Wohlfahrt",
+    "displayName": "Retail Shopping",
+    "category": "shopping",
+    "priority": 20
+  },
+  {
+    "pattern": "Contabo|Hostinger|Paddle\\.net|Mobbin\\.com",
+    "displayName": "Software & Hosting",
+    "category": "entertainment",
+    "priority": 20
+  },
+  {
+    "pattern": "(?:TWINT|transfer): .*\\+\\d{2,}",
+    "displayName": "P2P Transfer",
+    "category": "transfer",
+    "priority": 30
+  },
+  {
+    "pattern": "^Debit (?:Standing order|Account transfer): ([^,]+)",
+    "displayName": "$1",
+    "category": "transfer",
+    "priority": 40
+  },
+  {
+    "pattern": "^Credit (?:Account transfer|originator): ([^,]+)",
+    "displayName": "$1",
+    "category": "income",
+    "priority": 40
+  },
+  {
+    "pattern": "Debit Standing order \\(\\d+\\)",
+    "displayName": "Recurring Standing Order",
+    "category": "transfer",
+    "priority": 45
+  },
+  {
+    "pattern": ".*",
+    "displayName": "Miscellaneous Merchant",
+    "category": "other",
+    "priority": 99
+  }
+]
